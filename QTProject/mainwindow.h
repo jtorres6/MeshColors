@@ -65,5 +65,10 @@ private:
 
     QVector3D mousePosition;
     int pixel[3];
+
+    int vertexLocation;
+    int matrixLocation;
+    int colorLocation;
+
 };
 #endif // MAINWINDOW_H
