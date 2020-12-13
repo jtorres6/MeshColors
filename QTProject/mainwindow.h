@@ -18,6 +18,7 @@
 #include <QVector3D>
 #include <stdlib.h>     /* srand, rand */
 #include <QScreen>
+#include <QOpenGLShaderProgram>
 
 using namespace std;
 

@@ -24,7 +24,7 @@ MainWindow::MainWindow(QWidget *parent)
     {
         VertexID.push_back(QVector3D(i,0,0));
     }
-    int pixel[4] = {0,0,0,0};
+    GLfloat pixel[4] = {0.0f,0.0f,0.0f};
 }
 
 MainWindow::~MainWindow()
@@ -33,6 +33,28 @@ MainWindow::~MainWindow()
 
 void MainWindow::initializeGL()
 {
+    // @TODO: Read shaders from external files.
+    QOpenGLShaderProgram program(context);
+    program.addShaderFromSourceCode(QOpenGLShader::Vertex,
+        "#version 140\n"
+        "varying vec4 color;\n"
+        "void main()\n"
+        "{\n"
+        "   gl_Position = gl_ProjectionMatrix * gl_ModelViewMatrix * gl_Vertex; \n"
+        "   color = gl_Color; \n"
+        "}");
+
+    // @TODO: Add mesh colors formula to fragment shader..
+    program.addShaderFromSourceCode(QOpenGLShader::Fragment,
+        "#version 140\n"
+        "varying vec4 color;\n"
+        "void main(void)\n"
+        "{\n"
+        "   gl_FragColor = color;\n"
+        "}");
+    program.link();
+    program.bind();
+
     glEnable(GL_DEPTH_TEST);
     resizeGL(this->width(), this->height());
 }
@@ -56,9 +78,10 @@ void MainWindow::resizeGL(int w, int h)
 
 void MainWindow::paintGL()
 {
+
     // Remove last render buffer.
     glViewport(0,0, width(), height());
-    glClearColor(0.2, 0.3, 0.3, 0);
+    glClearColor(0.1, 0.4, 0.4, 0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // Reset Model View Matrix
@@ -72,26 +95,30 @@ void MainWindow::paintGL()
 
     glDisable(GL_LIGHTING);
 
-    glPointSize(5.0);
+    glPointSize(4.0);
+    glColor3f(0.1, 0.1, 0.1);
     glBegin(GL_POINTS);
     for(unsigned int i=0; i<=Coordinates.size()-3; i+=3)
     {
-        glColor3i(VertexID[i][0], VertexID[i][1], VertexID[i][2]);
+        //glColor3i(VertexID[i][0], VertexID[i][1], VertexID[i][2]);
         glVertex3f(Coordinates[i], Coordinates[i+1], Coordinates[i+2]);
     }
     glEnd();
 
     glPolygonMode(GL_FRONT,GL_FILL);
     glBegin(GL_TRIANGLES);
-    for(unsigned int i=0; i< Positions.size(); i+=1)
+    for(unsigned int i=0; i< Positions.size(); i+=3)
     {
-
-       glColor3i(VertexID[i][0], VertexID[i][1], VertexID[i][2]);
+       glColor3f(1.0, 0.0, 0.0);
        glVertex3f(Coordinates[Positions[i]*3], Coordinates[Positions[i]*3+1], Coordinates[Positions[i]*3+2]);
+       glColor3f(0.0, 1.0, 0.0);
+       glVertex3f(Coordinates[Positions[i+1]*3], Coordinates[Positions[i+1]*3+1], Coordinates[Positions[i+1]*3+2]);
+       glColor3f(0.0, 0.0, 1.0);
+       glVertex3f(Coordinates[Positions[i+2]*3], Coordinates[Positions[i+2]*3+1], Coordinates[Positions[i+2]*3+2]);
     }
     glEnd();
 
-    glColor3i(100, 2147483647 , 1147483647 );
+    glColor3f(0.1, 0.1, 0.1);
     glLineWidth(2.0);
     glPolygonMode(GL_FRONT,GL_LINE);
     glBegin(GL_TRIANGLES);
@@ -152,7 +179,8 @@ void MainWindow::mousePressEvent(QMouseEvent *event)
     glFlush();
     glFinish();
 
-    glReadPixels(event->pos().x(), height()-event->pos().y(), 1, 1, GL_RGB, GL_INT, &pixel);
+    glReadPixels(event->pos().x(), height()-event->pos().y(), 1, 1, GL_RGB, GL_FLOAT, &pixel);
+
     qDebug() << pixel[0] << pixel[1] << pixel[2];
 }
 
