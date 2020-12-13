@@ -20,10 +20,6 @@ MainWindow::MainWindow(QWidget *parent)
     image.load("images/imagen.png");
     image=image.mirrored(false,true);
 
-    for(int i = 0; i<Positions.size(); i++)
-    {
-        VertexID.push_back(QVector3D(i,0,0));
-    }
     GLfloat pixel[4] = {0.0f,0.0f,0.0f};
 }
 
@@ -35,23 +31,10 @@ void MainWindow::initializeGL()
 {
     // @TODO: Read shaders from external files.
     QOpenGLShaderProgram program(context);
-    program.addShaderFromSourceCode(QOpenGLShader::Vertex,
-        "#version 140\n"
-        "varying vec4 color;\n"
-        "void main()\n"
-        "{\n"
-        "   gl_Position = gl_ProjectionMatrix * gl_ModelViewMatrix * gl_Vertex; \n"
-        "   color = gl_Color; \n"
-        "}");
+    program.addCacheableShaderFromSourceFile(QOpenGLShader::Vertex, "MeshColorsVertex.vsh");
 
     // @TODO: Add mesh colors formula to fragment shader..
-    program.addShaderFromSourceCode(QOpenGLShader::Fragment,
-        "#version 140\n"
-        "varying vec4 color;\n"
-        "void main(void)\n"
-        "{\n"
-        "   gl_FragColor = color;\n"
-        "}");
+    program.addCacheableShaderFromSourceFile(QOpenGLShader::Fragment,"MeshColorsFragment.fsh");
     program.link();
     program.bind();
 
@@ -100,7 +83,6 @@ void MainWindow::paintGL()
     glBegin(GL_POINTS);
     for(unsigned int i=0; i<=Coordinates.size()-3; i+=3)
     {
-        //glColor3i(VertexID[i][0], VertexID[i][1], VertexID[i][2]);
         glVertex3f(Coordinates[i], Coordinates[i+1], Coordinates[i+2]);
     }
     glEnd();
