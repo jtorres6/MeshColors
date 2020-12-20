@@ -1,5 +1,7 @@
 #include "mainwindow.h"
 
+QVector3D points[10];
+
 MainWindow::MainWindow(QWidget *parent)
 {
     setSurfaceType(QWindow::OpenGLSurface);
@@ -14,11 +16,22 @@ MainWindow::MainWindow(QWidget *parent)
     rotationY = 0;
 
     _file_ply ply;
-    ply.open("models/ant.ply");
+    ply.open("models/beethoven.ply");
     ply.read(Coordinates, Positions);
 
     image.load("images/imagen.png");
     image=image.mirrored(false,true);
+
+    points[0] = *(new QVector3D(0.0f,0.0f,1.0f));
+
+    points[1] = *(new QVector3D(0.0f,0.0f,1.0f));
+    points[2] = *(new QVector3D(0.0f,0.0f,1.0f));
+    points[3] = *(new QVector3D(0.0f,0.0f,1.0f));
+    points[4] = *(new QVector3D(1.0f,1.0f,1.0f));
+    points[5] = *(new QVector3D(0.0f,0.0f,1.0f));
+    points[6] = *(new QVector3D(0.0f,0.0f,1.0f));
+    points[7] = *(new QVector3D(0.0f,0.0f,1.0f));
+    points[8] = *(new QVector3D(0.0f,0.0f,1.0f));
 
     GLfloat pixel[4] = {0.0f,0.0f,0.0f};
 }
@@ -37,6 +50,7 @@ void MainWindow::initializeGL()
     program.addCacheableShaderFromSourceFile(QOpenGLShader::Fragment,"MeshColorsFragment.fsh");
     program.link();
     program.bind();
+    program.setUniformValueArray("points", points, 10);
 
     glEnable(GL_DEPTH_TEST);
     resizeGL(this->width(), this->height());
@@ -61,7 +75,6 @@ void MainWindow::resizeGL(int w, int h)
 
 void MainWindow::paintGL()
 {
-
     // Remove last render buffer.
     glViewport(0,0, width(), height());
     glClearColor(0.1, 0.4, 0.4, 0);
