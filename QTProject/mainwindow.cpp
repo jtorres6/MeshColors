@@ -16,7 +16,7 @@ MainWindow::MainWindow(QWidget *parent)
     rotationY = 0;
 
     _file_ply ply;
-    ply.open("models/beethoven.ply");
+    ply.open("models/cube.ply");
     ply.read(Coordinates, Positions);
 
     image.load("images/imagen.png");
