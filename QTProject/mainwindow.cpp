@@ -24,14 +24,14 @@ MainWindow::MainWindow(QWidget *parent)
 
     points[0] = *(new QVector3D(0.0f,0.0f,1.0f));
 
-    points[1] = *(new QVector3D(0.0f,0.0f,1.0f));
-    points[2] = *(new QVector3D(0.0f,0.0f,1.0f));
-    points[3] = *(new QVector3D(0.0f,0.0f,1.0f));
-    points[4] = *(new QVector3D(1.0f,1.0f,1.0f));
-    points[5] = *(new QVector3D(0.0f,0.0f,1.0f));
-    points[6] = *(new QVector3D(0.0f,0.0f,1.0f));
-    points[7] = *(new QVector3D(0.0f,0.0f,1.0f));
-    points[8] = *(new QVector3D(0.0f,0.0f,1.0f));
+    points[1] = *(new QVector3D(0.0f,0.0f,0.01f));
+    points[2] = *(new QVector3D(0.0f,0.0f,0.01f));
+    points[3] = *(new QVector3D(0.0f,0.0f,0.01f));
+    points[4] = *(new QVector3D(1.0f,1.0f,0.01f));
+    points[5] = *(new QVector3D(0.0f,0.0f,0.01f));
+    points[6] = *(new QVector3D(0.0f,0.0f,0.01f));
+    points[7] = *(new QVector3D(0.0f,0.0f,0.01f));
+    points[8] = *(new QVector3D(0.0f,0.0f,0.01f));
 
     GLfloat pixel[4] = {0.0f,0.0f,0.0f};
 }
@@ -42,16 +42,11 @@ MainWindow::~MainWindow()
 
 void MainWindow::initializeGL()
 {
-    // @TODO: Read shaders from external files.
-    QOpenGLShaderProgram program(context);
-    program.addCacheableShaderFromSourceFile(QOpenGLShader::Vertex, "MeshColorsVertex.vsh");
-
-    // @TODO: Add mesh colors formula to fragment shader..
-    program.addCacheableShaderFromSourceFile(QOpenGLShader::Fragment,"MeshColorsFragment.fsh");
-    program.link();
-    program.bind();
-    program.setUniformValueArray("points", points, 10);
-
+    program = new QOpenGLShaderProgram(context);
+    program->addCacheableShaderFromSourceFile(QOpenGLShader::Vertex, "MeshColorsVertex.vsh");
+    program->addCacheableShaderFromSourceFile(QOpenGLShader::Fragment,"MeshColorsFragment.fsh");
+    program->link();
+    program->bind();
     glEnable(GL_DEPTH_TEST);
     resizeGL(this->width(), this->height());
 }
@@ -73,8 +68,16 @@ void MainWindow::resizeGL(int w, int h)
     glLoadIdentity();
 }
 
+float RandomFloat(float a, float b) {
+    float random = ((float) rand()) / (float) RAND_MAX;
+    float diff = b - a;
+    float r = random * diff;
+    return a + r;
+}
+
 void MainWindow::paintGL()
 {
+
     // Remove last render buffer.
     glViewport(0,0, width(), height());
     glClearColor(0.1, 0.4, 0.4, 0);
@@ -93,35 +96,40 @@ void MainWindow::paintGL()
 
     glPointSize(4.0);
     glColor3f(0.1, 0.1, 0.1);
-    glBegin(GL_POINTS);
-    for(unsigned int i=0; i<=Coordinates.size()-3; i+=3)
-    {
-        glVertex3f(Coordinates[i], Coordinates[i+1], Coordinates[i+2]);
-    }
-    glEnd();
+    //glBegin(GL_POINTS);
+    //for(unsigned int i=0; i<=Coordinates.size()-3; i+=3)
+    //{
+    //    glVertex3f(Coordinates[i], Coordinates[i+1], Coordinates[i+2]);
+    //}
+    //glEnd();
 
     glPolygonMode(GL_FRONT,GL_FILL);
-    glBegin(GL_TRIANGLES);
     for(unsigned int i=0; i< Positions.size(); i+=3)
     {
-       glColor3f(1.0, 0.0, 0.0);
-       glVertex3f(Coordinates[Positions[i]*3], Coordinates[Positions[i]*3+1], Coordinates[Positions[i]*3+2]);
-       glColor3f(0.0, 1.0, 0.0);
-       glVertex3f(Coordinates[Positions[i+1]*3], Coordinates[Positions[i+1]*3+1], Coordinates[Positions[i+1]*3+2]);
-       glColor3f(0.0, 0.0, 1.0);
-       glVertex3f(Coordinates[Positions[i+2]*3], Coordinates[Positions[i+2]*3+1], Coordinates[Positions[i+2]*3+2]);
+        points[4] = *(new QVector3D(RandomFloat(0.0f,1.0f),RandomFloat(0.0f,1.0f),RandomFloat(0.0f,1.0f)));
+        //points[4] = *(new QVector3D(1.0f,1.0f,1.0f));
+        program->setUniformValue("R",rand()%10+1);
+        program->setUniformValueArray("points", points, 9);
+
+        glBegin(GL_TRIANGLES);
+        glColor3f(1.0, 0.0, 0.0);
+        glVertex3f(Coordinates[Positions[i]*3], Coordinates[Positions[i]*3+1], Coordinates[Positions[i]*3+2]);
+        glColor3f(0.0, 1.0, 0.0);
+        glVertex3f(Coordinates[Positions[i+1]*3], Coordinates[Positions[i+1]*3+1], Coordinates[Positions[i+1]*3+2]);
+        glColor3f(0.0, 0.0, 1.0);
+        glVertex3f(Coordinates[Positions[i+2]*3], Coordinates[Positions[i+2]*3+1], Coordinates[Positions[i+2]*3+2]);
+        glEnd();
     }
-    glEnd();
 
     glColor3f(0.1, 0.1, 0.1);
     glLineWidth(2.0);
-    glPolygonMode(GL_FRONT,GL_LINE);
-    glBegin(GL_TRIANGLES);
-    for(unsigned int i=0; i< Positions.size(); i+=1)
-    {
-        glVertex3f(Coordinates[Positions[i]*3], Coordinates[Positions[i]*3+1], Coordinates[Positions[i]*3+2]);
-    }
-    glEnd();
+    //glPolygonMode(GL_FRONT,GL_LINE);
+    //glBegin(GL_TRIANGLES);
+    //for(unsigned int i=0; i< Positions.size(); i+=1)
+    //{
+    //    glVertex3f(Coordinates[Positions[i]*3], Coordinates[Positions[i]*3+1], Coordinates[Positions[i]*3+2]);
+    //}
+    //glEnd();
 
     glFlush();
     glFinish();

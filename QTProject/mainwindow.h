@@ -69,6 +69,7 @@ private:
     int vertexLocation;
     int matrixLocation;
     int colorLocation;
+    QOpenGLShaderProgram* program;
 
 };
 #endif // MAINWINDOW_H

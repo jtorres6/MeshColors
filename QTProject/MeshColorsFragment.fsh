@@ -1,6 +1,6 @@
 #version 140
-uniform highp int R = 3;
-uniform highp vec3[9] points;
+uniform highp vec3[256] points;
+uniform mediump int R = 4;
 
 
 varying vec4 color;
