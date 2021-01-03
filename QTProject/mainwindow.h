@@ -50,12 +50,15 @@ private:
     float rotationY;
     float rotationX;
     float distance = 3.0;
-
-    QOpenGLTexture *textures[6] = {nullptr, nullptr, nullptr, nullptr, nullptr, nullptr};
+    int resolution = 3;
+    bool resolutionUpdated = true;
 
     vector<float> Coordinates;
     vector<unsigned int> Positions;
-    vector<QVector3D> VertexID;
+    vector<vector<QVector3D>> VertexID;
+    vector<QVector3D*> TriangleID;
+    vector<int> data;
+    vector<int> resolutions;
 
     QImage image;
 
@@ -64,11 +67,8 @@ private:
     GLint viewport[4];
 
     QVector3D mousePosition;
-    int pixel[3];
+    unsigned char pixel[3];
 
-    int vertexLocation;
-    int matrixLocation;
-    int colorLocation;
     QOpenGLShaderProgram* program;
 
 };
