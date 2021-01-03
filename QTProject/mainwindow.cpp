@@ -173,7 +173,7 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
 void MainWindow::wheelEvent(QWheelEvent *event)
 {
      QPoint points = event->angleDelta() / 8;
-     distance += points.y();
+     distance += distance/points.y();
      this->update();
 }
 
