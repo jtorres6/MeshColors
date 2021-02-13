@@ -29,8 +29,8 @@
 class _basic_object3D
 {
   public:
-  vector<_vertex3f> Vertices;
-  vector<_vertex3f> Colors;
+  QVector<QVector3D> Vertices;
+  QVector<QVector3D> Colors;
 
   QMatrix4x4 Projection;
   QOpenGLShaderProgram* program;

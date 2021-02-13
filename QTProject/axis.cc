@@ -21,20 +21,20 @@ using namespace _colors_ne;
 _axis::_axis(float Size)
 {
     Vertices.resize(6);
-    Vertices[0]= _vertex3f(-Size, 0, 0);// x
-    Vertices[1] = _vertex3f(-Size , 0 , 0 ) ;
-    Vertices[2] = _vertex3f( 0 ,Size , 0 ) ; // y
-    Vertices[3] = _vertex3f(0 , -Size , 0 ) ;
-    Vertices[4] = _vertex3f( 0 , 0 ,Size) ; // z
-    Vertices[5] = _vertex3f(0 ,0 , -Size) ;
+    Vertices[0] = QVector3D(Size, 0.0, 0.0);// x
+    Vertices[1] = QVector3D(-Size, 0.0, 0.0);
+    Vertices[2] = QVector3D(0.0, Size, 0.0); // y
+    Vertices[3] = QVector3D(0.0, -Size, 0.0);
+    Vertices[4] = QVector3D(0.0, 0.0, Size); // z
+    Vertices[5] = QVector3D(0.0, 0.0, -Size);
 
     Colors.resize(6);
-    Colors[0] = _vertex3f(1, 0, 0); // red
-    Colors[1] = _vertex3f(1, 0, 0);
-    Colors[2] = _vertex3f(0, 1, 0); // green
-    Colors[3] = _vertex3f(0, 1, 0);
-    Colors[4] = _vertex3f(0, 0, 1); // blue
-    Colors[5] = _vertex3f(0, 0, 1);
+    Colors[0] = QVector3D(1, 0, 0); // red
+    Colors[1] = QVector3D(1, 0, 0);
+    Colors[2] = QVector3D(0, 1, 0); // green
+    Colors[3] = QVector3D(0, 1, 0);
+    Colors[4] = QVector3D(0, 0, 1); // blue
+    Colors[5] = QVector3D(0, 0, 1);
 
 }
 

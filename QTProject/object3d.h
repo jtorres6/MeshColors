@@ -22,7 +22,7 @@
 class _object3D:public _basic_object3D
 {
   public:
-  vector<GLfloat> Triangles;
+  vector<QVector3D> Triangles;
 
   void draw_line();
   void draw_fill();

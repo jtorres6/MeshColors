@@ -1,8 +1,8 @@
 #version 450 core
 
 layout (location = 0) uniform mat4 matrix;
-layout (location = 1) uniform vec3 vertex;
-layout (location = 2) uniform vec4 color;
+layout (location = 1) in vec3 vertex;
+layout (location = 2) in vec4 color;
 
 out vec4 out_color;
 void main(void)

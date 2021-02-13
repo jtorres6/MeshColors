@@ -23,6 +23,7 @@ class _tetrahedron:public _object3D
 {
 public:
   _tetrahedron(float Size=1.0);
+  QVector<QVector3D> VerticesDrawArrays;
 };
 
 #endif

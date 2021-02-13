@@ -48,16 +48,12 @@ void _gl_widget::keyPressEvent(QKeyEvent *Keyevent)
   case Qt::Key_C:Draw_chess=!Draw_chess;break;
   case Qt::Key_M:Draw_meshcolors=!Draw_meshcolors;break;
 
-  case Qt::Key_Left:Observer_angle_y-=ANGLE_STEP;
-      qDebug() << Observer_angle_y;break;
+  case Qt::Key_Left:Observer_angle_y-=ANGLE_STEP;break;
   case Qt::Key_Right:Observer_angle_y+=ANGLE_STEP;break;
   case Qt::Key_Up:Observer_angle_x-=ANGLE_STEP;break;
-  case Qt::Key_Down:Observer_angle_x+=ANGLE_STEP;
-      qDebug() << Observer_angle_x;break;
-  case Qt::Key_PageUp:Observer_distance*=1.2;
-      qDebug() << Observer_distance; break;
-  case Qt::Key_PageDown:Observer_distance/=1.2;
-      qDebug() << Observer_distance;break;
+  case Qt::Key_Down:Observer_angle_x+=ANGLE_STEP;break;
+  case Qt::Key_PageUp:Observer_distance*=1.2;break;
+  case Qt::Key_PageDown:Observer_distance/=1.2;break;
   }
 
   update();
@@ -88,18 +84,6 @@ void _gl_widget::clear_window()
 void _gl_widget::change_projection()
 {
 
-    Projection.ortho(X_MIN, X_MAX, Y_MIN, Y_MAX, FRONT_PLANE_PERSPECTIVE, BACK_PLANE_PERSPECTIVE);
-
-    /*Rotation_x.rotate(Observer_angle_x,1,0,0);
-    Rotation_y.rotate(Observer_angle_y,0,1,0);
-    Translation.translate(Observer_angle_x,Observer_angle_y,-Observer_distance);
-
-    Projection*=Translation;
-    Projection*=Rotation_x;
-    Projection*=Rotation_y;
-
-    Tetrahedron.Projection = Projection;
-    Axis.Projection = Projection;*/
 }
 
 
@@ -128,64 +112,101 @@ void _gl_widget::change_observer()
 
 void _gl_widget::draw_objects()
 {
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    QMatrix4x4 Projection;
+    QMatrix4x4 Rotation_x;
+    QMatrix4x4 Rotation_y;
+    QMatrix4x4 Translation;
+
+    Projection.frustum(X_MIN, X_MAX, Y_MIN, Y_MAX, FRONT_PLANE_PERSPECTIVE, BACK_PLANE_PERSPECTIVE);
+    Rotation_x.rotate(Observer_angle_x,1,0,0);
+    Rotation_y.rotate(Observer_angle_y,0,1,0);
+    Translation.translate(0,0,-Observer_distance);
+
+    Projection*=Translation;
+    Projection*=Rotation_x;
+    Projection*=Rotation_y;
+
     program->bind();
     VAO->bind();
 
-    glPointSize(10);
-    glDrawArrays(GL_POINTS, 0, 1);
+    int matrixLocation = program->uniformLocation("matrix");
+    program->setUniformValue(matrixLocation, Projection);
+
+    glDrawArrays(GL_LINES, 0, Axis.Vertices.size());
+
+    if(glGetError() != GL_NO_ERROR)
+    {
+
+        qDebug() << "GL ERROR";
+    }
 
     VAO->release();
+
+    VAO2->bind();
+
+    int matrixLocation2 = program->uniformLocation("matrix");
+    program->setUniformValue(matrixLocation2, Projection);
+
+    glPointSize(10);
+    glDrawArrays(GL_POINTS, 0, ply.VerticesDrawArrays.size());
+    glDrawArrays(GL_LINES, 0, ply.VerticesDrawArrays.size());
+    glDrawArrays(GL_TRIANGLES,0, ply.VerticesDrawArrays.size());
+
+    if(glGetError() != GL_NO_ERROR)
+    {
+        qDebug() << "GL ERROR";
+    }
+
+    VAO2->release();
     program->release();
 
-  /*
-    Axis.draw_line();
-
-    Tetrahedron.Projection = Projection;
-    obj->Projection = Projection;
-    if(Draw_meshcolors)
-    {
-        obj->draw_texture();
-    }
-    else
-    {
-     if (Draw_point){
-       glPointSize(5);
-       glColor3fv((GLfloat *) &BLACK);
-       switch (Object){
-       case OBJECT_TETRAHEDRON:Tetrahedron.draw_point();break;
-       case OBJECT_MESHCOLORS:obj->draw_point();break;
-       default:break;
-       }
-     }
-
-     if (Draw_line){
-       glLineWidth(3);
-       glColor3fv((GLfloat *) &MAGENTA);
-       switch (Object){
-       case OBJECT_TETRAHEDRON:Tetrahedron.draw_line();break;
-       case OBJECT_MESHCOLORS:obj->draw_line();break;
-       default:break;
-       }
-     }
-
-     if (Draw_fill){
-       glColor3fv((GLfloat *) &BLUE);
-       switch (Object){
-       case OBJECT_TETRAHEDRON:Tetrahedron.draw_fill();break;
-       case OBJECT_MESHCOLORS:obj->draw_fill();break;
-       default:break;
-       }
-     }
-
-     if (Draw_chess){
-       switch (Object){
-       case OBJECT_TETRAHEDRON:Tetrahedron.draw_chess();break;
-       default:break;
-       }
-     }
-    }
-    */
+ // Axis.draw_line();
+ //
+ // Tetrahedron.Projection = Projection;
+ // obj->Projection = Projection;
+ ////if(Draw_meshcolors)
+ ////{
+ ////  obj->draw_texture();
+ ////}
+ ////else
+ //{
+ //    if (Draw_point){
+ //      glPointSize(5);
+ //      glColor3fv((GLfloat *) &BLACK);
+ //      switch (Object){
+ //      case OBJECT_TETRAHEDRON:Tetrahedron.draw_point();break;
+ //      case OBJECT_MESHCOLORS:obj->draw_point();break;
+ //      default:break;
+ //      }
+ //    }
+ //
+ //    if (Draw_line){
+ //      glLineWidth(3);
+ //      glColor3fv((GLfloat *) &MAGENTA);
+ //      switch (Object){
+ //      case OBJECT_TETRAHEDRON:Tetrahedron.draw_line();break;
+ //      case OBJECT_MESHCOLORS:obj->draw_line();break;
+ //      default:break;
+ //      }
+ //    }
+ //
+ //    if (Draw_fill){
+ //      glColor3fv((GLfloat *) &BLUE);
+ //      switch (Object){
+ //      case OBJECT_TETRAHEDRON:Tetrahedron.draw_fill();break;
+ //      case OBJECT_MESHCOLORS:obj->draw_fill();break;
+ //      default:break;
+ //      }
+ //    }
+ //
+ //    if (Draw_chess){
+ //      switch (Object){
+ //      case OBJECT_TETRAHEDRON:Tetrahedron.draw_chess();break;
+ //      default:break;
+ //      }
+ //    }
+ //}
+ //
 
 }
 
@@ -232,6 +253,10 @@ void _gl_widget::initializeGL()
     const GLubyte* strm;
     QOpenGLContext *context;
     context = new QOpenGLContext(this);
+    Axis = _axis(500.0f);
+    Tetrahedron = _tetrahedron(0.5f);
+
+    ply = object3DPly(p);
 
     program = new QOpenGLShaderProgram(context);
     program->addCacheableShaderFromSourceFile(QOpenGLShader::Vertex, "MeshColorsVertex.vsh");
@@ -239,34 +264,62 @@ void _gl_widget::initializeGL()
     program->link();
     program->bind();
 
+     // VAO 1
     VAO = new QOpenGLVertexArrayObject();
     VAO->create();
     VAO->bind();
 
-    QOpenGLBuffer *positionBuffer = new QOpenGLBuffer();
+    QOpenGLBuffer *positionBuffer = new QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
     positionBuffer->create();
+    positionBuffer->setUsagePattern(QOpenGLBuffer::StaticDraw);
     positionBuffer->bind();
-    positionBuffer->allocate(Axis.Vertices.data(), sizeof(Axis.Vertices.size() * 3 * sizeof(float)));
+    positionBuffer->allocate(Axis.Vertices.data(), Axis.Vertices.size() * sizeof(QVector3D));
+    positionBuffer->release();
 
-    QOpenGLBuffer *colorBuffer = new QOpenGLBuffer();
+    QOpenGLBuffer *colorBuffer = new QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
     colorBuffer->create();
+    colorBuffer->setUsagePattern(QOpenGLBuffer::StaticDraw);
     colorBuffer->bind();
-    colorBuffer->allocate(Axis.Vertices.data(), sizeof(Axis.Vertices.size() * 3 * sizeof(float)));
+    colorBuffer->allocate(Axis.Colors.data(), Axis.Colors.size() * sizeof(QVector3D));
+    colorBuffer->release();
+
+    positionBuffer->bind();
+    program->enableAttributeArray("vertex");
+    program->setAttributeBuffer("vertex", GL_FLOAT, 0, 3);
+    positionBuffer->release();
+
+    colorBuffer->bind();
+    program->enableAttributeArray("color");
+    program->setAttributeBuffer("color", GL_FLOAT, 0, 3);
+    colorBuffer->release();
 
     VAO->release();
-    positionBuffer->release(
-    colorBuffer->release();
+
+    // VAO 2
+    VAO2 = new QOpenGLVertexArrayObject();
+    VAO2->create();
+    VAO2->bind();
+
+    positionBuffer = new QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
+    positionBuffer->create();
+    positionBuffer->setUsagePattern(QOpenGLBuffer::StaticDraw);
+    positionBuffer->bind();
+    positionBuffer->allocate(ply.VerticesDrawArrays.data(), ply.VerticesDrawArrays.size() * sizeof(QVector3D));
+    program->enableAttributeArray("vertex");
+    program->setAttributeBuffer("vertex", GL_FLOAT, 0, 3);
+    positionBuffer->release();
+
+    colorBuffer = new QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
+    colorBuffer->create();
+    colorBuffer->setUsagePattern(QOpenGLBuffer::StaticDraw);
+    colorBuffer->bind();
+    colorBuffer->allocate(ply.colors.data(), ply.colors.size() * sizeof(QVector4D));
+    program->enableAttributeArray("color");
+    program->setAttributeBuffer("color", GL_FLOAT, 0, 3);
+
+    VAO2->release();
+
     program->release();
-    glClearColor(1.0,1.0,1.0,1.0);
-    glEnable(GL_DEPTH_TEST);
-
-
-
-    /*obj = new object3DMeshColors(p, context);
-    obj->program = program;
-
-    Tetrahedron.program = program;
-    Axis.program = program;
 
     strm = glGetString(GL_VENDOR);
     std::cerr << "Vendor: " << strm << "\n";
@@ -287,6 +340,10 @@ void _gl_widget::initializeGL()
     glGetIntegerv(GL_MAX_TEXTURE_SIZE, &Max_texture_size);
     std::cerr << "Max texture size: " << Max_texture_size << "\n";
 
+    glClearColor(1.0,1.0,1.0,1.0);
+    glEnable(GL_DEPTH_TEST);
+
+
     Observer_angle_x=0;
     Observer_angle_y=0;
     Observer_distance=DEFAULT_DISTANCE;
@@ -294,5 +351,4 @@ void _gl_widget::initializeGL()
     Draw_point=false;
     Draw_line=true;
     Draw_fill=false;
-    Draw_chess=false;*/
 }
