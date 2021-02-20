@@ -3,7 +3,6 @@ HEADERS += \
   basic_object3d.h \
   object3d.h \
   axis.h \
-  tetrahedron.h \
   glwidget.h \
   window.h \
   file_ply_stl.ch
@@ -12,7 +11,6 @@ SOURCES += \
   basic_object3d.cc \
   object3d.cc \
   axis.cc \
-  tetrahedron.cc \
   main.cc \
   glwidget.cc \
   window.cc \
