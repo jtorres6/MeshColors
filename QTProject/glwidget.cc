@@ -45,8 +45,6 @@ void _gl_widget::keyPressEvent(QKeyEvent *Keyevent)
   case Qt::Key_P:Draw_point=!Draw_point;break;
   case Qt::Key_L:Draw_line=!Draw_line;break;
   case Qt::Key_F:Draw_fill=!Draw_fill;break;
-  case Qt::Key_C:Draw_chess=!Draw_chess;break;
-  case Qt::Key_M:Draw_meshcolors=!Draw_meshcolors;break;
 
   case Qt::Key_Left:Observer_angle_y-=ANGLE_STEP;break;
   case Qt::Key_Right:Observer_angle_y+=ANGLE_STEP;break;
@@ -147,10 +145,20 @@ void _gl_widget::draw_objects()
     int matrixLocation2 = program->uniformLocation("matrix");
     program->setUniformValue(matrixLocation2, Projection);
 
-    glPointSize(10);
-    glDrawArrays(GL_POINTS, 0, ply.VerticesDrawArrays.size());
-    glDrawArrays(GL_LINES, 0, ply.VerticesDrawArrays.size());
-    glDrawArrays(GL_TRIANGLES,0, ply.VerticesDrawArrays.size());
+    if(Draw_point)
+    {
+        glPointSize(10);
+        glDrawArrays(GL_POINTS, 0, ply.VerticesDrawArrays.size());
+    }
+    if(Draw_line)
+    {
+        glDrawArrays(GL_LINES, 0, ply.VerticesDrawArrays.size());
+    }
+
+    if(Draw_fill)
+    {
+        glDrawArrays(GL_TRIANGLES,0, ply.VerticesDrawArrays.size());
+    }
 
     if(glGetError() != GL_NO_ERROR)
     {
@@ -159,55 +167,6 @@ void _gl_widget::draw_objects()
 
     VAO2->release();
     program->release();
-
- // Axis.draw_line();
- //
- // Tetrahedron.Projection = Projection;
- // obj->Projection = Projection;
- ////if(Draw_meshcolors)
- ////{
- ////  obj->draw_texture();
- ////}
- ////else
- //{
- //    if (Draw_point){
- //      glPointSize(5);
- //      glColor3fv((GLfloat *) &BLACK);
- //      switch (Object){
- //      case OBJECT_TETRAHEDRON:Tetrahedron.draw_point();break;
- //      case OBJECT_MESHCOLORS:obj->draw_point();break;
- //      default:break;
- //      }
- //    }
- //
- //    if (Draw_line){
- //      glLineWidth(3);
- //      glColor3fv((GLfloat *) &MAGENTA);
- //      switch (Object){
- //      case OBJECT_TETRAHEDRON:Tetrahedron.draw_line();break;
- //      case OBJECT_MESHCOLORS:obj->draw_line();break;
- //      default:break;
- //      }
- //    }
- //
- //    if (Draw_fill){
- //      glColor3fv((GLfloat *) &BLUE);
- //      switch (Object){
- //      case OBJECT_TETRAHEDRON:Tetrahedron.draw_fill();break;
- //      case OBJECT_MESHCOLORS:obj->draw_fill();break;
- //      default:break;
- //      }
- //    }
- //
- //    if (Draw_chess){
- //      switch (Object){
- //      case OBJECT_TETRAHEDRON:Tetrahedron.draw_chess();break;
- //      default:break;
- //      }
- //    }
- //}
- //
-
 }
 
 

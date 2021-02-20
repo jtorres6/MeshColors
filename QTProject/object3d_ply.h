@@ -19,8 +19,6 @@ public:
     vector<GLfloat> triangleVertices;
     vector<QVector4D> colors;
     GLfloat* triangles;
-
-    QVector<QVector3D> VerticesDrawArrays;
 };
 
 #endif // OBJECT3DPLY_H

@@ -30,12 +30,7 @@ class _basic_object3D
 {
   public:
   QVector<QVector3D> Vertices;
-  QVector<QVector3D> Colors;
-
-  QMatrix4x4 Projection;
-  QOpenGLShaderProgram* program;
-
-  void draw_point();
+  QVector<QVector4D> Colors;
 };
 
 #endif

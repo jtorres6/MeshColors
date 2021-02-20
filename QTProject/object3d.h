@@ -22,13 +22,14 @@
 class _object3D:public _basic_object3D
 {
   public:
-  vector<QVector3D> Triangles;
+  QVector<QVector3D> Triangles;
+  QVector<QVector3D> VerticesDrawArrays;
 
-  void draw_line();
-  void draw_fill();
-  void draw_chess();
-  void draw_texture();
+public:
+    _object3D();
+    _object3D(const char *Filename);
 
+    void ReadPlyFile(const char *Filename);
 };
 
 #endif // OBJECT3D_H

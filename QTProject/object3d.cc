@@ -8,84 +8,48 @@
 
 
 #include "object3d.h"
+#include "file_ply_stl.h"
 
 using namespace _colors_ne;
 
-
-/*****************************************************************************//**
- *
- *
- *
- *****************************************************************************/
-
-void _object3D::draw_line()
+void _object3D::ReadPlyFile(const char *Filename)
 {
-    //glBegin(GL_LINES);
-    //for(unsigned int i=0; i< Triangles.size(); i++)
-    //{
-    //    glColor3f(1.0, 0.0, 0.0);
-    //    glVertex3fv((GLfloat *) &Vertices[Triangles[i].x]);
-    //    glColor3f(0.0, 1.0, 0.0);
-    //    glVertex3fv((GLfloat *) &Vertices[Triangles[i].y]);
-    //    glColor3f(0.0, 0.0, 1.0);
-    //    glVertex3fv((GLfloat *) &Vertices[Triangles[i].z]);
-    //}
-    //glEnd();
+    _file_ply ply;
+    ply.open(Filename);
+    vector<float> Coordinates;
+    vector<unsigned int> Positions;
+    ply.read(Coordinates, Positions);
 
-//
-// int vertexLocation = program->attributeLocation("vertex");
-// int matrixLocation = program->uniformLocation("matrix");
-//
-//
-// program->enableAttributeArray(vertexLocation);
-// program->setAttributeArray(vertexLocation, Vertices.data(), 3);
-// program->setUniformValue(matrixLocation, Projection);
-//
-// glDrawArrays(GL_LINES, 0, 3);
+   for(int i = 0; i <= Coordinates.size()-3; i+=3)
+   {
+       Vertices.push_back(QVector3D(Coordinates[i],Coordinates[i+1],Coordinates[i+2]));
+   }
+
+   for(int i = 0; i <= Positions.size()-3; i+=3)
+   {
+        Triangles.push_back(QVector3D(Positions[i],Positions[i+1],Positions[i+2]));
+   }
+
+   VerticesDrawArrays.resize(Triangles.size()*3);
+
+   for (unsigned int i= 0;i<Triangles.size(); i++)
+   {
+       VerticesDrawArrays[i*3]=Vertices[Triangles[i].x()] ;
+       VerticesDrawArrays[i*3+1]=Vertices[Triangles[i].y()] ;
+       VerticesDrawArrays[i*3+2]=Vertices[Triangles[i].z()] ;
+
+       Colors.push_back(QVector4D(1.0, 0.0, 0.0, 0.0));
+       Colors.push_back(QVector4D(0.0, 1.0, 0.0, 0.0));
+       Colors.push_back(QVector4D(0.0, 0.0, 1.0, 0.0));
+   }
+}
+
+_object3D::_object3D()
+{
 }
 
 
-/*****************************************************************************//**
- *
- *
- *
- *****************************************************************************/
-
-void _object3D::draw_fill()
+_object3D::_object3D(const char *Filename)
 {
-   //glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
-   //glBegin(GL_TRIANGLES);
-   //for(unsigned int i=0; i< Triangles.size(); i++)
-   //{
-   //    glColor3f(1.0, 0.0, 0.0);
-   //    glVertex3fv((GLfloat *) &Vertices[Triangles[i].x]);
-   //    glColor3f(0.0, 1.0, 0.0);
-   //    glVertex3fv((GLfloat *) &Vertices[Triangles[i].y]);
-   //    glColor3f(0.0, 0.0, 1.0);
-   //    glVertex3fv((GLfloat *) &Vertices[Triangles[i].z]);
-   //}
-   //glEnd();
-
-   //int vertexLocation = program->attributeLocation("vertex");
-   //int matrixLocation = program->uniformLocation("matrix");
-   //
-   //
-   //program->enableAttributeArray(vertexLocation);
-   //program->setAttributeArray(vertexLocation, Vertices.data(), 3);
-   //program->setUniformValue(matrixLocation, Projection);
-   //
-   //glDrawArrays(GL_TRIANGLES, 0, 3);
+    ReadPlyFile(Filename);
 }
-
-
-/*****************************************************************************//**
- *
- *
- *
- *****************************************************************************/
-
-void _object3D::draw_chess()
-{
-  
-}
-

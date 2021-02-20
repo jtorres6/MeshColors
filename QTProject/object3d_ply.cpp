@@ -16,7 +16,6 @@ void object3DPly::Read(const char *Filename)
    for(int i = 0; i <= Positions.size()-3; i+=3)
    {
         Triangles.push_back(QVector3D(Positions[i],Positions[i+1],Positions[i+2]));
-
    }
 
    VerticesDrawArrays.resize(Triangles.size()*3);
