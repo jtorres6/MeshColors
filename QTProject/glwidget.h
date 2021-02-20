@@ -84,7 +84,7 @@ private:
     QOpenGLShaderProgram* program;
     QOpenGLVertexArrayObject *VAO, *VAO2;
 
-    const char* p = "models/ant.ply";
+    const char* p = "Models/ant.ply";
     object3DMeshColors *obj;
 
     _gl_widget_ne::_object Object;
