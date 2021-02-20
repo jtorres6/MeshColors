@@ -6,8 +6,7 @@ HEADERS += \
   tetrahedron.h \
   glwidget.h \
   window.h \
-  file_ply_stl.ch \
-  object3d_ply.h
+  file_ply_stl.ch
 
 SOURCES += \
   basic_object3d.cc \
@@ -17,8 +16,7 @@ SOURCES += \
   main.cc \
   glwidget.cc \
   window.cc \
-  file_ply_stl.cc \
-  object3d_ply.cpp
+  file_ply_stl.cc
 
 DISTFILES += \
   MeshColorsFragment.fsh \
