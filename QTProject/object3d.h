@@ -21,11 +21,11 @@
 
 class _object3D:public _basic_object3D
 {
-  public:
-  QVector<QVector3D> Triangles;
-  QVector<QVector3D> VerticesDrawArrays;
+    public:
+    QVector<QVector3D> Triangles;
+    QVector<QVector3D> VerticesDrawArrays;
+    QVector<QVector3D> MeshColorsData;
 
-public:
     _object3D();
     _object3D(const char *Filename);
 

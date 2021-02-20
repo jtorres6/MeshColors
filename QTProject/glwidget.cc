@@ -278,8 +278,8 @@ void _gl_widget::initializeGL()
     std::cerr << "OpenGL Version: " << strm << "\n";
 
     if (strm[0] == '1'){
-    std::cerr << "Only OpenGL 1.X supported!\n";
-    exit(-1);
+        std::cerr << "Only OpenGL 1.X supported!\n";
+        exit(-1);
     }
 
     strm = glGetString(GL_SHADING_LANGUAGE_VERSION);
