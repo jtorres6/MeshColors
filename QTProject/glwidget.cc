@@ -125,6 +125,8 @@ void _gl_widget::draw_objects()
     Projection*=Rotation_y;
 
     program->bind();
+
+    // Draw axis
     VAO->bind();
 
     int matrixLocation = program->uniformLocation("matrix");
@@ -132,14 +134,9 @@ void _gl_widget::draw_objects()
 
     glDrawArrays(GL_LINES, 0, Axis.Vertices.size());
 
-    if(glGetError() != GL_NO_ERROR)
-    {
-
-        qDebug() << "GL ERROR";
-    }
-
     VAO->release();
 
+    // Draw 3D model
     VAO2->bind();
 
     int matrixLocation2 = program->uniformLocation("matrix");
@@ -148,21 +145,15 @@ void _gl_widget::draw_objects()
     if(Draw_point)
     {
         glPointSize(10);
-        glDrawArrays(GL_POINTS, 0, ply.VerticesDrawArrays.size());
+        glDrawArrays(GL_POINTS, 0, object3d.VerticesDrawArrays.size());
     }
     if(Draw_line)
     {
-        glDrawArrays(GL_LINES, 0, ply.VerticesDrawArrays.size());
+        glDrawArrays(GL_LINES, 0, object3d.VerticesDrawArrays.size());
     }
-
     if(Draw_fill)
     {
-        glDrawArrays(GL_TRIANGLES,0, ply.VerticesDrawArrays.size());
-    }
-
-    if(glGetError() != GL_NO_ERROR)
-    {
-        qDebug() << "GL ERROR";
+        glDrawArrays(GL_TRIANGLES,0, object3d.VerticesDrawArrays.size());
     }
 
     VAO2->release();
@@ -213,9 +204,8 @@ void _gl_widget::initializeGL()
     QOpenGLContext *context;
     context = new QOpenGLContext(this);
     Axis = _axis(500.0f);
-    Tetrahedron = _tetrahedron(0.5f);
 
-    ply = object3DPly(p);
+    object3d = _object3D(p);
 
     program = new QOpenGLShaderProgram(context);
     program->addCacheableShaderFromSourceFile(QOpenGLShader::Vertex, "MeshColorsVertex.vsh");
@@ -263,7 +253,7 @@ void _gl_widget::initializeGL()
     positionBuffer->create();
     positionBuffer->setUsagePattern(QOpenGLBuffer::StaticDraw);
     positionBuffer->bind();
-    positionBuffer->allocate(ply.VerticesDrawArrays.data(), ply.VerticesDrawArrays.size() * sizeof(QVector3D));
+    positionBuffer->allocate(object3d.VerticesDrawArrays.data(), object3d.VerticesDrawArrays.size() * sizeof(QVector3D));
     program->enableAttributeArray("vertex");
     program->setAttributeBuffer("vertex", GL_FLOAT, 0, 3);
     positionBuffer->release();
@@ -272,7 +262,7 @@ void _gl_widget::initializeGL()
     colorBuffer->create();
     colorBuffer->setUsagePattern(QOpenGLBuffer::StaticDraw);
     colorBuffer->bind();
-    colorBuffer->allocate(ply.colors.data(), ply.colors.size() * sizeof(QVector4D));
+    colorBuffer->allocate(object3d.Colors.data(), object3d.Colors.size() * sizeof(QVector4D));
     program->enableAttributeArray("color");
     program->setAttributeBuffer("color", GL_FLOAT, 0, 3);
 
@@ -301,7 +291,6 @@ void _gl_widget::initializeGL()
 
     glClearColor(1.0,1.0,1.0,1.0);
     glEnable(GL_DEPTH_TEST);
-
 
     Observer_angle_x=0;
     Observer_angle_y=0;

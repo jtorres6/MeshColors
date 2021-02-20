@@ -18,10 +18,9 @@
 #include "vertex.h"
 #include "colors.h"
 #include "axis.h"
-#include "tetrahedron.h"
-#include "object3d_meshcolors.h"
-#include "object3d_ply.h"
+#include "object3d.h"
 #include <QOpenGLBuffer>
+#include <QOpenGLContext>
 
 
 namespace _gl_widget_ne {
@@ -68,32 +67,27 @@ protected:
     void initializeGL() Q_DECL_OVERRIDE;
     void keyPressEvent(QKeyEvent *Keyevent) Q_DECL_OVERRIDE;
 
-
 private:
+    _window *Window;
+
+    QOpenGLShaderProgram* program;
+    QOpenGLVertexArrayObject *VAO, *VAO2;
 
     QMatrix4x4 Projection;
     QMatrix4x4 Rotation_x;
     QMatrix4x4 Rotation_y;
     QMatrix4x4 Translation;
 
-    _window *Window;
     _axis Axis;
-    _tetrahedron Tetrahedron;
-    object3DPly ply;
-
-    QOpenGLShaderProgram* program;
-    QOpenGLVertexArrayObject *VAO, *VAO2;
+    _object3D object3d;
 
     const char* p = "Models/ant.ply";
-    object3DMeshColors *obj;
 
     _gl_widget_ne::_object Object;
 
     bool Draw_point;
     bool Draw_line;
     bool Draw_fill;
-    bool Draw_chess;
-    bool Draw_meshcolors;
 
     float Observer_angle_x = 0;
     float Observer_angle_y = 0;
