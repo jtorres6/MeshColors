@@ -47,8 +47,18 @@ _object3D::_object3D(const char *Filename)
        VerticesDrawArrays[i*3+1]=Vertices[Triangles[i].y()];
        VerticesDrawArrays[i*3+2]=Vertices[Triangles[i].z()];
 
-       Colors.push_back(QVector4D(1.0, 0.0, 0.0, 0.0));
-       Colors.push_back(QVector4D(0.0, 1.0, 0.0, 0.0));
-       Colors.push_back(QVector4D(0.0, 0.0, 1.0, 0.0));
+       Colors.push_back(QVector4D(1.0, 0.0, 0.0, 1.0));
+       Colors.push_back(QVector4D(0.0, 1.0, 0.0, 1.0));
+       Colors.push_back(QVector4D(0.0, 0.0, 1.0, 1.0));
+
+       // Vertex 1
+       Index.push_back(QVector3D(0,1,2));
+       PerFaceData.push_back(QVector4D(3,4,5,6));
+       // Vertex 1
+       Index.push_back(QVector3D(0,1,2));
+       PerFaceData.push_back(QVector4D(3,4,5,6));
+       // Vertex 1
+       Index.push_back(QVector3D(0,1,2));
+       PerFaceData.push_back(QVector4D(3,4,5,6));
     }
 }

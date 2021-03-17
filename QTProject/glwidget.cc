@@ -116,9 +116,9 @@ void _gl_widget::draw_objects()
     QMatrix4x4 Translation;
 
     Projection.frustum(X_MIN, X_MAX, Y_MIN, Y_MAX, FRONT_PLANE_PERSPECTIVE, BACK_PLANE_PERSPECTIVE);
-    Rotation_x.rotate(Observer_angle_x,1,0,0);
-    Rotation_y.rotate(Observer_angle_y,0,1,0);
-    Translation.translate(0,0,-Observer_distance);
+    Rotation_x.rotate(Observer_angle_x, 1, 0, 0);
+    Rotation_y.rotate(Observer_angle_y, 0, 1, 0);
+    Translation.translate(0, 0, -Observer_distance);
 
     Projection*=Translation;
     Projection*=Rotation_x;
@@ -264,7 +264,48 @@ void _gl_widget::initializeGL()
     colorBuffer->bind();
     colorBuffer->allocate(object3d.Colors.data(), object3d.Colors.size() * sizeof(QVector4D));
     program->enableAttributeArray("color");
-    program->setAttributeBuffer("color", GL_FLOAT, 0, 3);
+    program->setAttributeBuffer("color", GL_FLOAT, 0, 4);
+    colorBuffer->release();
+
+    QOpenGLBuffer *VertexIndexBuffer = new QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
+    VertexIndexBuffer->create();
+    VertexIndexBuffer->setUsagePattern(QOpenGLBuffer::StaticDraw);
+    VertexIndexBuffer->bind();
+    VertexIndexBuffer->allocate(object3d.Index.data(), object3d.Index.size() * sizeof(QVector3D));
+    program->enableAttributeArray("indexes");
+    program->setAttributeBuffer("indexes", GL_FLOAT, 0, 3);
+    VertexIndexBuffer->release();
+
+    QOpenGLBuffer *FaceIndexBuffer = new QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
+    FaceIndexBuffer->create();
+    FaceIndexBuffer->setUsagePattern(QOpenGLBuffer::StaticDraw);
+    FaceIndexBuffer->bind();
+    FaceIndexBuffer->allocate(object3d.PerFaceData.data(), object3d.PerFaceData.size() * sizeof(QVector4D));
+    program->enableAttributeArray("faceIndexes");
+    program->setAttributeBuffer("faceIndexes", GL_FLOAT, 0, 4);
+    FaceIndexBuffer->release();
+
+    QVector3D points[256];
+
+    points[0] = *(new QVector3D(1.0f,1.0f,0.0f));
+
+    points[1] = *(new QVector3D(0.0f,0.0f,0.0f));
+    points[2] = *(new QVector3D(0.0f,0.0f,0.0f));
+    points[3] = *(new QVector3D(0.0f,0.0f,0.0f));
+    points[4] = *(new QVector3D(0.0f,0.0f,0.0f));
+    points[5] = *(new QVector3D(0.0f,0.0f,0.0f));
+    points[6] = *(new QVector3D(1.0f,1.0f,1.0f));
+    points[7] = *(new QVector3D(0.0f,0.0f,0.0f));
+    points[8] = *(new QVector3D(0.0f,0.0f,0.0f));
+    points[9] = *(new QVector3D(0.0f,0.0f,0.0f));
+    points[10] = *(new QVector3D(1.0f,1.0f,1.0f));
+    points[11] = *(new QVector3D(0.0f,0.0f,0.0f));
+    points[12] = *(new QVector3D(0.0f,0.0f,0.0f));
+    points[13] = *(new QVector3D(0.0f,0.0f,0.0f));
+    points[14] = *(new QVector3D(0.0f,0.0f,0.0f));
+    points[15] = *(new QVector3D(0.0f,0.0f,0.0f));
+    points[16] = *(new QVector3D(0.0f,0.0f,0.0f));
+    program->setUniformValueArray("points", points, 256);
 
     VAO2->release();
 

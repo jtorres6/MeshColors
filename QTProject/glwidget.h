@@ -81,7 +81,7 @@ private:
     _axis Axis;
     _object3D object3d;
 
-    const char* p = "Models/ant.ply";
+    const char* p = "Models/cube.ply";
 
     _gl_widget_ne::_object Object;
 
