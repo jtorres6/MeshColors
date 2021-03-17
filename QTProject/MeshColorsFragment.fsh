@@ -30,8 +30,8 @@ void main(void)
     }
 
     PointsIndex[1][1] = int(fragFaceIndexes.a);
-    PointsIndex[3][2] = int(fragIndexes.x);
-    PointsIndex[2][3] = int(fragIndexes.x);
+    PointsIndex[3][2] = int(fragFaceIndexes.a);
+    PointsIndex[2][3] = int(fragFaceIndexes.a);
 
     if(round(w.r+w.g+w.b) == 0)
     {
