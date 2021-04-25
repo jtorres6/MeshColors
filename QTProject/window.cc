@@ -62,7 +62,15 @@ _window::_window()
   File_menu->addAction(Exit);
   File_menu->setAttribute(Qt::WA_AlwaysShowToolTips);
 
-  setWindowTitle(tr("Práctica 1"));
+  setWindowTitle(tr("MeshColors"));
 
   resize(800,800);
+}
+
+void _window::mouseMoveEvent(QMouseEvent *e)
+{
+    if(e->buttons() & Qt::LeftButton)
+    {
+        GL_widget->pick(e->pos().x(), e->pos().y());
+    }
 }

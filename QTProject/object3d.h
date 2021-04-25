@@ -28,6 +28,10 @@ class _object3D:public _basic_object3D
     QVector<QVector3D> Index;
     QVector<QVector4D> PerFaceData;
 
+    QVector<int> Resolutions;
+
+    QMap<QPair<int,int>, int> EdgeIndexMap;
+
     _object3D();
     _object3D(const char *Filename);
 

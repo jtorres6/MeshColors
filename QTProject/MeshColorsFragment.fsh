@@ -3,35 +3,35 @@ layout (location = 3) uniform highp vec3 points[255];
 
 const int R = 4;
 
-in vec3 fragIndexes;
-in vec4 fragFaceIndexes;
-in vec4 out_color;
+flat in int Index[3];
+in vec4 out_fragFaceIndexes;
+in vec4 next_color;
 out vec4 frag_color;
 
 void main(void)
 {
     const int IndexSize = int(ceil(3 + 3*(R-1) + (R-1)*(R-2)*0.5));
 
-    vec4 color = out_color;
+    vec4 color = next_color;
     int PointsIndex[R+1][R+1];
-    vec4 B =  floor(R*color);
-    vec4 w =(R*color)-B;
+    vec4 B =  floor(R * color);
+    vec4 w = (R * color) - B;
     vec4 c = vec4(0.0f,0.0f,0.0f,0.0f);
 
-    PointsIndex[0][0] = int(fragIndexes.x);
-    PointsIndex[0][R] = int(fragIndexes.y);
-    PointsIndex[R][0] = int(fragIndexes.z);
+    PointsIndex[0][0] = Index[0];
+    PointsIndex[0][R] = Index[1];
+    PointsIndex[R][0] = Index[2];
 
     for(int i = 1; i < R-1; i++)
     {
-        PointsIndex[0][i] = int(fragFaceIndexes.r);
-        PointsIndex[i][0] = int(fragFaceIndexes.g);
-        PointsIndex[i][R-i] = int(fragFaceIndexes.b);
+        PointsIndex[0][i] = int(out_fragFaceIndexes.g);
+        PointsIndex[i][0] = int(out_fragFaceIndexes.b);
+        PointsIndex[i][R-i] = int(out_fragFaceIndexes.a);
     }
 
-    PointsIndex[1][1] = int(fragFaceIndexes.a);
-    PointsIndex[3][2] = int(fragFaceIndexes.a);
-    PointsIndex[2][3] = int(fragFaceIndexes.a);
+    PointsIndex[1][1] = int(out_fragFaceIndexes.r);
+    PointsIndex[3][2] = int(out_fragFaceIndexes.r);
+    PointsIndex[2][3] = int(out_fragFaceIndexes.r);
 
     if(round(w.r+w.g+w.b) == 0)
     {
@@ -53,5 +53,5 @@ void main(void)
     }
 
 
-    gl_FragColor = c;
+    gl_FragColor = c;//vec4(color.r*points[Index[0]] + color.g*points[Index[1]] + color.b*points[Index[2]], 1.0f);
 }

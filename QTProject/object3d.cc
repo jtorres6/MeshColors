@@ -9,6 +9,8 @@
 
 #include "object3d.h"
 #include "file_ply_stl.h"
+#include <QDebug>
+#include <map>
 
 using namespace _colors_ne;
 
@@ -22,13 +24,84 @@ void _object3D::ReadPlyFile(const char *Filename)
 
     for(int i = 0; i <= Coordinates.size()-3; i+=3)
     {
-       Vertices.push_back(QVector3D(Coordinates[i],Coordinates[i+1],Coordinates[i+2]));
+        Vertices.push_back(QVector3D(Coordinates[i],Coordinates[i+1],Coordinates[i+2]));
     }
 
+    int R = 4;
+    int index = 8;
     for(int i = 0; i <= Positions.size()-3; i+=3)
     {
         Triangles.push_back(QVector3D(Positions[i],Positions[i+1],Positions[i+2]));
+        Resolutions.push_back(R);
+
+        // Colors per face:
+        qDebug() << "Face: " << index;
+        int faceindex = index;
+
+        index += ((R - 1) * (R - 2))/2;
+        int edge1index = index;
+        QPair<int, int> pair = qMakePair(Positions[i],Positions[i+1]);
+
+        if(pair.first > pair.second)
+        {
+            pair = qMakePair(pair.second, pair.first);
+        }
+        if(EdgeIndexMap.contains(pair))
+        {
+            edge1index = *EdgeIndexMap.find(pair);
+        }
+        else
+        {
+            EdgeIndexMap.insert(pair, edge1index);
+        }
+        qDebug() << "Edge: " << edge1index << "      vertices: " <<  pair.first << pair.second;
+
+        index += R-1;
+        int edge2index = index;
+        pair =  qMakePair(Positions[i+1],Positions[i+2]);
+
+        if(pair.first > pair.second)
+        {
+            pair = qMakePair(pair.second, pair.first);
+        }
+
+        if(EdgeIndexMap.contains(pair))
+        {
+            edge2index = *EdgeIndexMap.find(pair);
+        }
+        else
+        {
+            EdgeIndexMap.insert(pair, edge2index);
+        }
+        qDebug() << "Edge: " << edge2index  << "      vertices: " <<  pair.first << pair.second;
+
+        pair =  qMakePair(Positions[i+2],Positions[i]);
+        if(pair.first > pair.second)
+        {
+            pair = qMakePair(pair.second, pair.first);
+        }
+
+        // Colors per edge (R-1)+1:
+        index += R-1;
+        int edge3index = index;
+        if(EdgeIndexMap.contains(pair))
+        {
+            edge3index = *EdgeIndexMap.find(pair);
+        }
+        else
+        {
+            EdgeIndexMap.insert(pair, edge3index);
+        }
+        qDebug() << "Edge: " << edge3index  << "      vertices: " <<  pair.first << pair.second;
+        index += R-1;
+
+        PerFaceData.push_back(QVector4D(faceindex,edge2index,edge3index,edge1index));
+        PerFaceData.push_back(QVector4D(faceindex,edge2index,edge3index,edge1index));
+        PerFaceData.push_back(QVector4D(faceindex,edge2index,edge3index,edge1index));
     }
+
+    qDebug() << index;
+    qDebug() << Positions.size()/3;
 }
 
 _object3D::_object3D()
@@ -41,6 +114,13 @@ _object3D::_object3D(const char *Filename)
 
     VerticesDrawArrays.resize(Triangles.size()*3);
 
+    QVector<QVector4D> ColorPerVertex;
+    for (unsigned int i= 0; i < Triangles.size(); i++)
+    {
+        ColorPerVertex.push_back(QVector4D((float)i/(float)Triangles.size(), 0.0f, 0.0f, 1.0f));
+    }
+
+    int EdgeIndex = Vertices.size();
     for (unsigned int i= 0; i < Triangles.size(); i++)
     {
        VerticesDrawArrays[i*3]=Vertices[Triangles[i].x()];
@@ -51,14 +131,29 @@ _object3D::_object3D(const char *Filename)
        Colors.push_back(QVector4D(0.0, 1.0, 0.0, 1.0));
        Colors.push_back(QVector4D(0.0, 0.0, 1.0, 1.0));
 
+       //Colors.push_back(ColorPerVertex[Triangles[i].x()]);
+       //Colors.push_back(ColorPerVertex[Triangles[i].y()]);
+       //Colors.push_back(ColorPerVertex[Triangles[i].z()]);
+
+
        // Vertex 1
-       Index.push_back(QVector3D(0,1,2));
-       PerFaceData.push_back(QVector4D(3,4,5,6));
+       //Index.push_back(QVector3D(Triangles[i].x(),Triangles[i].y(),Triangles[i].z()));
+       //PerFaceData.push_back(QVector4D(3,4,5,6));
+       //// Vertex 1
+       //Index.push_back(QVector3D(Triangles[i].x(),Triangles[i].y(),Triangles[i].z()));
+       //PerFaceData.push_back(QVector4D(3,4,5,6));
+       //// Vertex 1
+       //Index.push_back(QVector3D(Triangles[i].x(),Triangles[i].y(),Triangles[i].z()));
+       //PerFaceData.push_back(QVector4D(3,4,5,6));
        // Vertex 1
-       Index.push_back(QVector3D(0,1,2));
-       PerFaceData.push_back(QVector4D(3,4,5,6));
+       Index.push_back(QVector3D(Triangles[i].x(),Triangles[i].x(),Triangles[i].x()));
+       //PerFaceData.push_back(QVector4D(Vertices.size()+i,15,15,15));
        // Vertex 1
-       Index.push_back(QVector3D(0,1,2));
-       PerFaceData.push_back(QVector4D(3,4,5,6));
+       Index.push_back(QVector3D(Triangles[i].y(),Triangles[i].y(),Triangles[i].y()));
+       //PerFaceData.push_back(QVector4D(15,15,15,15));
+       // Vertex 1
+       Index.push_back(QVector3D(Triangles[i].z(),Triangles[i].z(),Triangles[i].z()));
+       //PerFaceData.push_back(QVector4D(15,15,15,15));
     }
 }
+

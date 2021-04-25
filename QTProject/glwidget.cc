@@ -209,6 +209,7 @@ void _gl_widget::initializeGL()
 
     program = new QOpenGLShaderProgram(context);
     program->addCacheableShaderFromSourceFile(QOpenGLShader::Vertex, "MeshColorsVertex.vsh");
+    program->addCacheableShaderFromSourceFile(QOpenGLShader::Geometry, "MeshColorsGeometry.gsh");
     program->addCacheableShaderFromSourceFile(QOpenGLShader::Fragment,"MeshColorsFragment.fsh");
     program->link();
     program->bind();
@@ -287,24 +288,84 @@ void _gl_widget::initializeGL()
 
     QVector3D points[256];
 
-    points[0] = *(new QVector3D(1.0f,1.0f,0.0f));
+    points[0] = *(new QVector3D(0.0f,0.0f,0.0f));
 
-    points[1] = *(new QVector3D(0.0f,0.0f,0.0f));
-    points[2] = *(new QVector3D(0.0f,0.0f,0.0f));
-    points[3] = *(new QVector3D(0.0f,0.0f,0.0f));
-    points[4] = *(new QVector3D(0.0f,0.0f,0.0f));
-    points[5] = *(new QVector3D(0.0f,0.0f,0.0f));
-    points[6] = *(new QVector3D(1.0f,1.0f,1.0f));
-    points[7] = *(new QVector3D(0.0f,0.0f,0.0f));
-    points[8] = *(new QVector3D(0.0f,0.0f,0.0f));
-    points[9] = *(new QVector3D(0.0f,0.0f,0.0f));
-    points[10] = *(new QVector3D(1.0f,1.0f,1.0f));
-    points[11] = *(new QVector3D(0.0f,0.0f,0.0f));
-    points[12] = *(new QVector3D(0.0f,0.0f,0.0f));
-    points[13] = *(new QVector3D(0.0f,0.0f,0.0f));
-    points[14] = *(new QVector3D(0.0f,0.0f,0.0f));
-    points[15] = *(new QVector3D(0.0f,0.0f,0.0f));
-    points[16] = *(new QVector3D(0.0f,0.0f,0.0f));
+    points[1] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+    points[2] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+    points[3] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+    points[4] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+    points[5] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+    points[6] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+    points[7] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+    points[8] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+    points[9] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+    points[10] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+    points[11] = *(new QVector3D(0.0f, 1.0f, 0.0f));
+
+    points[12] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+    points[13] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+    points[14] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+    points[15] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+    points[16] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+
+    points[17] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+    points[18] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+    points[19] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+    points[20] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+    points[21] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+    points[22] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+    points[23] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+    points[24] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+    points[25] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+    points[26] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+    points[27] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+    points[28] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+    points[29] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+    points[30] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+
+
+    points[31] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+    points[32] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+    points[33] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+    points[34] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+    points[35] = *(new QVector3D(1.0f, 0.0f, 0.0f));
+    points[36] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+    points[37] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+    points[38] = *(new QVector3D(0.0f, 0.0f, 1.0f));
+    points[39] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+    points[40] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+    points[41] = *(new QVector3D(0.0f, 1.0f, 0.0f));
+    points[42] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+    points[43] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+    points[44] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+    points[45] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+    points[46] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+    points[47] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+    points[48] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+    points[49] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+
+
+    points[50] = *(new QVector3D(0.0f, 1.0f, 1.0f));
+    points[51] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+    points[52] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+    points[53] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+    points[54] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+    points[55] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+    points[56] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+    points[57] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+    points[58] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+    points[59] = *(new QVector3D(1.0f, 1.0f, 1.0f));
+    points[60] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+    points[61] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+    points[62] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+    points[63] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+    points[64] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+    points[65] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+    points[66] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+    points[67] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+    points[68] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+    points[69] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+
     program->setUniformValueArray("points", points, 256);
 
     VAO2->release();
@@ -340,4 +401,66 @@ void _gl_widget::initializeGL()
     Draw_point=false;
     Draw_line=true;
     Draw_fill=false;
+}
+
+
+void _gl_widget::pick(int Selection_position_x, int Selection_position_y)
+{
+    makeCurrent();
+
+    // Frame Buffer Object to do the off-screen rendering
+    context()->functions()->glGenFramebuffers(1, &FBO);
+    context()->functions()->glBindFramebuffer(GL_FRAMEBUFFER,FBO);
+
+    // Texture for drawing
+    glGenTextures(1,&Color_texture);
+    glBindTexture(GL_TEXTURE_2D,Color_texture);
+    // RGBA8
+    context()->extraFunctions()->glTexStorage2D(GL_TEXTURE_2D,1,GL_RGBA8, 300,300);
+    // this implies that there is not mip mapping
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+
+    // Texure for computing the depth
+    glGenTextures(1,&Depth_texture);
+    glBindTexture(GL_TEXTURE_2D,Depth_texture);
+    // Float
+    context()->extraFunctions()->glTexStorage2D(GL_TEXTURE_2D,1,GL_DEPTH_COMPONENT24, 300,300);
+
+    // Attatchment of the textures to the FBO
+    context()->extraFunctions()->glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,Color_texture,0);
+    context()->extraFunctions()->glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,Depth_texture,0);
+
+    // OpenGL will draw to these buffers (only one in this case)
+    static const GLenum Draw_buffers[]={GL_COLOR_ATTACHMENT0};
+    context()->extraFunctions()->glDrawBuffers(1,Draw_buffers);
+
+    clear_window();
+    change_projection();
+    change_observer();
+    draw_objects();
+
+    // get the pixel
+    int Color;
+    glReadBuffer(GL_FRONT);
+    glPixelStorei(GL_PACK_ALIGNMENT,1);
+    glReadPixels(Selection_position_x,Selection_position_y,1,1,GL_RGBA,GL_UNSIGNED_BYTE,&Color);
+
+
+    uint B=uint((Color & 0x00FF0000) >> 16);
+    uint G=uint((Color & 0x0000FF00) >> 8);
+    uint R=uint((Color & 0x000000FF));
+
+    int Selected_triangle= (R << 16) + (G << 8) + B;
+
+    if (Selected_triangle==16777215) Selected_triangle=-1;
+
+    qDebug() << Selection_position_x << Selection_position_y << "(" << R << G << B << ")" << Selected_triangle;
+    draw_objects();
+
+    glDeleteTextures(1,&Color_texture);
+    glDeleteTextures(1,&Depth_texture);
+    context()->functions()->glDeleteFramebuffers(1,&FBO);
+    // the normal framebuffer takes the control of drawing
+    context()->functions()->glBindFramebuffer(GL_DRAW_FRAMEBUFFER,defaultFramebufferObject());
 }

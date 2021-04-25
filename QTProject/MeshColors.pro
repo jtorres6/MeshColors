@@ -18,7 +18,8 @@ SOURCES += \
 
 DISTFILES += \
   MeshColorsFragment.fsh \
-  MeshColorsVertex.vsh
+  MeshColorsVertex.vsh \
+  MeshColorsGeometry.gsh
 
 LIBS += -L/usr/X11R6/lib64 -lopengl32 -lglu32
 

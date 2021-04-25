@@ -21,6 +21,8 @@
 #include "object3d.h"
 #include <QOpenGLBuffer>
 #include <QOpenGLContext>
+#include <QOpenGLFunctions>
+#include <QOpenGLExtraFunctions>
 
 
 namespace _gl_widget_ne {
@@ -60,6 +62,7 @@ public:
     void draw_axis();
     void draw_objects();
 
+    void pick(int Selection_position_x, int Selection_position_y);
 
 protected:
     void resizeGL(int Width1, int Height1) Q_DECL_OVERRIDE;
@@ -72,6 +75,9 @@ private:
 
     QOpenGLShaderProgram* program;
     QOpenGLVertexArrayObject *VAO, *VAO2;
+    GLuint FBO;
+    GLuint Color_texture;
+    GLuint Depth_texture;
 
     QMatrix4x4 Projection;
     QMatrix4x4 Rotation_x;
