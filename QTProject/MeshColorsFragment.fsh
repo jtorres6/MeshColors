@@ -18,20 +18,29 @@ void main(void)
     vec4 w = (R * color) - B;
     vec4 c = vec4(0.0f,0.0f,0.0f,0.0f);
 
-    PointsIndex[0][0] = Index[0];
+    PointsIndex[R][0] = Index[0];
     PointsIndex[0][R] = Index[1];
-    PointsIndex[R][0] = Index[2];
+    PointsIndex[0][0] = Index[2];
 
-    for(int i = 1; i < R-1; i++)
+    for(int i = 1; i < R; i++)
     {
         PointsIndex[0][i] = int(out_fragFaceIndexes.g);
         PointsIndex[i][0] = int(out_fragFaceIndexes.b);
-        PointsIndex[i][R-i] = int(out_fragFaceIndexes.a);
+        for(int j = 1; j < R; j++)
+        {
+            if(i+j == R)
+            {
+
+                PointsIndex[i][j] = int(out_fragFaceIndexes.a);
+            }
+            else
+            {
+
+                PointsIndex[i][j] = int(out_fragFaceIndexes.r);
+            }
+        }
     }
 
-    PointsIndex[1][1] = int(out_fragFaceIndexes.r);
-    PointsIndex[3][2] = int(out_fragFaceIndexes.r);
-    PointsIndex[2][3] = int(out_fragFaceIndexes.r);
 
     if(round(w.r+w.g+w.b) == 0)
     {

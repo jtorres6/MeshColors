@@ -288,32 +288,32 @@ void _gl_widget::initializeGL()
 
     QVector3D points[256];
 
-    points[0] = *(new QVector3D(0.0f,0.0f,0.0f));
+    points[0] = *(new QVector3D(1.0f,0.0f,0.0f));
 
-    points[1] = *(new QVector3D(0.0f, 0.0f, 0.0f));
-    points[2] = *(new QVector3D(0.0f, 0.0f, 0.0f));
-    points[3] = *(new QVector3D(0.0f, 0.0f, 0.0f));
-    points[4] = *(new QVector3D(0.0f, 0.0f, 0.0f));
-    points[5] = *(new QVector3D(0.0f, 0.0f, 0.0f));
-    points[6] = *(new QVector3D(0.0f, 0.0f, 0.0f));
-    points[7] = *(new QVector3D(0.0f, 0.0f, 0.0f));
-    points[8] = *(new QVector3D(0.0f, 0.0f, 0.0f));
-    points[9] = *(new QVector3D(0.0f, 0.0f, 0.0f));
-    points[10] = *(new QVector3D(0.0f, 0.0f, 0.0f));
-    points[11] = *(new QVector3D(0.0f, 1.0f, 0.0f));
+    points[1] = *(new QVector3D(0.0f, 1.0f, 0.5f));
+    points[2] = *(new QVector3D(1.0f, 0.0f, 1.0f));
+    points[3] = *(new QVector3D(1.0f, 0.0f, 1.0f));
+    points[4] = *(new QVector3D(0.0f, 1.0f, 0.0f));
+    points[5] = *(new QVector3D(1.0f, 1.0f, 0.0f));
+    points[6] = *(new QVector3D(0.0f, 0.0f, 1.0f));
+    points[7] = *(new QVector3D(0.0f, 0.0f, 1.0f));
+    points[8] = *(new QVector3D(0.0f, 0.0f, 1.0f));
+    points[9] = *(new QVector3D(0.0f, 0.0f, 1.0f));
+    points[10] = *(new QVector3D(0.0f, 0.0f, 1.0f));
+    points[11] = *(new QVector3D(1.0f, 0.0f, 0.0f));
 
-    points[12] = *(new QVector3D(0.0f, 0.0f, 0.0f));
-    points[13] = *(new QVector3D(0.0f, 0.0f, 0.0f));
-    points[14] = *(new QVector3D(0.0f, 0.0f, 0.0f));
-    points[15] = *(new QVector3D(0.0f, 0.0f, 0.0f));
-    points[16] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+    points[12] = *(new QVector3D(1.0f, 0.0f, 0.0f));
+    points[13] = *(new QVector3D(1.0f, 0.0f, 0.0f));
+    points[14] = *(new QVector3D(0.0f, 1.0f, 0.0f));
+    points[15] = *(new QVector3D(0.0f, 1.0f, 0.0f));
+    points[16] = *(new QVector3D(0.0f, 1.0f, 0.0f));
 
-    points[17] = *(new QVector3D(0.0f, 0.0f, 0.0f));
-    points[18] = *(new QVector3D(0.0f, 0.0f, 0.0f));
-    points[19] = *(new QVector3D(0.0f, 0.0f, 0.0f));
-    points[20] = *(new QVector3D(0.0f, 0.0f, 0.0f));
-    points[21] = *(new QVector3D(0.0f, 0.0f, 0.0f));
-    points[22] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+    points[17] = *(new QVector3D(0.0f, 0.0f, 1.0f));
+    points[18] = *(new QVector3D(0.0f, 0.0f, 1.0f));
+    points[19] = *(new QVector3D(0.0f, 0.0f, 1.0f));
+    points[20] = *(new QVector3D(1.0f, 0.0f, 0.0f));
+    points[21] = *(new QVector3D(1.0f, 0.0f, 0.0f));
+    points[22] = *(new QVector3D(1.0f, 0.0f, 0.0f));
     points[23] = *(new QVector3D(0.0f, 0.0f, 0.0f));
     points[24] = *(new QVector3D(0.0f, 0.0f, 0.0f));
     points[25] = *(new QVector3D(0.0f, 0.0f, 0.0f));
@@ -328,13 +328,13 @@ void _gl_widget::initializeGL()
     points[32] = *(new QVector3D(0.0f, 0.0f, 0.0f));
     points[33] = *(new QVector3D(0.0f, 0.0f, 0.0f));
     points[34] = *(new QVector3D(0.0f, 0.0f, 0.0f));
-    points[35] = *(new QVector3D(1.0f, 0.0f, 0.0f));
+    points[35] = *(new QVector3D(0.3f, 0.7f, 0.0f));
     points[36] = *(new QVector3D(0.0f, 0.0f, 0.0f));
     points[37] = *(new QVector3D(0.0f, 0.0f, 0.0f));
     points[38] = *(new QVector3D(0.0f, 0.0f, 1.0f));
     points[39] = *(new QVector3D(0.0f, 0.0f, 0.0f));
     points[40] = *(new QVector3D(0.0f, 0.0f, 0.0f));
-    points[41] = *(new QVector3D(0.0f, 1.0f, 0.0f));
+    points[41] = *(new QVector3D(0.0f, 0.0f, 0.0f));
     points[42] = *(new QVector3D(0.0f, 0.0f, 0.0f));
     points[43] = *(new QVector3D(0.0f, 0.0f, 0.0f));
     points[44] = *(new QVector3D(0.0f, 0.0f, 0.0f));
