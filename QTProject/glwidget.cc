@@ -406,39 +406,46 @@ void _gl_widget::initializeGL()
 
 void _gl_widget::pick(int Selection_position_x, int Selection_position_y)
 {
-    makeCurrent();
-
-    // Frame Buffer Object to do the off-screen rendering
-    context()->functions()->glGenFramebuffers(1, &FBO);
-    context()->functions()->glBindFramebuffer(GL_FRAMEBUFFER,FBO);
-
-    // Texture for drawing
-    glGenTextures(1,&Color_texture);
-    glBindTexture(GL_TEXTURE_2D,Color_texture);
-    // RGBA8
-    context()->extraFunctions()->glTexStorage2D(GL_TEXTURE_2D,1,GL_RGBA8, 300,300);
-    // this implies that there is not mip mapping
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
-
-    // Texure for computing the depth
-    glGenTextures(1,&Depth_texture);
-    glBindTexture(GL_TEXTURE_2D,Depth_texture);
-    // Float
-    context()->extraFunctions()->glTexStorage2D(GL_TEXTURE_2D,1,GL_DEPTH_COMPONENT24, 300,300);
-
-    // Attatchment of the textures to the FBO
-    context()->extraFunctions()->glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,Color_texture,0);
-    context()->extraFunctions()->glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,Depth_texture,0);
-
-    // OpenGL will draw to these buffers (only one in this case)
-    static const GLenum Draw_buffers[]={GL_COLOR_ATTACHMENT0};
-    context()->extraFunctions()->glDrawBuffers(1,Draw_buffers);
-
-    clear_window();
-    change_projection();
-    change_observer();
-    draw_objects();
+    //makeCurrent();
+    //
+    //// Frame Buffer Object to do the off-screen rendering
+    //context()->functions()->glGenFramebuffers(1, &FBO);
+    //context()->functions()->glBindFramebuffer(GL_FRAMEBUFFER,FBO);
+    //
+    //// Texture for drawing
+    //glGenTextures(1,&Color_texture);
+    //glBindTexture(GL_TEXTURE_2D,Color_texture);
+    //// RGBA8
+    //context()->extraFunctions()->glTexStorage2D(GL_TEXTURE_2D,1,GL_RGBA8, this->Window->width(),this->Window->height());
+    //// this implies that there is not mip mapping
+    //glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+    //glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+    //
+    //// Texure for computing the depth
+    //glGenTextures(1,&Depth_texture);
+    //glBindTexture(GL_TEXTURE_2D,Depth_texture);
+    //// Float
+    //context()->extraFunctions()->glTexStorage2D(GL_TEXTURE_2D,1,GL_DEPTH_COMPONENT24, 300,300);
+    //
+    //// Attatchment of the textures to the FBO
+    //context()->extraFunctions()->glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,Color_texture,0);
+    //context()->extraFunctions()->glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,Depth_texture,0);
+    //
+    //// OpenGL will draw to these buffers (only one in this case)
+    //static const GLenum Draw_buffers[]={GL_COLOR_ATTACHMENT0};
+    //context()->extraFunctions()->glDrawBuffers(1,Draw_buffers);
+    //
+    //clear_window();
+    //change_projection();
+    //change_observer();
+    //draw_objects();
+    //
+    // Wait until all the pending drawing commands are really done.
+    // Ultra-mega-over slow !
+    // There are usually a long time between glDrawElements() and
+    // all the fragments completely rasterized.
+    glFlush();
+    glFinish();
 
     // get the pixel
     int Color;

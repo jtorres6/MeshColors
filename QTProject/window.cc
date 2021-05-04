@@ -71,6 +71,6 @@ void _window::mouseMoveEvent(QMouseEvent *e)
 {
     if(e->buttons() & Qt::LeftButton)
     {
-        GL_widget->pick(e->pos().x(), e->pos().y());
+        GL_widget->pick(e->pos().x(), height() - e->pos().y());
     }
 }

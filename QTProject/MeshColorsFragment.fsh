@@ -1,7 +1,7 @@
 #version 450 core
 layout (location = 3) uniform highp vec3 points[255];
 
-const int R = 4;
+const int R = 8;
 
 flat in int Index[3];
 in vec4 out_fragFaceIndexes;
@@ -28,14 +28,12 @@ void main(void)
         PointsIndex[i][0] = int(out_fragFaceIndexes.b);
         for(int j = 1; j < R; j++)
         {
-            if(i+j == R)
+            if(i + j == R)
             {
-
                 PointsIndex[i][j] = int(out_fragFaceIndexes.a);
             }
             else
             {
-
                 PointsIndex[i][j] = int(out_fragFaceIndexes.r);
             }
         }
