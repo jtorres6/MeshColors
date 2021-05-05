@@ -27,6 +27,7 @@ class _object3D:public _basic_object3D
     QVector<QVector3D> MeshColorsData;
     QVector<QVector3D> Index;
     QVector<QVector4D> PerFaceData;
+    QVector<QVector4D> TriangleSelectionColors;
 
     QVector<int> Resolutions;
 
@@ -36,6 +37,8 @@ class _object3D:public _basic_object3D
     _object3D(const char *Filename);
 
     void ReadPlyFile(const char *Filename);
+
+    bool TriangleSelectionMode = true;
 };
 
 #endif // OBJECT3D_H

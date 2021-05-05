@@ -131,10 +131,20 @@ _object3D::_object3D(const char *Filename)
        Colors.push_back(QVector4D(0.0, 1.0, 0.0, 1.0));
        Colors.push_back(QVector4D(0.0, 0.0, 1.0, 1.0));
 
+       qDebug() <<"AAAAAAAAAAAAAAA" << i;
+
+       // Convert "i", the integer mesh ID, into an RGB color
+       int r = (i & 0x000000FF) >>  0;
+       int g = (i & 0x0000FF00) >>  8;
+       int b = (i & 0x00FF0000) >> 16;
+
+       TriangleSelectionColors.push_back(QVector4D(r/255.0f, g/255.0f, b/255.0f, 1.0f));
+       TriangleSelectionColors.push_back(QVector4D(r/255.0f, g/255.0f, b/255.0f, 1.0f));
+       TriangleSelectionColors.push_back(QVector4D(r/255.0f, g/255.0f, b/255.0f, 1.0f));
+
        //Colors.push_back(ColorPerVertex[Triangles[i].x()]);
        //Colors.push_back(ColorPerVertex[Triangles[i].y()]);
        //Colors.push_back(ColorPerVertex[Triangles[i].z()]);
-
 
        // Vertex 1
        //Index.push_back(QVector3D(Triangles[i].x(),Triangles[i].y(),Triangles[i].z()));

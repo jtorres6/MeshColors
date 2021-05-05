@@ -208,169 +208,234 @@ void _gl_widget::initializeGL()
     object3d = _object3D(p);
 
     program = new QOpenGLShaderProgram(context);
-    program->addCacheableShaderFromSourceFile(QOpenGLShader::Vertex, "MeshColorsVertex.vsh");
-    program->addCacheableShaderFromSourceFile(QOpenGLShader::Geometry, "MeshColorsGeometry.gsh");
-    program->addCacheableShaderFromSourceFile(QOpenGLShader::Fragment,"MeshColorsFragment.fsh");
-    program->link();
-    program->bind();
 
-     // VAO 1
-    VAO = new QOpenGLVertexArrayObject();
-    VAO->create();
-    VAO->bind();
+    if(!TriangleSelectionMode)
+    {
+        program->addCacheableShaderFromSourceFile(QOpenGLShader::Vertex, "MeshColorsVertex.vsh");
+        program->addCacheableShaderFromSourceFile(QOpenGLShader::Geometry, "MeshColorsGeometry.gsh");
+        program->addCacheableShaderFromSourceFile(QOpenGLShader::Fragment,"MeshColorsFragment.fsh");
+        program->link();
+        program->bind();
 
-    QOpenGLBuffer *positionBuffer = new QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
-    positionBuffer->create();
-    positionBuffer->setUsagePattern(QOpenGLBuffer::StaticDraw);
-    positionBuffer->bind();
-    positionBuffer->allocate(Axis.Vertices.data(), Axis.Vertices.size() * sizeof(QVector3D));
-    positionBuffer->release();
+         // VAO 1
+        VAO = new QOpenGLVertexArrayObject();
+        VAO->create();
+        VAO->bind();
 
-    QOpenGLBuffer *colorBuffer = new QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
-    colorBuffer->create();
-    colorBuffer->setUsagePattern(QOpenGLBuffer::StaticDraw);
-    colorBuffer->bind();
-    colorBuffer->allocate(Axis.Colors.data(), Axis.Colors.size() * sizeof(QVector3D));
-    colorBuffer->release();
+        QOpenGLBuffer *positionBuffer = new QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
+        positionBuffer->create();
+        positionBuffer->setUsagePattern(QOpenGLBuffer::StaticDraw);
+        positionBuffer->bind();
+        positionBuffer->allocate(Axis.Vertices.data(), Axis.Vertices.size() * sizeof(QVector3D));
+        positionBuffer->release();
 
-    positionBuffer->bind();
-    program->enableAttributeArray("vertex");
-    program->setAttributeBuffer("vertex", GL_FLOAT, 0, 3);
-    positionBuffer->release();
+        QOpenGLBuffer *colorBuffer = new QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
+        colorBuffer->create();
+        colorBuffer->setUsagePattern(QOpenGLBuffer::StaticDraw);
+        colorBuffer->bind();
+        colorBuffer->allocate(Axis.Colors.data(), Axis.Colors.size() * sizeof(QVector3D));
+        colorBuffer->release();
 
-    colorBuffer->bind();
-    program->enableAttributeArray("color");
-    program->setAttributeBuffer("color", GL_FLOAT, 0, 3);
-    colorBuffer->release();
+        positionBuffer->bind();
+        program->enableAttributeArray("vertex");
+        program->setAttributeBuffer("vertex", GL_FLOAT, 0, 3);
+        positionBuffer->release();
 
-    VAO->release();
+        colorBuffer->bind();
+        program->enableAttributeArray("color");
+        program->setAttributeBuffer("color", GL_FLOAT, 0, 3);
+        colorBuffer->release();
 
-    // VAO 2
-    VAO2 = new QOpenGLVertexArrayObject();
-    VAO2->create();
-    VAO2->bind();
+        VAO->release();
 
-    positionBuffer = new QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
-    positionBuffer->create();
-    positionBuffer->setUsagePattern(QOpenGLBuffer::StaticDraw);
-    positionBuffer->bind();
-    positionBuffer->allocate(object3d.VerticesDrawArrays.data(), object3d.VerticesDrawArrays.size() * sizeof(QVector3D));
-    program->enableAttributeArray("vertex");
-    program->setAttributeBuffer("vertex", GL_FLOAT, 0, 3);
-    positionBuffer->release();
+        // VAO 2
+        VAO2 = new QOpenGLVertexArrayObject();
+        VAO2->create();
+        VAO2->bind();
 
-    colorBuffer = new QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
-    colorBuffer->create();
-    colorBuffer->setUsagePattern(QOpenGLBuffer::StaticDraw);
-    colorBuffer->bind();
-    colorBuffer->allocate(object3d.Colors.data(), object3d.Colors.size() * sizeof(QVector4D));
-    program->enableAttributeArray("color");
-    program->setAttributeBuffer("color", GL_FLOAT, 0, 4);
-    colorBuffer->release();
+        positionBuffer = new QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
+        positionBuffer->create();
+        positionBuffer->setUsagePattern(QOpenGLBuffer::StaticDraw);
+        positionBuffer->bind();
+        positionBuffer->allocate(object3d.VerticesDrawArrays.data(), object3d.VerticesDrawArrays.size() * sizeof(QVector3D));
+        program->enableAttributeArray("vertex");
+        program->setAttributeBuffer("vertex", GL_FLOAT, 0, 3);
+        positionBuffer->release();
 
-    QOpenGLBuffer *VertexIndexBuffer = new QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
-    VertexIndexBuffer->create();
-    VertexIndexBuffer->setUsagePattern(QOpenGLBuffer::StaticDraw);
-    VertexIndexBuffer->bind();
-    VertexIndexBuffer->allocate(object3d.Index.data(), object3d.Index.size() * sizeof(QVector3D));
-    program->enableAttributeArray("indexes");
-    program->setAttributeBuffer("indexes", GL_FLOAT, 0, 3);
-    VertexIndexBuffer->release();
+        colorBuffer = new QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
+        colorBuffer->create();
+        colorBuffer->setUsagePattern(QOpenGLBuffer::StaticDraw);
+        colorBuffer->bind();
+        colorBuffer->allocate(object3d.Colors.data(), object3d.Colors.size() * sizeof(QVector4D));
+        program->enableAttributeArray("color");
+        program->setAttributeBuffer("color", GL_FLOAT, 0, 4);
+        colorBuffer->release();
 
-    QOpenGLBuffer *FaceIndexBuffer = new QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
-    FaceIndexBuffer->create();
-    FaceIndexBuffer->setUsagePattern(QOpenGLBuffer::StaticDraw);
-    FaceIndexBuffer->bind();
-    FaceIndexBuffer->allocate(object3d.PerFaceData.data(), object3d.PerFaceData.size() * sizeof(QVector4D));
-    program->enableAttributeArray("faceIndexes");
-    program->setAttributeBuffer("faceIndexes", GL_FLOAT, 0, 4);
-    FaceIndexBuffer->release();
+        QOpenGLBuffer *VertexIndexBuffer = new QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
+        VertexIndexBuffer->create();
+        VertexIndexBuffer->setUsagePattern(QOpenGLBuffer::StaticDraw);
+        VertexIndexBuffer->bind();
+        VertexIndexBuffer->allocate(object3d.Index.data(), object3d.Index.size() * sizeof(QVector3D));
+        program->enableAttributeArray("indexes");
+        program->setAttributeBuffer("indexes", GL_FLOAT, 0, 3);
+        VertexIndexBuffer->release();
 
-    QVector3D points[256];
+        QOpenGLBuffer *FaceIndexBuffer = new QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
+        FaceIndexBuffer->create();
+        FaceIndexBuffer->setUsagePattern(QOpenGLBuffer::StaticDraw);
+        FaceIndexBuffer->bind();
+        FaceIndexBuffer->allocate(object3d.PerFaceData.data(), object3d.PerFaceData.size() * sizeof(QVector4D));
+        program->enableAttributeArray("faceIndexes");
+        program->setAttributeBuffer("faceIndexes", GL_FLOAT, 0, 4);
+        FaceIndexBuffer->release();
 
-    points[0] = *(new QVector3D(1.0f,0.0f,0.0f));
+        QVector3D points[256];
 
-    points[1] = *(new QVector3D(0.0f, 1.0f, 0.5f));
-    points[2] = *(new QVector3D(1.0f, 0.0f, 1.0f));
-    points[3] = *(new QVector3D(1.0f, 0.0f, 1.0f));
-    points[4] = *(new QVector3D(0.0f, 1.0f, 0.0f));
-    points[5] = *(new QVector3D(1.0f, 1.0f, 0.0f));
-    points[6] = *(new QVector3D(0.0f, 0.0f, 1.0f));
-    points[7] = *(new QVector3D(0.0f, 0.0f, 1.0f));
-    points[8] = *(new QVector3D(0.0f, 0.0f, 1.0f));
-    points[9] = *(new QVector3D(0.0f, 0.0f, 1.0f));
-    points[10] = *(new QVector3D(0.0f, 0.0f, 1.0f));
-    points[11] = *(new QVector3D(1.0f, 0.0f, 0.0f));
+        points[0] = *(new QVector3D(1.0f,0.0f,0.0f));
 
-    points[12] = *(new QVector3D(1.0f, 0.0f, 0.0f));
-    points[13] = *(new QVector3D(1.0f, 0.0f, 0.0f));
-    points[14] = *(new QVector3D(0.0f, 1.0f, 0.0f));
-    points[15] = *(new QVector3D(0.0f, 1.0f, 0.0f));
-    points[16] = *(new QVector3D(0.0f, 1.0f, 0.0f));
+        points[1] = *(new QVector3D(0.0f, 1.0f, 0.5f));
+        points[2] = *(new QVector3D(1.0f, 0.0f, 1.0f));
+        points[3] = *(new QVector3D(1.0f, 0.0f, 1.0f));
+        points[4] = *(new QVector3D(0.0f, 1.0f, 0.0f));
+        points[5] = *(new QVector3D(1.0f, 1.0f, 0.0f));
+        points[6] = *(new QVector3D(0.0f, 0.0f, 1.0f));
+        points[7] = *(new QVector3D(0.0f, 0.0f, 1.0f));
+        points[8] = *(new QVector3D(0.0f, 0.0f, 1.0f));
+        points[9] = *(new QVector3D(0.0f, 0.0f, 1.0f));
+        points[10] = *(new QVector3D(0.0f, 0.0f, 1.0f));
+        points[11] = *(new QVector3D(1.0f, 0.0f, 0.0f));
 
-    points[17] = *(new QVector3D(0.0f, 0.0f, 1.0f));
-    points[18] = *(new QVector3D(0.0f, 0.0f, 1.0f));
-    points[19] = *(new QVector3D(0.0f, 0.0f, 1.0f));
-    points[20] = *(new QVector3D(1.0f, 0.0f, 0.0f));
-    points[21] = *(new QVector3D(1.0f, 0.0f, 0.0f));
-    points[22] = *(new QVector3D(1.0f, 0.0f, 0.0f));
-    points[23] = *(new QVector3D(0.0f, 0.0f, 0.0f));
-    points[24] = *(new QVector3D(0.0f, 0.0f, 0.0f));
-    points[25] = *(new QVector3D(0.0f, 0.0f, 0.0f));
-    points[26] = *(new QVector3D(0.0f, 0.0f, 0.0f));
-    points[27] = *(new QVector3D(0.0f, 0.0f, 0.0f));
-    points[28] = *(new QVector3D(0.0f, 0.0f, 0.0f));
-    points[29] = *(new QVector3D(0.0f, 0.0f, 0.0f));
-    points[30] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+        points[12] = *(new QVector3D(1.0f, 0.0f, 0.0f));
+        points[13] = *(new QVector3D(1.0f, 0.0f, 0.0f));
+        points[14] = *(new QVector3D(0.0f, 1.0f, 0.0f));
+        points[15] = *(new QVector3D(0.0f, 1.0f, 0.0f));
+        points[16] = *(new QVector3D(0.0f, 1.0f, 0.0f));
 
+        points[17] = *(new QVector3D(0.0f, 0.0f, 1.0f));
+        points[18] = *(new QVector3D(0.0f, 0.0f, 1.0f));
+        points[19] = *(new QVector3D(0.0f, 0.0f, 1.0f));
+        points[20] = *(new QVector3D(1.0f, 0.0f, 0.0f));
+        points[21] = *(new QVector3D(1.0f, 0.0f, 0.0f));
+        points[22] = *(new QVector3D(1.0f, 0.0f, 0.0f));
+        points[23] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+        points[24] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+        points[25] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+        points[26] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+        points[27] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+        points[28] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+        points[29] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+        points[30] = *(new QVector3D(0.0f, 0.0f, 0.0f));
 
-    points[31] = *(new QVector3D(0.0f, 0.0f, 0.0f));
-    points[32] = *(new QVector3D(0.0f, 0.0f, 0.0f));
-    points[33] = *(new QVector3D(0.0f, 0.0f, 0.0f));
-    points[34] = *(new QVector3D(0.0f, 0.0f, 0.0f));
-    points[35] = *(new QVector3D(0.3f, 0.7f, 0.0f));
-    points[36] = *(new QVector3D(0.0f, 0.0f, 0.0f));
-    points[37] = *(new QVector3D(0.0f, 0.0f, 0.0f));
-    points[38] = *(new QVector3D(0.0f, 0.0f, 1.0f));
-    points[39] = *(new QVector3D(0.0f, 0.0f, 0.0f));
-    points[40] = *(new QVector3D(0.0f, 0.0f, 0.0f));
-    points[41] = *(new QVector3D(0.0f, 0.0f, 0.0f));
-    points[42] = *(new QVector3D(0.0f, 0.0f, 0.0f));
-    points[43] = *(new QVector3D(0.0f, 0.0f, 0.0f));
-    points[44] = *(new QVector3D(0.0f, 0.0f, 0.0f));
-    points[45] = *(new QVector3D(0.0f, 0.0f, 0.0f));
-    points[46] = *(new QVector3D(0.0f, 0.0f, 0.0f));
-    points[47] = *(new QVector3D(0.0f, 0.0f, 0.0f));
-    points[48] = *(new QVector3D(0.0f, 0.0f, 0.0f));
-    points[49] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+        points[31] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+        points[32] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+        points[33] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+        points[34] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+        points[35] = *(new QVector3D(0.3f, 0.7f, 0.0f));
+        points[36] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+        points[37] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+        points[38] = *(new QVector3D(0.0f, 0.0f, 1.0f));
+        points[39] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+        points[40] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+        points[41] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+        points[42] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+        points[43] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+        points[44] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+        points[45] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+        points[46] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+        points[47] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+        points[48] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+        points[49] = *(new QVector3D(0.0f, 0.0f, 0.0f));
 
+        points[50] = *(new QVector3D(0.0f, 1.0f, 1.0f));
+        points[51] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+        points[52] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+        points[53] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+        points[54] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+        points[55] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+        points[56] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+        points[57] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+        points[58] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+        points[59] = *(new QVector3D(1.0f, 1.0f, 1.0f));
+        points[60] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+        points[61] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+        points[62] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+        points[63] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+        points[64] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+        points[65] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+        points[66] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+        points[67] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+        points[68] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+        points[69] = *(new QVector3D(0.0f, 0.0f, 0.0f));
 
-    points[50] = *(new QVector3D(0.0f, 1.0f, 1.0f));
-    points[51] = *(new QVector3D(0.0f, 0.0f, 0.0f));
-    points[52] = *(new QVector3D(0.0f, 0.0f, 0.0f));
-    points[53] = *(new QVector3D(0.0f, 0.0f, 0.0f));
-    points[54] = *(new QVector3D(0.0f, 0.0f, 0.0f));
-    points[55] = *(new QVector3D(0.0f, 0.0f, 0.0f));
-    points[56] = *(new QVector3D(0.0f, 0.0f, 0.0f));
-    points[57] = *(new QVector3D(0.0f, 0.0f, 0.0f));
-    points[58] = *(new QVector3D(0.0f, 0.0f, 0.0f));
-    points[59] = *(new QVector3D(1.0f, 1.0f, 1.0f));
-    points[60] = *(new QVector3D(0.0f, 0.0f, 0.0f));
-    points[61] = *(new QVector3D(0.0f, 0.0f, 0.0f));
-    points[62] = *(new QVector3D(0.0f, 0.0f, 0.0f));
-    points[63] = *(new QVector3D(0.0f, 0.0f, 0.0f));
-    points[64] = *(new QVector3D(0.0f, 0.0f, 0.0f));
-    points[65] = *(new QVector3D(0.0f, 0.0f, 0.0f));
-    points[66] = *(new QVector3D(0.0f, 0.0f, 0.0f));
-    points[67] = *(new QVector3D(0.0f, 0.0f, 0.0f));
-    points[68] = *(new QVector3D(0.0f, 0.0f, 0.0f));
-    points[69] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+        program->setUniformValueArray("points", points, 256);
 
-    program->setUniformValueArray("points", points, 256);
+        VAO2->release();
+        program->release();
+    }
+    else
+    {
+        program->addCacheableShaderFromSourceFile(QOpenGLShader::Vertex, "BaseVertex.vsh");
+        program->addCacheableShaderFromSourceFile(QOpenGLShader::Fragment,"BaseFragment.fsh");
+        program->link();
+        program->bind();
 
-    VAO2->release();
+         // VAO 1
+        VAO = new QOpenGLVertexArrayObject();
+        VAO->create();
+        VAO->bind();
 
-    program->release();
+        QOpenGLBuffer *positionBuffer = new QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
+        positionBuffer->create();
+        positionBuffer->setUsagePattern(QOpenGLBuffer::StaticDraw);
+        positionBuffer->bind();
+        positionBuffer->allocate(Axis.Vertices.data(), Axis.Vertices.size() * sizeof(QVector3D));
+        positionBuffer->release();
+
+        QOpenGLBuffer *colorBuffer = new QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
+        colorBuffer->create();
+        colorBuffer->setUsagePattern(QOpenGLBuffer::StaticDraw);
+        colorBuffer->bind();
+        colorBuffer->allocate(Axis.Colors.data(), Axis.Colors.size() * sizeof(QVector3D));
+        colorBuffer->release();
+
+        positionBuffer->bind();
+        program->enableAttributeArray("vertex");
+        program->setAttributeBuffer("vertex", GL_FLOAT, 0, 3);
+        positionBuffer->release();
+
+        colorBuffer->bind();
+        program->enableAttributeArray("color");
+        program->setAttributeBuffer("color", GL_FLOAT, 0, 3);
+        colorBuffer->release();
+
+        VAO->release();
+
+        // VAO 2
+        VAO2 = new QOpenGLVertexArrayObject();
+        VAO2->create();
+        VAO2->bind();
+
+        positionBuffer = new QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
+        positionBuffer->create();
+        positionBuffer->setUsagePattern(QOpenGLBuffer::StaticDraw);
+        positionBuffer->bind();
+        positionBuffer->allocate(object3d.VerticesDrawArrays.data(), object3d.VerticesDrawArrays.size() * sizeof(QVector3D));
+        program->enableAttributeArray("vertex");
+        program->setAttributeBuffer("vertex", GL_FLOAT, 0, 3);
+        positionBuffer->release();
+
+        colorBuffer = new QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
+        colorBuffer->create();
+        colorBuffer->setUsagePattern(QOpenGLBuffer::StaticDraw);
+        colorBuffer->bind();
+        colorBuffer->allocate(object3d.TriangleSelectionColors.data(), object3d.TriangleSelectionColors.size() * sizeof(QVector4D));
+        program->enableAttributeArray("color");
+        program->setAttributeBuffer("color", GL_FLOAT, 0, 4);
+        colorBuffer->release();
+
+        VAO2->release();
+        program->release();
+    }
 
     strm = glGetString(GL_VENDOR);
     std::cerr << "Vendor: " << strm << "\n";
@@ -454,16 +519,30 @@ void _gl_widget::pick(int Selection_position_x, int Selection_position_y)
     glReadPixels(Selection_position_x,Selection_position_y,1,1,GL_RGBA,GL_UNSIGNED_BYTE,&Color);
 
 
-    uint B=uint((Color & 0x00FF0000) >> 16);
-    uint G=uint((Color & 0x0000FF00) >> 8);
-    uint R=uint((Color & 0x000000FF));
+    int R=int((Color & 0x000000FF));
+    int G=int((Color & 0x0000FF00) >> 8);
+    int B=int((Color & 0x00FF0000) >> 16);
 
     int Selected_triangle= (R << 16) + (G << 8) + B;
 
     if (Selected_triangle==16777215) Selected_triangle=-1;
 
+    // Convert the color back to an integer ID
+    int pickedID =
+        R +
+        G * 256 +
+        B * 256*256;
+
+    qDebug() << object3d.TriangleSelectionColors.size() << pickedID;
+
+
+    qDebug() << "Color: " <<  object3d.TriangleSelectionColors[pickedID];
+    object3d.TriangleSelectionColors[pickedID] = QVector4D(0.0f, 0.0f, 1.0f, 1.0f);
+
+    qDebug() << "Color: " <<  object3d.TriangleSelectionColors[pickedID];
+
     qDebug() << Selection_position_x << Selection_position_y << "(" << R << G << B << ")" << Selected_triangle;
-    draw_objects();
+    paintGL();
 
     glDeleteTextures(1,&Color_texture);
     glDeleteTextures(1,&Depth_texture);
