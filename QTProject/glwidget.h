@@ -99,7 +99,10 @@ private:
     float Observer_angle_y = 0;
     float Observer_distance = 1;
 
-    bool TriangleSelectionMode = true;
+    bool TriangleSelectionMode = false;
+
+    QVector3D points[256];
+    QVector3D pointsIndex[256];
 };
 
 #endif

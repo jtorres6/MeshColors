@@ -289,7 +289,14 @@ void _gl_widget::initializeGL()
         program->setAttributeBuffer("faceIndexes", GL_FLOAT, 0, 4);
         FaceIndexBuffer->release();
 
-        QVector3D points[256];
+        for(uint i = 0; i< 256; i++)
+        {
+            // Convert "i", the integer mesh ID, into an RGB color
+            int r = (i & 0x000000FF) >>  0;
+            int g = (i & 0x0000FF00) >>  8;
+            int b = (i & 0x00FF0000) >> 16;
+            pointsIndex[i] = *(new QVector3D(r/255.0f, g/255.0f, b/255.0f));
+        }
 
         points[0] = *(new QVector3D(1.0f,0.0f,0.0f));
 
@@ -368,6 +375,7 @@ void _gl_widget::initializeGL()
         points[69] = *(new QVector3D(0.0f, 0.0f, 0.0f));
 
         program->setUniformValueArray("points", points, 256);
+        program->setUniformValue("ColorLerpEnabled", true);
 
         VAO2->release();
         program->release();
@@ -500,11 +508,29 @@ void _gl_widget::pick(int Selection_position_x, int Selection_position_y)
     //static const GLenum Draw_buffers[]={GL_COLOR_ATTACHMENT0};
     //context()->extraFunctions()->glDrawBuffers(1,Draw_buffers);
     //
-    //clear_window();
-    //change_projection();
-    //change_observer();
-    //draw_objects();
-    //
+    makeCurrent();
+    clear_window();
+    static bool yes = false;
+    //if(!yes)
+    {
+
+        glFlush();
+        glFinish();
+
+        program->bind();
+        program->setUniformValueArray("points", pointsIndex, 256);
+        program->setUniformValue("ColorLerpEnabled", false);
+        program->release();
+
+        update();
+        paintGL();
+        yes = true;
+    }
+    //else
+    {
+        yes = false;
+    }
+
     // Wait until all the pending drawing commands are really done.
     // Ultra-mega-over slow !
     // There are usually a long time between glDrawElements() and
@@ -518,35 +544,47 @@ void _gl_widget::pick(int Selection_position_x, int Selection_position_y)
     glPixelStorei(GL_PACK_ALIGNMENT,1);
     glReadPixels(Selection_position_x,Selection_position_y,1,1,GL_RGBA,GL_UNSIGNED_BYTE,&Color);
 
+    uint R = uint((Color & 0x000000FF));
+    uint G = uint((Color & 0x0000FF00) >> 8);
+    uint B = uint((Color & 0x00FF0000) >> 16);
 
-    int R=int((Color & 0x000000FF));
-    int G=int((Color & 0x0000FF00) >> 8);
-    int B=int((Color & 0x00FF0000) >> 16);
-
-    int Selected_triangle= (R << 16) + (G << 8) + B;
+    uint Selected_triangle= (R << 16) + (G << 8) + B;
 
     if (Selected_triangle==16777215) Selected_triangle=-1;
-
     // Convert the color back to an integer ID
-    int pickedID =
+    uint pickedID =
         R +
         G * 256 +
         B * 256*256;
 
-    qDebug() << object3d.TriangleSelectionColors.size() << pickedID;
+    if(pickedID != -1 && pickedID < 256)
+    {
+        qDebug() << object3d.TriangleSelectionColors.size() << pickedID;
 
+        points[pickedID] = QVector3D(0.0f, 0.0f, 1.0f);
 
-    qDebug() << "Color: " <<  object3d.TriangleSelectionColors[pickedID];
-    object3d.TriangleSelectionColors[pickedID] = QVector4D(0.0f, 0.0f, 1.0f, 1.0f);
+        qDebug() << Selection_position_x << Selection_position_y << "(" << R << G << B << ")" << Selected_triangle;
+    }
 
-    qDebug() << "Color: " <<  object3d.TriangleSelectionColors[pickedID];
+    glFlush();
+    glFinish();
 
-    qDebug() << Selection_position_x << Selection_position_y << "(" << R << G << B << ")" << Selected_triangle;
-    paintGL();
+    //if(!yes)
+    {
 
-    glDeleteTextures(1,&Color_texture);
-    glDeleteTextures(1,&Depth_texture);
-    context()->functions()->glDeleteFramebuffers(1,&FBO);
-    // the normal framebuffer takes the control of drawing
-    context()->functions()->glBindFramebuffer(GL_DRAW_FRAMEBUFFER,defaultFramebufferObject());
+    program->bind();
+    program->setUniformValueArray("points", points, 256);
+    program->setUniformValue("ColorLerpEnabled", true);
+    program->release();
+    }
+
+    update();
+    glFlush();
+    glFinish();
+
+    //glDeleteTextures(1,&Color_texture);
+    //glDeleteTextures(1,&Depth_texture);
+    //context()->functions()->glDeleteFramebuffers(1,&FBO);
+    //// the normal framebuffer takes the control of drawing
+    //context()->functions()->glBindFramebuffer(GL_DRAW_FRAMEBUFFER,defaultFramebufferObject());
 }
