@@ -27,16 +27,14 @@ void _object3D::ReadPlyFile(const char *Filename)
         Vertices.push_back(QVector3D(Coordinates[i],Coordinates[i+1],Coordinates[i+2]));
     }
 
-    int R = 4;
+    int R = 8;
     int index = Vertices.size() - 1;
     for(int i = 0; i <= Positions.size()-3; i+=3)
     {
-        qDebug() << index;
         Triangles.push_back(QVector3D(Positions[i],Positions[i+1],Positions[i+2]));
         Resolutions.push_back(R);
 
         // Colors per face:
-        //qDebug() << "Face: " << index;
         int faceindex = index;
 
         index += ((R - 1) * (R - 2))/2;
@@ -55,9 +53,9 @@ void _object3D::ReadPlyFile(const char *Filename)
         {
             EdgeIndexMap.insert(pair, edge1index);
         }
-        //qDebug() << "Edge: " << edge1index << "      vertices: " <<  pair.first << pair.second;
+        qDebug() << "Edge: " << edge1index << "      vertices: " <<  pair.first << pair.second;
 
-        index += R-1;
+        index += R;
         int edge2index = index;
         pair =  qMakePair(Positions[i+1],Positions[i+2]);
 
@@ -74,7 +72,7 @@ void _object3D::ReadPlyFile(const char *Filename)
         {
             EdgeIndexMap.insert(pair, edge2index);
         }
-        //qDebug() << "Edge: " << edge2index  << "      vertices: " <<  pair.first << pair.second;
+        qDebug() << "Edge: " << edge2index  << "      vertices: " <<  pair.first << pair.second;
 
         pair =  qMakePair(Positions[i+2],Positions[i]);
         if(pair.first > pair.second)
@@ -83,7 +81,7 @@ void _object3D::ReadPlyFile(const char *Filename)
         }
 
         // Colors per edge (R-1)+1:
-        index += R-1;
+        index += R;
         int edge3index = index;
         if(EdgeIndexMap.contains(pair))
         {
@@ -93,17 +91,15 @@ void _object3D::ReadPlyFile(const char *Filename)
         {
             EdgeIndexMap.insert(pair, edge3index);
         }
-        //qDebug() << "Edge: " << edge3index  << "      vertices: " <<  pair.first << pair.second;
-        index += R-1;
-
-        qDebug() << faceindex << edge2index << edge3index << edge1index;
+        qDebug() << "Edge: " << edge3index  << "      vertices: " <<  pair.first << pair.second;
+        index += R;
 
         PerFaceData.push_back(QVector4D(faceindex,edge2index,edge3index,edge1index));
         PerFaceData.push_back(QVector4D(faceindex,edge2index,edge3index,edge1index));
         PerFaceData.push_back(QVector4D(faceindex,edge2index,edge3index,edge1index));
+        qDebug() << index << faceindex << edge2index << edge3index << edge1index;
     }
 
-    //qDebug() << index;
     //qDebug() << Positions.size()/3;
 }
 

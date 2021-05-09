@@ -1,7 +1,7 @@
 #version 450 core
-layout (location = 3) uniform highp vec3 points[255];
+layout (location = 3) uniform highp vec3 points[1024];
 
-const int R = 4;
+const int R = 8;
 
 flat in int Index[3];
 in vec4 out_fragFaceIndexes;
@@ -23,6 +23,7 @@ void main(void)
     {
         PointsIndex[0][i] = int(out_fragFaceIndexes.g + i);
         PointsIndex[i][0] = int(out_fragFaceIndexes.b + i);
+
         for(int j = 1; j < R; j++)
         {
             if(i + j == R)
@@ -106,7 +107,6 @@ void main(void)
             }
         }
     }
-
 
     gl_FragColor = c;//vec4(color.r*points[Index[0]] + color.g*points[Index[1]] + color.b*points[Index[2]], 1.0f);
 }

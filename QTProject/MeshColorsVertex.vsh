@@ -3,7 +3,6 @@
 layout (location = 0) uniform mat4 matrix;
 layout (location = 1) in vec3 vertex;
 layout (location = 2) in vec4 color;
-layout (location = 3) uniform highp vec3 points[255];
 layout (location = 4) in vec3 indexes;
 layout (location = 5) in vec4 faceIndexes;
 //flat out vec3 fragIndexes;

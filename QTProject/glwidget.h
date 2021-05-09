@@ -101,8 +101,8 @@ private:
 
     bool TriangleSelectionMode = false;
 
-    QVector3D points[256];
-    QVector3D pointsIndex[256];
+    QVector3D points[1024];
+    QVector3D pointsIndex[1024];
 };
 
 #endif

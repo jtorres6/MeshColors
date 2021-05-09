@@ -289,7 +289,7 @@ void _gl_widget::initializeGL()
         program->setAttributeBuffer("faceIndexes", GL_FLOAT, 0, 4);
         FaceIndexBuffer->release();
 
-        for(uint i = 0; i< 256; i++)
+        for(uint i = 0; i< 1024; i++)
         {
             // Convert "i", the integer mesh ID, into an RGB color
             int r = (i & 0x000000FF) >>  0;
@@ -328,7 +328,7 @@ void _gl_widget::initializeGL()
         points[24] = *(new QVector3D(0.0f, 0.0f, 0.0f));
         points[25] = *(new QVector3D(0.0f, 0.0f, 0.0f));
         points[26] = *(new QVector3D(0.0f, 0.0f, 0.0f));
-        points[27] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+        points[27] = *(new QVector3D(1.0f, 1.0f, 0.6f));
         points[28] = *(new QVector3D(0.0f, 0.0f, 0.0f));
         points[29] = *(new QVector3D(0.0f, 0.0f, 0.0f));
         points[30] = *(new QVector3D(0.0f, 0.0f, 0.0f));
@@ -345,7 +345,7 @@ void _gl_widget::initializeGL()
         points[40] = *(new QVector3D(0.0f, 0.0f, 0.0f));
         points[41] = *(new QVector3D(0.0f, 0.0f, 0.0f));
         points[42] = *(new QVector3D(0.0f, 0.0f, 0.0f));
-        points[43] = *(new QVector3D(0.0f, 0.0f, 0.0f));
+        points[43] = *(new QVector3D(0.3f, 0.7f, 0.3f));
         points[44] = *(new QVector3D(0.0f, 0.0f, 0.0f));
         points[45] = *(new QVector3D(0.0f, 0.0f, 0.0f));
         points[46] = *(new QVector3D(0.0f, 0.0f, 0.0f));
@@ -479,64 +479,16 @@ void _gl_widget::initializeGL()
 
 void _gl_widget::pick(int Selection_position_x, int Selection_position_y)
 {
-    //makeCurrent();
-    //
-    //// Frame Buffer Object to do the off-screen rendering
-    //context()->functions()->glGenFramebuffers(1, &FBO);
-    //context()->functions()->glBindFramebuffer(GL_FRAMEBUFFER,FBO);
-    //
-    //// Texture for drawing
-    //glGenTextures(1,&Color_texture);
-    //glBindTexture(GL_TEXTURE_2D,Color_texture);
-    //// RGBA8
-    //context()->extraFunctions()->glTexStorage2D(GL_TEXTURE_2D,1,GL_RGBA8, this->Window->width(),this->Window->height());
-    //// this implies that there is not mip mapping
-    //glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
-    //glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
-    //
-    //// Texure for computing the depth
-    //glGenTextures(1,&Depth_texture);
-    //glBindTexture(GL_TEXTURE_2D,Depth_texture);
-    //// Float
-    //context()->extraFunctions()->glTexStorage2D(GL_TEXTURE_2D,1,GL_DEPTH_COMPONENT24, 300,300);
-    //
-    //// Attatchment of the textures to the FBO
-    //context()->extraFunctions()->glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,Color_texture,0);
-    //context()->extraFunctions()->glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,Depth_texture,0);
-    //
-    //// OpenGL will draw to these buffers (only one in this case)
-    //static const GLenum Draw_buffers[]={GL_COLOR_ATTACHMENT0};
-    //context()->extraFunctions()->glDrawBuffers(1,Draw_buffers);
-    //
     makeCurrent();
     clear_window();
-    static bool yes = false;
-    //if(!yes)
-    {
 
-        glFlush();
-        glFinish();
+    program->bind();
+    program->setUniformValueArray("points", pointsIndex, 512);
+    program->setUniformValue("ColorLerpEnabled", false);
+    program->release();
 
-        program->bind();
-        program->setUniformValueArray("points", pointsIndex, 256);
-        program->setUniformValue("ColorLerpEnabled", false);
-        program->release();
-
-        update();
-        paintGL();
-        yes = true;
-    }
-    //else
-    {
-        yes = false;
-    }
-
-    // Wait until all the pending drawing commands are really done.
-    // Ultra-mega-over slow !
-    // There are usually a long time between glDrawElements() and
-    // all the fragments completely rasterized.
-    glFlush();
-    glFinish();
+    update();
+    paintGL();
 
     // get the pixel
     int Color;
@@ -551,40 +503,21 @@ void _gl_widget::pick(int Selection_position_x, int Selection_position_y)
     uint Selected_triangle= (R << 16) + (G << 8) + B;
 
     if (Selected_triangle==16777215) Selected_triangle=-1;
+
     // Convert the color back to an integer ID
     uint pickedID =
         R +
         G * 256 +
         B * 256*256;
 
-    if(pickedID != -1 && pickedID < 256)
+    if(pickedID != -1 && pickedID < 1024)
     {
-        qDebug() << object3d.TriangleSelectionColors.size() << pickedID;
-
-        points[pickedID] = QVector3D(0.0f, 0.0f, 1.0f);
-
-        qDebug() << Selection_position_x << Selection_position_y << "(" << R << G << B << ")" << Selected_triangle;
+        points[pickedID] = QVector3D(0.0f, 1.0f, 1.0f);
+        qDebug() << pickedID;
     }
-
-    glFlush();
-    glFinish();
-
-    //if(!yes)
-    {
 
     program->bind();
-    program->setUniformValueArray("points", points, 256);
-    program->setUniformValue("ColorLerpEnabled", true);
+    //program->setUniformValueArray("points", points, 512);
+    //program->setUniformValue("ColorLerpEnabled", true);
     program->release();
-    }
-
-    update();
-    glFlush();
-    glFinish();
-
-    //glDeleteTextures(1,&Color_texture);
-    //glDeleteTextures(1,&Depth_texture);
-    //context()->functions()->glDeleteFramebuffers(1,&FBO);
-    //// the normal framebuffer takes the control of drawing
-    //context()->functions()->glBindFramebuffer(GL_DRAW_FRAMEBUFFER,defaultFramebufferObject());
 }
