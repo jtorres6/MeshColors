@@ -9,6 +9,7 @@ in vec4 fragFaceIndexes[];
 in vec3 vIndexes[];
 
 flat out int Index[];
+flat out int res;
 out vec4 next_color;
 out vec4 out_fragFaceIndexes;
 

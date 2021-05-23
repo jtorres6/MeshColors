@@ -38,7 +38,25 @@ class _object3D:public _basic_object3D
 
     void ReadPlyFile(const char *Filename);
 
+    int SsboSize();
+
+    void UpdateMeshColorsArray(QVector<QVector4D> p);
+
     bool TriangleSelectionMode = true;
+
+    QVector<QVector4D> points, selectionPoints;
+
+    struct ssbo_data
+    {
+        int Resolution;
+        float fill[3];
+        QVector4D Colors[132][132];
+    };
+
+    QVector<ssbo_data> MeshColorArray;
+    QVector<ssbo_data> MeshSelectionArray;
+    QVector<QVector4D> ColorArray;
+
 };
 
 #endif // OBJECT3D_H

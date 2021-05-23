@@ -53,7 +53,7 @@ void _object3D::ReadPlyFile(const char *Filename)
         {
             EdgeIndexMap.insert(pair, edge1index);
         }
-        qDebug() << "Edge: " << edge1index << "      vertices: " <<  pair.first << pair.second;
+        //qDebug() << "Edge: " << edge1index << "      vertices: " <<  pair.first << pair.second;
 
         index += R;
         int edge2index = index;
@@ -72,7 +72,7 @@ void _object3D::ReadPlyFile(const char *Filename)
         {
             EdgeIndexMap.insert(pair, edge2index);
         }
-        qDebug() << "Edge: " << edge2index  << "      vertices: " <<  pair.first << pair.second;
+        //qDebug() << "Edge: " << edge2index  << "      vertices: " <<  pair.first << pair.second;
 
         pair =  qMakePair(Positions[i+2],Positions[i]);
         if(pair.first > pair.second)
@@ -91,16 +91,23 @@ void _object3D::ReadPlyFile(const char *Filename)
         {
             EdgeIndexMap.insert(pair, edge3index);
         }
-        qDebug() << "Edge: " << edge3index  << "      vertices: " <<  pair.first << pair.second;
+        //qDebug() << "Edge: " << edge3index  << "      vertices: " <<  pair.first << pair.second;
         index += R;
 
         PerFaceData.push_back(QVector4D(faceindex,edge2index,edge3index,edge1index));
         PerFaceData.push_back(QVector4D(faceindex,edge2index,edge3index,edge1index));
         PerFaceData.push_back(QVector4D(faceindex,edge2index,edge3index,edge1index));
-        qDebug() << index << faceindex << edge2index << edge3index << edge1index;
+        //qDebug() << index << faceindex << edge2index << edge3index << edge1index;
     }
 
-    //qDebug() << Positions.size()/3;
+    qDebug() << Positions.size()/3;
+}
+
+float RandomFloat(float a, float b) {
+    float random = ((float) rand()) / (float) RAND_MAX;
+    float diff = b - a;
+    float r = random * diff;
+    return a + r;
 }
 
 _object3D::_object3D()
@@ -117,6 +124,17 @@ _object3D::_object3D(const char *Filename)
     for (unsigned int i= 0; i < Triangles.size(); i++)
     {
         ColorPerVertex.push_back(QVector4D((float)i/(float)Triangles.size(), 0.0f, 0.0f, 1.0f));
+    }
+
+    for(int i = 0; i < 1048; i++)
+    {
+        points.push_back(QVector4D(RandomFloat(0.0f, 1.0f), RandomFloat(0.0f, 1.0f), RandomFloat(0.0f, 1.0f), 1.0f));
+
+        // Convert "i", the integer mesh ID, into an RGB color
+        int r = (i & 0x000000FF) >>  0;
+        int g = (i & 0x0000FF00) >>  8;
+        int b = (i & 0x00FF0000) >> 16;
+        selectionPoints.push_back(QVector4D(r/255.0f, g/255.0f, b/255.0f, 1.0f));
     }
 
     int EdgeIndex = Vertices.size();
@@ -162,5 +180,59 @@ _object3D::_object3D(const char *Filename)
        Index.push_back(QVector3D(Triangles[i].z(),Triangles[i].z(),Triangles[i].z()));
        //PerFaceData.push_back(QVector4D(15,15,15,15));
     }
+
+    UpdateMeshColorsArray(points);
 }
 
+int _object3D::SsboSize()
+{
+    return sizeof(ssbo_data);
+}
+
+void _object3D::UpdateMeshColorsArray(QVector<QVector4D> p)
+{
+    MeshColorArray.clear();
+    for (unsigned int i= 0; i < Triangles.size(); i++)
+    {
+        ssbo_data d;
+        d.Colors[0][0] = QVector4D(0.1f, 0.2f, 0.5f, 1.0f);
+
+        if(i%2 == 0)
+        {
+            d.Resolution = 8;
+        }
+        else
+        {
+            d.Resolution = 4;
+        }
+
+        // BEGIN_TODO: Move this code to the geometr shader
+        d.Colors[d.Resolution][0] = p[int(Triangles[i].x())];
+        d.Colors[0][d.Resolution] = p[int(Triangles[i].y())];
+        d.Colors[0][0]            = p[int(Triangles[i].z())];
+        int faceIndexOffset = 0;
+        int edgeIndexOffset = 0;
+        for(int a = 1; a < d.Resolution; a++)
+        {
+            d.Colors[0][a] = p[int(PerFaceData[i][2] + a)];
+            d.Colors[a][0] = p[int(PerFaceData[i][3] + a)];
+
+            for(int j = 1; j < d.Resolution; j++)
+            {
+                if(a + j == d.Resolution)
+                {
+                    d.Colors[a][j] = p[int(PerFaceData[i][1] + edgeIndexOffset)];
+                    edgeIndexOffset += 1;
+                }
+                else
+                {
+                    d.Colors[a][j] = p[int(PerFaceData[i][0] + faceIndexOffset)];
+                    faceIndexOffset += 1;
+                }
+            }
+        }
+        // END_TODO
+
+        MeshColorArray.push_back(d);
+    }
+}

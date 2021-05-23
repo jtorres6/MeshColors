@@ -23,6 +23,7 @@
 #include <QOpenGLContext>
 #include <QOpenGLFunctions>
 #include <QOpenGLExtraFunctions>
+#include <QOpenGLTexture>
 
 
 namespace _gl_widget_ne {
@@ -74,7 +75,8 @@ private:
     _window *Window;
 
     QOpenGLShaderProgram* program;
-    QOpenGLVertexArrayObject *VAO, *VAO2;
+    QOpenGLShaderProgram* program2;
+    QOpenGLVertexArrayObject *VAO, *VAO2, *VAO3;
     GLuint FBO;
     GLuint Color_texture;
     GLuint Depth_texture;
@@ -103,6 +105,10 @@ private:
 
     QVector3D points[1024];
     QVector3D pointsIndex[1024];
+    QOpenGLTexture *text;
+
+    QOpenGLContext *context;
+    GLuint ssbo;
 };
 
 #endif
