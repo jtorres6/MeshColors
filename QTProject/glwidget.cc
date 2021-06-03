@@ -312,9 +312,7 @@ void _gl_widget::initializeGL()
     }
 
     context->functions()->glGenBuffers(1, &ssbo);
-    context->functions()->glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
-    context->functions()->glBufferData(GL_SHADER_STORAGE_BUFFER, object3d.SsboSize() * object3d.MeshColorArray.size(), object3d.MeshColorArray.data(), GL_DYNAMIC_DRAW); //sizeof(data) only works for statically sized C/C++ arrays.
-    context->functions()->glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0); // unbind
+    UpdateSSBO(ssbo, object3d.SsboSize() * object3d.MeshColorArray.size(), object3d.MeshColorArray.data());
 
     VAO2->release();
     program->release();
@@ -385,22 +383,14 @@ void _gl_widget::pick(int Selection_position_x, int Selection_position_y)
     if(!TriangleSelectionMode)
     {
         makeCurrent();
-        clear_window();
 
-        program->bind();
-        program->setUniformValueArray("points", pointsIndex, 512);
-        program->setUniformValue("ColorLerpEnabled", false);
         object3d.UpdateMeshColorsArray(object3d.selectionPoints);
 
-        context->functions()->glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
-        context->functions()->glBufferData(GL_SHADER_STORAGE_BUFFER, object3d.SsboSize() * object3d.MeshColorArray.size(), object3d.MeshColorArray.data(), GL_DYNAMIC_DRAW); //sizeof(data) only works for statically sized C/C++ arrays.
-        context->functions()->glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0); // unbind
-
-        program->release();
+        UpdateSSBO(ssbo, object3d.SsboSize() * object3d.MeshColorArray.size(), object3d.MeshColorArray.data());
 
         update();
-
         paintGL();
+
         // get the pixel
         int Color;
         glReadBuffer(GL_FRONT);
@@ -424,19 +414,12 @@ void _gl_widget::pick(int Selection_position_x, int Selection_position_y)
         if(pickedID != -1 && pickedID < 1024)
         {
             object3d.points[pickedID] = QVector4D(0.0f, 1.0f, 1.0f, 1.0f);
-            qDebug() << pickedID;
         }
 
         object3d.UpdateMeshColorsArray(object3d.points);
 
-        context->functions()->glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
-        context->functions()->glBufferData(GL_SHADER_STORAGE_BUFFER, object3d.SsboSize() * object3d.MeshColorArray.size(), object3d.MeshColorArray.data(), GL_DYNAMIC_DRAW); //sizeof(data) only works for statically sized C/C++ arrays.
-        context->functions()->glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0); // unbind
+        UpdateSSBO(ssbo, object3d.SsboSize() * object3d.MeshColorArray.size(), object3d.MeshColorArray.data());
 
-        program->bind();
-        program->setUniformValueArray("points", points, 1024);
-        //program->setUniformValue("ColorLerpEnabled", true);
-        program->release();
     }
     else
     {
@@ -483,4 +466,12 @@ QOpenGLBuffer* _gl_widget::GenerateBuffer(const void *InData, int InCount)
     Buffer->allocate(InData, InCount);
     Buffer->release();
     return Buffer;
+}
+
+
+void _gl_widget::UpdateSSBO(GLuint InSsbo, GLsizei InSize, void* InData)
+{
+    context->functions()->glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
+    context->functions()->glBufferData(GL_SHADER_STORAGE_BUFFER, InSize, InData, GL_DYNAMIC_DRAW); //sizeof(data) only works for statically sized C/C++ arrays.
+    context->functions()->glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0); // unbind
 }

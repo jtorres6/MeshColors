@@ -73,6 +73,8 @@ protected:
 
     QOpenGLBuffer* GenerateBuffer(const void *data, int count);
 
+    void UpdateSSBO(GLuint InSsbo, GLsizei InSize, void* InData);
+
 private:
     _window *Window;
 
