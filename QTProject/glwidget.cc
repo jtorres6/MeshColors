@@ -244,25 +244,13 @@ void _gl_widget::initializeGL()
     VAO->create();
     VAO->bind();
 
-    QOpenGLBuffer *positionBuffer = new QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
-    positionBuffer->create();
-    positionBuffer->setUsagePattern(QOpenGLBuffer::StaticDraw);
-    positionBuffer->bind();
-    positionBuffer->allocate(Axis.Vertices.data(), Axis.Vertices.size() * sizeof(QVector3D));
-    positionBuffer->release();
-
-    QOpenGLBuffer *colorBuffer = new QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
-    colorBuffer->create();
-    colorBuffer->setUsagePattern(QOpenGLBuffer::StaticDraw);
-    colorBuffer->bind();
-    colorBuffer->allocate(Axis.Colors.data(), Axis.Colors.size() * sizeof(QVector3D));
-    colorBuffer->release();
-
+    QOpenGLBuffer *positionBuffer = GenerateBuffer(Axis.Vertices.data(), Axis.Vertices.size() * sizeof(QVector3D));
     positionBuffer->bind();
     program->enableAttributeArray("vertex");
     program->setAttributeBuffer("vertex", GL_FLOAT, 0, 3);
     positionBuffer->release();
 
+    QOpenGLBuffer *colorBuffer = GenerateBuffer(Axis.Colors.data(), Axis.Colors.size() * sizeof(QVector3D));
     colorBuffer->bind();
     program->enableAttributeArray("color");
     program->setAttributeBuffer("color", GL_FLOAT, 0, 3);
@@ -275,38 +263,26 @@ void _gl_widget::initializeGL()
     VAO2->create();
     VAO2->bind();
 
-    positionBuffer = new QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
-    positionBuffer->create();
-    positionBuffer->setUsagePattern(QOpenGLBuffer::StaticDraw);
+    positionBuffer = GenerateBuffer(object3d.VerticesDrawArrays.data(), object3d.VerticesDrawArrays.size() * sizeof(QVector3D));
     positionBuffer->bind();
-    positionBuffer->allocate(object3d.VerticesDrawArrays.data(), object3d.VerticesDrawArrays.size() * sizeof(QVector3D));
     program->enableAttributeArray("vertex");
     program->setAttributeBuffer("vertex", GL_FLOAT, 0, 3);
     positionBuffer->release();
 
-    colorBuffer = new QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
-    colorBuffer->create();
-    colorBuffer->setUsagePattern(QOpenGLBuffer::StaticDraw);
+    colorBuffer = GenerateBuffer(object3d.Colors.data(), object3d.Colors.size() * sizeof(QVector4D));
     colorBuffer->bind();
-    colorBuffer->allocate(object3d.Colors.data(), object3d.Colors.size() * sizeof(QVector4D));
     program->enableAttributeArray("color");
     program->setAttributeBuffer("color", GL_FLOAT, 0, 4);
     colorBuffer->release();
 
-    QOpenGLBuffer *VertexIndexBuffer = new QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
-    VertexIndexBuffer->create();
-    VertexIndexBuffer->setUsagePattern(QOpenGLBuffer::StaticDraw);
+    QOpenGLBuffer *VertexIndexBuffer = GenerateBuffer(object3d.Index.data(), object3d.Index.size() * sizeof(QVector3D));
     VertexIndexBuffer->bind();
-    VertexIndexBuffer->allocate(object3d.Index.data(), object3d.Index.size() * sizeof(QVector3D));
     program->enableAttributeArray("indexes");
     program->setAttributeBuffer("indexes", GL_FLOAT, 0, 3);
     VertexIndexBuffer->release();
 
-    QOpenGLBuffer *FaceIndexBuffer = new QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
-    FaceIndexBuffer->create();
-    FaceIndexBuffer->setUsagePattern(QOpenGLBuffer::StaticDraw);
+    QOpenGLBuffer *FaceIndexBuffer = GenerateBuffer(object3d.PerFaceData.data(), object3d.PerFaceData.size() * sizeof(QVector4D));
     FaceIndexBuffer->bind();
-    FaceIndexBuffer->allocate(object3d.PerFaceData.data(), object3d.PerFaceData.size() * sizeof(QVector4D));
     program->enableAttributeArray("faceIndexes");
     program->setAttributeBuffer("faceIndexes", GL_FLOAT, 0, 4);
     FaceIndexBuffer->release();
@@ -357,20 +333,14 @@ void _gl_widget::initializeGL()
     VAO3->create();
     VAO3->bind();
 
-    positionBuffer = new QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
-    positionBuffer->create();
-    positionBuffer->setUsagePattern(QOpenGLBuffer::StaticDraw);
+    positionBuffer = GenerateBuffer(object3d.VerticesDrawArrays.data(), object3d.VerticesDrawArrays.size() * sizeof(QVector3D));
     positionBuffer->bind();
-    positionBuffer->allocate(object3d.VerticesDrawArrays.data(), object3d.VerticesDrawArrays.size() * sizeof(QVector3D));
     program2->enableAttributeArray("vertex");
     program2->setAttributeBuffer("vertex", GL_FLOAT, 0, 3);
     positionBuffer->release();
 
-    colorBuffer = new QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
-    colorBuffer->create();
-    colorBuffer->setUsagePattern(QOpenGLBuffer::StaticDraw);
+    colorBuffer = GenerateBuffer(object3d.TriangleSelectionColors.data(), object3d.TriangleSelectionColors.size() * sizeof(QVector4D));
     colorBuffer->bind();
-    colorBuffer->allocate(object3d.TriangleSelectionColors.data(), object3d.TriangleSelectionColors.size() * sizeof(QVector4D));
     program2->enableAttributeArray("color");
     program2->setAttributeBuffer("color", GL_FLOAT, 0, 4);
     colorBuffer->release();
@@ -502,4 +472,15 @@ void _gl_widget::pick(int Selection_position_x, int Selection_position_y)
             TriangleSelectionMode = false;
         }
     }
+}
+
+QOpenGLBuffer* _gl_widget::GenerateBuffer(const void *InData, int InCount)
+{
+    QOpenGLBuffer* Buffer = new QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
+    Buffer->create();
+    Buffer->setUsagePattern(QOpenGLBuffer::StaticDraw);
+    Buffer->bind();
+    Buffer->allocate(InData, InCount);
+    Buffer->release();
+    return Buffer;
 }

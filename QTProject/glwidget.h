@@ -71,6 +71,8 @@ protected:
     void initializeGL() Q_DECL_OVERRIDE;
     void keyPressEvent(QKeyEvent *Keyevent) Q_DECL_OVERRIDE;
 
+    QOpenGLBuffer* GenerateBuffer(const void *data, int count);
+
 private:
     _window *Window;
 
