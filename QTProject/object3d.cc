@@ -95,12 +95,10 @@ void _object3D::ReadPlyFile(const char *Filename)
         index += R;
 
         PerFaceData.push_back(QVector4D(faceindex,edge2index,edge3index,edge1index));
-        PerFaceData.push_back(QVector4D(faceindex,edge2index,edge3index,edge1index));
-        PerFaceData.push_back(QVector4D(faceindex,edge2index,edge3index,edge1index));
+        //PerFaceData.push_back(QVector4D(faceindex,edge2index,edge3index,edge1index));
+        //PerFaceData.push_back(QVector4D(faceindex,edge2index,edge3index,edge1index));
         //qDebug() << index << faceindex << edge2index << edge3index << edge1index;
     }
-
-    qDebug() << Positions.size()/3;
 }
 
 float RandomFloat(float a, float b) {
@@ -121,12 +119,12 @@ _object3D::_object3D(const char *Filename)
     VerticesDrawArrays.resize(Triangles.size()*3);
 
     QVector<QVector4D> ColorPerVertex;
-    for (unsigned int i= 0; i < Triangles.size(); i++)
+    for (size_t i= 0; i < Triangles.size(); i++)
     {
         ColorPerVertex.push_back(QVector4D((float)i/(float)Triangles.size(), 0.0f, 0.0f, 1.0f));
     }
 
-    for(int i = 0; i < 1048; i++)
+    for(size_t i = 0; i < 123*256; i++)
     {
         points.push_back(QVector4D(RandomFloat(0.0f, 1.0f), RandomFloat(0.0f, 1.0f), RandomFloat(0.0f, 1.0f), 1.0f));
 
@@ -137,8 +135,7 @@ _object3D::_object3D(const char *Filename)
         selectionPoints.push_back(QVector4D(r/255.0f, g/255.0f, b/255.0f, 1.0f));
     }
 
-    int EdgeIndex = Vertices.size();
-    for (unsigned int i= 0; i < Triangles.size(); i++)
+    for (size_t i= 0; i < Triangles.size(); i++)
     {
        VerticesDrawArrays[i*3]=Vertices[Triangles[i].x()];
        VerticesDrawArrays[i*3+1]=Vertices[Triangles[i].y()];
@@ -157,28 +154,9 @@ _object3D::_object3D(const char *Filename)
        TriangleSelectionColors.push_back(QVector4D(r/255.0f, g/255.0f, b/255.0f, 1.0f));
        TriangleSelectionColors.push_back(QVector4D(r/255.0f, g/255.0f, b/255.0f, 1.0f));
 
-       //Colors.push_back(ColorPerVertex[Triangles[i].x()]);
-       //Colors.push_back(ColorPerVertex[Triangles[i].y()]);
-       //Colors.push_back(ColorPerVertex[Triangles[i].z()]);
-
-       // Vertex 1
-       //Index.push_back(QVector3D(Triangles[i].x(),Triangles[i].y(),Triangles[i].z()));
-       //PerFaceData.push_back(QVector4D(3,4,5,6));
-       //// Vertex 1
-       //Index.push_back(QVector3D(Triangles[i].x(),Triangles[i].y(),Triangles[i].z()));
-       //PerFaceData.push_back(QVector4D(3,4,5,6));
-       //// Vertex 1
-       //Index.push_back(QVector3D(Triangles[i].x(),Triangles[i].y(),Triangles[i].z()));
-       //PerFaceData.push_back(QVector4D(3,4,5,6));
-       // Vertex 1
-       Index.push_back(QVector3D(Triangles[i].x(),Triangles[i].x(),Triangles[i].x()));
-       //PerFaceData.push_back(QVector4D(Vertices.size()+i,15,15,15));
-       // Vertex 1
-       Index.push_back(QVector3D(Triangles[i].y(),Triangles[i].y(),Triangles[i].y()));
-       //PerFaceData.push_back(QVector4D(15,15,15,15));
-       // Vertex 1
-       Index.push_back(QVector3D(Triangles[i].z(),Triangles[i].z(),Triangles[i].z()));
-       //PerFaceData.push_back(QVector4D(15,15,15,15));
+       Index.push_back(QVector3D(i, i, i));
+       Index.push_back(QVector3D(i, i, i));
+       Index.push_back(QVector3D(i, i, i));
     }
 
     UpdateMeshColorsArray(points);
@@ -191,48 +169,37 @@ int _object3D::SsboSize()
 
 void _object3D::UpdateMeshColorsArray(QVector<QVector4D> p)
 {
-    MeshColorArray.clear();
-    for (unsigned int i= 0; i < Triangles.size(); i++)
+    ssbo.Resolution = 4;
+
+    for(int i = 0; i < Triangles.size(); i++)
     {
-        ssbo_data d;
-        d.Colors[0][0] = QVector4D(0.1f, 0.2f, 0.5f, 1.0f);
+        ssbo.Colors[i][ssbo.Resolution * (ssbo.Resolution + 1) + 0] = p[int(Triangles[i].x())];
+        ssbo.Colors[i][ssbo.Resolution] = p[int(Triangles[i].y())];
+        ssbo.Colors[i][0]               = p[int(Triangles[i].z())];
 
-        if(i%2 == 0)
-        {
-            d.Resolution = 8;
-        }
-        else
-        {
-            d.Resolution = 4;
-        }
-
-        // BEGIN_TODO: Move this code to the geometr shader
-        d.Colors[d.Resolution][0] = p[int(Triangles[i].x())];
-        d.Colors[0][d.Resolution] = p[int(Triangles[i].y())];
-        d.Colors[0][0]            = p[int(Triangles[i].z())];
         int faceIndexOffset = 0;
         int edgeIndexOffset = 0;
-        for(int a = 1; a < d.Resolution; a++)
-        {
-            d.Colors[0][a] = p[int(PerFaceData[i][2] + a)];
-            d.Colors[a][0] = p[int(PerFaceData[i][3] + a)];
 
-            for(int j = 1; j < d.Resolution; j++)
+        for(int a = 1; a <= ssbo.Resolution + 1; a++)
+        {
+
+            ssbo.Colors[i][0 * (ssbo.Resolution + 1) + a] = p[int(PerFaceData[i][2] + a)];
+            ssbo.Colors[i][a * (ssbo.Resolution + 1) + 0] = p[int(PerFaceData[i][3] + a)];
+
+            for(int j = 1; j <= ssbo.Resolution + 1; j++)
             {
-                if(a + j == d.Resolution)
+                if(a + j == ssbo.Resolution)
                 {
-                    d.Colors[a][j] = p[int(PerFaceData[i][1] + edgeIndexOffset)];
+                    ssbo.Colors[i][a * (ssbo.Resolution + 1) + j] = p[int(PerFaceData[i][1] + edgeIndexOffset)];
                     edgeIndexOffset += 1;
+
                 }
                 else
                 {
-                    d.Colors[a][j] = p[int(PerFaceData[i][0] + faceIndexOffset)];
+                    ssbo.Colors[i][a * (ssbo.Resolution + 1) + j] = p[int(PerFaceData[i][0] + faceIndexOffset)];
                     faceIndexOffset += 1;
                 }
             }
         }
-        // END_TODO
-
-        MeshColorArray.push_back(d);
     }
 }

@@ -50,12 +50,14 @@ class _object3D:public _basic_object3D
     {
         int Resolution;
         float fill[3];
-        QVector4D Colors[132][132];
+        QVector4D Colors[132][256];
     };
 
     QVector<ssbo_data> MeshColorArray;
     QVector<ssbo_data> MeshSelectionArray;
     QVector<QVector4D> ColorArray;
+
+    ssbo_data ssbo;
 
 };
 

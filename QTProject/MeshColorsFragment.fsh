@@ -3,7 +3,7 @@ uniform highp vec3 points[1024];
 layout(std430, binding = 3) buffer MeshColorsData
 {
     int Resolution;
-    vec4 Colors[132][132];
+    vec4 Colors[132][256];
 };
 
 const int R = 4;
@@ -48,7 +48,7 @@ void main(void)
     {
         if(round(w.r+w.g+w.b) == 0)
         {
-           c = Colors[int(B[0])][int(B[1])];
+           c = Colors[Index[0]][int(B[0]) * Resolution + int(B[1])];
         }
         else if(round(w.r+w.g+w.b) == 1)
         {
@@ -56,15 +56,15 @@ void main(void)
 
             if(maxc == w.r)
             {
-                c = Colors[int(B.r+1)][int(B.g)];
+                c = Colors[Index[0]][int(B.r+1) * Resolution + int(B.g)];
             }
             else if(maxc == w.g)
             {
-                c = Colors[int(B.r)][int(B.g+1)];
+                c = Colors[Index[0]][int(B.r) * Resolution + int(B.g+1)];
             }
             else if(maxc == w.b)
             {
-                c = Colors[int(B.r)][int(B.g)];
+                c = Colors[Index[0]][int(B.r) * Resolution + int(B.g)];
             }
         }
         else if(round(w.r+w.g+w.b) == 2)
@@ -73,18 +73,20 @@ void main(void)
 
             if(maxc == (1-w.r))
             {
-                c = Colors[int(B.r)][int(B.g+1)];
+                c = Colors[Index[0]][int(B.r) * Resolution + int(B.g+1)];
             }
             else if(maxc == (1-w.g))
             {
-                c = Colors[int(B.r+1)][int(B.g)];
+                c = Colors[Index[0]][int(B.r+1) * Resolution + int(B.g)];
             }
             else if(maxc == (1-w.b))
             {
-                c = Colors[int(B.r+1)][int(B.g+1)];
+                c = Colors[Index[0]][int(B.r+1) * Resolution + int(B.g+1)];
             }
         }
     }
 
-    gl_FragColor = c;
+    {
+        gl_FragColor = c;//vec4(Index[0]/11.0f,0.0f,0.0f, 1.0f);//Colors[Index[0]][0];
+    }
 }

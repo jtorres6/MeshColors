@@ -275,6 +275,8 @@ void _gl_widget::initializeGL()
     program->setAttributeBuffer("color", GL_FLOAT, 0, 4);
     colorBuffer->release();
 
+    qDebug() << object3d.Index;
+
     QOpenGLBuffer *VertexIndexBuffer = GenerateBuffer(object3d.Index.data(), object3d.Index.size() * sizeof(QVector3D));
     VertexIndexBuffer->bind();
     program->enableAttributeArray("indexes");
@@ -296,23 +298,11 @@ void _gl_widget::initializeGL()
         pointsIndex[i] = *(new QVector3D(r/255.0f, g/255.0f, b/255.0f));
     }
 
-    for(uint i = 0; i< 1024; i++)
-    {
-        points[i] = *(new QVector3D(0.0f, 1.0f, 0.0f));
-    }
-
-    program->setUniformValueArray("points", points, 256);
     program->setUniformValue("ColorLerpEnabled", false);
 
-    //qDebug() << object3d.MeshColorArray[0].Colors[0][0];
-
-    for(int i = 0; i <object3d.MeshColorArray.size(); i++)
-    {
-        qDebug() << object3d.MeshColorArray[i].Resolution;
-    }
-
     context->functions()->glGenBuffers(1, &ssbo);
-    UpdateSSBO(ssbo, object3d.SsboSize() * object3d.MeshColorArray.size(), object3d.MeshColorArray.data());
+
+    UpdateSSBO(ssbo, sizeof(object3d.ssbo), &object3d.ssbo);
 
     VAO2->release();
     program->release();
@@ -386,7 +376,7 @@ void _gl_widget::pick(int Selection_position_x, int Selection_position_y)
 
         object3d.UpdateMeshColorsArray(object3d.selectionPoints);
 
-        UpdateSSBO(ssbo, object3d.SsboSize() * object3d.MeshColorArray.size(), object3d.MeshColorArray.data());
+        UpdateSSBO(ssbo, sizeof(object3d.ssbo), &object3d.ssbo);
 
         update();
         paintGL();
@@ -406,7 +396,7 @@ void _gl_widget::pick(int Selection_position_x, int Selection_position_y)
         if (Selected_triangle==16777215) Selected_triangle=-1;
 
         // Convert the color back to an integer ID
-        uint pickedID =
+        int pickedID =
             R +
             G * 256 +
             B * 256 * 256;
@@ -414,11 +404,12 @@ void _gl_widget::pick(int Selection_position_x, int Selection_position_y)
         if(pickedID != -1 && pickedID < 1024)
         {
             object3d.points[pickedID] = QVector4D(0.0f, 1.0f, 1.0f, 1.0f);
+            qDebug() << pickedID/255.0f * 11.0f;
         }
 
         object3d.UpdateMeshColorsArray(object3d.points);
 
-        UpdateSSBO(ssbo, object3d.SsboSize() * object3d.MeshColorArray.size(), object3d.MeshColorArray.data());
+        UpdateSSBO(ssbo, sizeof(object3d.ssbo), &object3d.ssbo);
 
     }
     else
@@ -451,7 +442,6 @@ void _gl_widget::pick(int Selection_position_x, int Selection_position_y)
         if(pickedID != -1 && pickedID < 1024)
         {
             object3d.Resolutions[pickedID] = 4;
-            qDebug() << pickedID;
             TriangleSelectionMode = false;
         }
     }
