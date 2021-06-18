@@ -11,6 +11,7 @@
 #include <QByteArray>
 #include <QColor>
 #include <QOpenGLTexture>
+#include <QColorDialog>
 
 using namespace std;
 using namespace _gl_widget_ne;
@@ -57,6 +58,17 @@ void _gl_widget::keyPressEvent(QKeyEvent *Keyevent)
 
   case Qt::Key_R:TriangleSelectionMode=!TriangleSelectionMode;
       break;
+
+  case Qt::Key_C:
+       QColor NewColor = QColorDialog::getColor(Qt::yellow, this );
+
+      if(NewColor.isValid())
+      {
+        CurrentPaintingColor = NewColor;
+      }
+
+      break;
+
   }
 
   update();
@@ -403,8 +415,7 @@ void _gl_widget::pick(int Selection_position_x, int Selection_position_y)
 
         if(pickedID != -1 && pickedID < 1024)
         {
-            object3d.points[pickedID] = QVector4D(0.0f, 1.0f, 1.0f, 1.0f);
-            qDebug() << pickedID/255.0f * 11.0f;
+            object3d.points[pickedID] = QVector4D(CurrentPaintingColor.red()/255.0f, CurrentPaintingColor.green()/255.0f, CurrentPaintingColor.blue()/255.0f, CurrentPaintingColor.alpha()/255.0f);
         }
 
         object3d.UpdateMeshColorsArray(object3d.points);

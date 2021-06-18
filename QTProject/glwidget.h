@@ -113,6 +113,8 @@ private:
 
     QOpenGLContext *context;
     GLuint ssbo;
+
+    QColor CurrentPaintingColor = QColor(1.0f, 0.0f, 0.0f, 1.0f);
 };
 
 #endif
