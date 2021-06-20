@@ -32,7 +32,6 @@ void _object3D::ReadPlyFile(const char *Filename)
     for(int i = 0; i <= Positions.size()-3; i+=3)
     {
         Triangles.push_back(QVector3D(Positions[i],Positions[i+1],Positions[i+2]));
-        Resolutions.push_back(R);
 
         // Colors per face:
         int faceindex = index;
@@ -137,6 +136,8 @@ _object3D::_object3D(const char *Filename)
 
     for (size_t i= 0; i < Triangles.size(); i++)
     {
+        Resolutions.push_back(2);
+
        VerticesDrawArrays[i*3]=Vertices[Triangles[i].x()];
        VerticesDrawArrays[i*3+1]=Vertices[Triangles[i].y()];
        VerticesDrawArrays[i*3+2]=Vertices[Triangles[i].z()];
@@ -159,6 +160,7 @@ _object3D::_object3D(const char *Filename)
        Index.push_back(QVector3D(i, i, i));
     }
 
+    UpdateResolutionsArray(Resolutions);
     UpdateMeshColorsArray(points);
 }
 
@@ -169,37 +171,48 @@ int _object3D::SsboSize()
 
 void _object3D::UpdateMeshColorsArray(QVector<QVector4D> p)
 {
-    ssbo.Resolution = 4;
-
     for(int i = 0; i < Triangles.size(); i++)
     {
-        ssbo.Colors[i][ssbo.Resolution * (ssbo.Resolution + 1) + 0] = p[int(Triangles[i].x())];
-        ssbo.Colors[i][ssbo.Resolution] = p[int(Triangles[i].y())];
-        ssbo.Colors[i][0]               = p[int(Triangles[i].z())];
+        int Res = ssbo.Resolution[i];
+
+        ssbo.Colors[i][Res * (Res + 1) + 0] = p[int(Triangles[i].x())];
+        ssbo.Colors[i][Res]                 = p[int(Triangles[i].y())];
+        ssbo.Colors[i][0]                   = p[int(Triangles[i].z())];
 
         int faceIndexOffset = 0;
         int edgeIndexOffset = 0;
 
-        for(int a = 1; a <= ssbo.Resolution + 1; a++)
+        for(int a = 1; a <= Res + 1; a++)
         {
+            ssbo.Colors[i][0 * (Res + 1) + a] = p[int(PerFaceData[i][2] + a)];
+            ssbo.Colors[i][a * (Res + 1) + 0] = p[int(PerFaceData[i][3] + a)];
 
-            ssbo.Colors[i][0 * (ssbo.Resolution + 1) + a] = p[int(PerFaceData[i][2] + a)];
-            ssbo.Colors[i][a * (ssbo.Resolution + 1) + 0] = p[int(PerFaceData[i][3] + a)];
-
-            for(int j = 1; j <= ssbo.Resolution + 1; j++)
+            for(int j = 1; j <= Res + 1; j++)
             {
-                if(a + j == ssbo.Resolution)
+                if(a + j == Res)
                 {
-                    ssbo.Colors[i][a * (ssbo.Resolution + 1) + j] = p[int(PerFaceData[i][1] + edgeIndexOffset)];
+                    ssbo.Colors[i][a * (Res + 1) + j] = p[int(PerFaceData[i][1] + edgeIndexOffset)];
                     edgeIndexOffset += 1;
 
                 }
                 else
                 {
-                    ssbo.Colors[i][a * (ssbo.Resolution + 1) + j] = p[int(PerFaceData[i][0] + faceIndexOffset)];
+                    ssbo.Colors[i][a * (Res + 1) + j] = p[int(PerFaceData[i][0] + faceIndexOffset)];
                     faceIndexOffset += 1;
                 }
             }
+        }
+    }
+}
+
+void _object3D::UpdateResolutionsArray(const QVector<int>& InNewResolutions)
+{
+    int s = Triangles.size();
+    for(size_t i = 0; i < s; i++)
+    {
+        if(i < InNewResolutions.size())
+        {
+            ssbo.Resolution[i] = InNewResolutions[i];
         }
     }
 }

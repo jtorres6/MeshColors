@@ -64,6 +64,8 @@ public:
     void draw_objects();
 
     void pick(int Selection_position_x, int Selection_position_y);
+    void DrawTrianglesSelectionMode();
+
 
 protected:
     void resizeGL(int Width1, int Height1) Q_DECL_OVERRIDE;
@@ -106,6 +108,8 @@ private:
     float Observer_distance = 1;
 
     bool TriangleSelectionMode = false;
+
+    int SelectedTriangle = -1;
 
     QVector3D points[1024];
     QVector3D pointsIndex[1024];

@@ -1,4 +1,4 @@
-/*! \file
+ /*! \file
  * Copyright Domingo Martín Perandres
  * email: dmartin@ugr.es
  * web: http://calipso.ugr.es/dmartin
@@ -60,13 +60,35 @@ void _gl_widget::keyPressEvent(QKeyEvent *Keyevent)
       break;
 
   case Qt::Key_C:
-       QColor NewColor = QColorDialog::getColor(Qt::yellow, this );
+  {
+        QColor NewColor = QColorDialog::getColor(Qt::yellow, this );
 
-      if(NewColor.isValid())
-      {
+        if(NewColor.isValid())
+        {
         CurrentPaintingColor = NewColor;
-      }
+        }
 
+        break;
+  }
+
+  case Qt::Key_Plus:
+
+      if(SelectedTriangle >= 0 && object3d.Resolutions[SelectedTriangle] < 64)
+      {
+          object3d.Resolutions[SelectedTriangle] *= 2;
+          object3d.UpdateResolutionsArray(object3d.Resolutions);
+          UpdateSSBO(ssbo, sizeof(object3d.ssbo), &object3d.ssbo);
+      }
+      break;
+
+  case Qt::Key_Minus:
+
+      if(SelectedTriangle >= 0 && object3d.Resolutions[SelectedTriangle] > 2)
+      {
+          object3d.Resolutions[SelectedTriangle] /= 2;
+          object3d.UpdateResolutionsArray(object3d.Resolutions);
+          UpdateSSBO(ssbo, sizeof(object3d.ssbo), &object3d.ssbo);
+      }
       break;
 
   }
@@ -141,60 +163,92 @@ void _gl_widget::draw_objects()
     Projection*=Rotation_x;
     Projection*=Rotation_y;
 
-    if(!TriangleSelectionMode)
+    program->bind();
+
+    // Draw axis
+    VAO->bind();
+    int matrixLocation = program->uniformLocation("matrix");
+    program->setUniformValue(matrixLocation, Projection);
+
+    glDrawArrays(GL_LINES, 0, Axis.Vertices.size());
+
+    VAO->release();
+    // Draw 3D model
+    VAO2->bind();
+
+    int matrixLocation2 = program->uniformLocation("matrix");
+    program->setUniformValue(matrixLocation2, Projection);
+
+    if(Draw_point)
     {
-        program->bind();
-
-        // Draw axis
-        VAO->bind();
-        int matrixLocation = program->uniformLocation("matrix");
-        program->setUniformValue(matrixLocation, Projection);
-
-        glDrawArrays(GL_LINES, 0, Axis.Vertices.size());
-
-        VAO->release();
-        // Draw 3D model
-        VAO2->bind();
-
-        int matrixLocation2 = program->uniformLocation("matrix");
-        program->setUniformValue(matrixLocation2, Projection);
-
-        if(Draw_point)
-        {
-            glPointSize(10);
-            glDrawArrays(GL_POINTS, 0, object3d.VerticesDrawArrays.size());
-        }
-        if(Draw_line)
-        {
-            glDrawArrays(GL_LINES, 0, object3d.VerticesDrawArrays.size());
-        }
-        if(Draw_fill)
-        {
-            context->extraFunctions()->glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, ssbo);
-            context->functions()->glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
-            glDrawArrays(GL_TRIANGLES,0, object3d.VerticesDrawArrays.size());
-            context->functions()->glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0); // unbind
-        }
-
-        VAO2->release();
-        program->release();
+        glPointSize(10);
+        glDrawArrays(GL_POINTS, 0, object3d.VerticesDrawArrays.size());
     }
-    else
+    if(Draw_line)
     {
-        program2->bind();
-        // Draw 3D model
-        VAO3->bind();
-
-        int matrixLocation2 = program2->uniformLocation("matrix");
-        program2->setUniformValue(matrixLocation2, Projection);
-
+        glDrawArrays(GL_LINES, 0, object3d.VerticesDrawArrays.size());
+    }
+    if(Draw_fill)
+    {
+        context->extraFunctions()->glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, ssbo);
+        context->functions()->glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
         glDrawArrays(GL_TRIANGLES,0, object3d.VerticesDrawArrays.size());
-
-        VAO3->release();
-        program2->release();
+        context->functions()->glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0); // unbind
     }
+
+    VAO2->release();
+    program->release();
+
+    program2->bind();
+    // Draw 3D model
+    VAO3->bind();
+
+    program2->setUniformValue("LineColor", QVector4D(0.0f, 0.5f, 1.0f, 1.0f));
+    program2->setUniformValue("LineMode", true);
+    program2->setUniformValue(matrixLocation2, Projection);
+
+    glDrawArrays(GL_LINES, 0, object3d.VerticesDrawArrays.size());
+
+    VAO3->release();
+    program2->release();
+
 }
 
+void _gl_widget::DrawTrianglesSelectionMode()
+{
+    QMatrix4x4 Projection;
+    QMatrix4x4 Rotation_x;
+    QMatrix4x4 Rotation_y;
+    QMatrix4x4 Translation;
+
+    Projection.frustum(X_MIN, X_MAX, Y_MIN, Y_MAX, FRONT_PLANE_PERSPECTIVE, BACK_PLANE_PERSPECTIVE);
+    Rotation_x.rotate(Observer_angle_x, 1, 0, 0);
+    Rotation_y.rotate(Observer_angle_y, 0, 1, 0);
+    Translation.translate(0, 0, -Observer_distance);
+
+    Projection*=Translation;
+    Projection*=Rotation_x;
+    Projection*=Rotation_y;
+
+    clear_window();
+    change_projection();
+    change_observer();
+
+    program2->bind();
+    // Draw 3D model
+    VAO3->bind();
+
+    int matrixLocation2 = program2->uniformLocation("matrix");
+    program2->setUniformValue(matrixLocation2, Projection);
+
+    program2->setUniformValue("LineColor", QVector4D(0.0f, 0.3f, 0.8f, 1.0f));
+    program2->setUniformValue("LineMode", false);
+
+    glDrawArrays(GL_TRIANGLES,0, object3d.VerticesDrawArrays.size());
+
+    VAO3->release();
+    program2->release();
+}
 
 
 /*****************************************************************************//**
@@ -428,7 +482,8 @@ void _gl_widget::pick(int Selection_position_x, int Selection_position_y)
         makeCurrent();
         clear_window();
 
-        paintGL();
+        //paintGL();
+        DrawTrianglesSelectionMode();
 
         // get the pixel
         int Color;
@@ -452,9 +507,9 @@ void _gl_widget::pick(int Selection_position_x, int Selection_position_y)
 
         if(pickedID != -1 && pickedID < 1024)
         {
-            object3d.Resolutions[pickedID] = 4;
-            TriangleSelectionMode = false;
+            SelectedTriangle = pickedID;
         }
+        TriangleSelectionMode = false;
     }
 }
 

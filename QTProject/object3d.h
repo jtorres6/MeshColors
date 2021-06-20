@@ -41,6 +41,7 @@ class _object3D:public _basic_object3D
     int SsboSize();
 
     void UpdateMeshColorsArray(QVector<QVector4D> p);
+    void UpdateResolutionsArray(const QVector<int>& InNewResolutions);
 
     bool TriangleSelectionMode = true;
 
@@ -48,8 +49,7 @@ class _object3D:public _basic_object3D
 
     struct ssbo_data
     {
-        int Resolution;
-        float fill[3];
+        int Resolution[132];
         QVector4D Colors[132][256];
     };
 
