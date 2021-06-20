@@ -74,3 +74,11 @@ void _window::mouseMoveEvent(QMouseEvent *e)
         GL_widget->pick(e->pos().x(), height() - e->pos().y());
     }
 }
+
+void _window::resizeEvent(QResizeEvent *event)
+{
+    if(event != nullptr)
+    {
+        GL_widget->resize(event->size().width(), event->size().height());
+    }
+}

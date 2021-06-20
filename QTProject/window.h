@@ -38,6 +38,7 @@ public:
 private:
   _gl_widget *GL_widget;
   void mouseMoveEvent(QMouseEvent *e);
+  void resizeEvent(QResizeEvent *event);
 };
 
 #endif

@@ -120,7 +120,6 @@ void _gl_widget::clear_window()
 
 void _gl_widget::change_projection()
 {
-
 }
 
 
@@ -154,7 +153,9 @@ void _gl_widget::draw_objects()
     QMatrix4x4 Rotation_y;
     QMatrix4x4 Translation;
 
-    Projection.frustum(X_MIN, X_MAX, Y_MIN, Y_MAX, FRONT_PLANE_PERSPECTIVE, BACK_PLANE_PERSPECTIVE);
+    const float AspectRatio = GLfloat(width()) / GLfloat(height());
+    qDebug() << AspectRatio;
+    Projection.frustum(X_MIN * AspectRatio, X_MAX * AspectRatio, Y_MIN, Y_MAX , FRONT_PLANE_PERSPECTIVE, BACK_PLANE_PERSPECTIVE);
     Rotation_x.rotate(Observer_angle_x, 1, 0, 0);
     Rotation_y.rotate(Observer_angle_y, 0, 1, 0);
     Translation.translate(0, 0, -Observer_distance);
@@ -364,7 +365,7 @@ void _gl_widget::initializeGL()
         pointsIndex[i] = *(new QVector3D(r/255.0f, g/255.0f, b/255.0f));
     }
 
-    program->setUniformValue("ColorLerpEnabled", false);
+    program->setUniformValue("ColorLerpEnabled", true);
 
     context->functions()->glGenBuffers(1, &ssbo);
 

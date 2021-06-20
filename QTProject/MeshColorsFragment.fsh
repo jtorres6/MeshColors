@@ -87,6 +87,6 @@ void main(void)
     }
 
     {
-        gl_FragColor = c;//vec4(Index[0]/11.0f,0.0f,0.0f, 1.0f);//Colors[Index[0]][0];
+        gl_FragColor = c;
     }
 }
