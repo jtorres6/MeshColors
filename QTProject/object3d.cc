@@ -90,13 +90,9 @@ void _object3D::ReadPlyFile(const char *Filename)
         {
             EdgeIndexMap.insert(pair, edge3index);
         }
-        //qDebug() << "Edge: " << edge3index  << "      vertices: " <<  pair.first << pair.second;
         index += R;
 
         PerFaceData.push_back(QVector4D(faceindex,edge2index,edge3index,edge1index));
-        //PerFaceData.push_back(QVector4D(faceindex,edge2index,edge3index,edge1index));
-        //PerFaceData.push_back(QVector4D(faceindex,edge2index,edge3index,edge1index));
-        //qDebug() << index << faceindex << edge2index << edge3index << edge1index;
     }
 }
 

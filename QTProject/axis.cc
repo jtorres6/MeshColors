@@ -35,7 +35,6 @@ _axis::_axis(float Size)
     Colors[3] = QVector3D(0, 1, 0);
     Colors[4] = QVector3D(0, 0, 1); // blue
     Colors[5] = QVector3D(0, 0, 1);
-
 }
 
 
@@ -48,22 +47,6 @@ _axis::_axis(float Size)
 
 void _axis::draw_line()
 {
-
-    //glDrawElements(GL_LINES, Vertices.size(), GL_UNSIGNED_INT, nullptr);
-    //glLineWidth(1);
-    //int vertexLocation = program->attributeLocation("vertex");
-    //int matrixLocation = program->uniformLocation("matrix");
-    //
-    //
-    //
-    //program->enableAttributeArray(vertexLocation);
-    ////program->setAttributeArray(vertexLocation, Vertices.data(), 3);
-    ////program->setAttributeArray(vertexLocation, Vertices.data());
-    //program->setAttributeBuffer(vertexLocation, GL_FLOAT, 0, 3, sizeof(Vertices[0]));
-    //program->setUniformValue(matrixLocation, Projection);
-    //
-    //glPointSize(10);
-    //glDrawArrays(GL_LINES, 0, 3);
 }
 
 

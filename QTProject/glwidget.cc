@@ -120,6 +120,20 @@ void _gl_widget::clear_window()
 
 void _gl_widget::change_projection()
 {
+    Projection  = QMatrix4x4();
+    Rotation_x  = QMatrix4x4();
+    Rotation_y  = QMatrix4x4();
+    Translation = QMatrix4x4();
+
+    const float AspectRatio = GLfloat(width()) / GLfloat(height());
+    Projection.frustum(X_MIN * AspectRatio, X_MAX * AspectRatio, Y_MIN, Y_MAX , FRONT_PLANE_PERSPECTIVE, BACK_PLANE_PERSPECTIVE);
+    Rotation_x.rotate(Observer_angle_x, 1, 0, 0);
+    Rotation_y.rotate(Observer_angle_y, 0, 1, 0);
+    Translation.translate(0, 0, -Observer_distance);
+
+    Projection*=Translation;
+    Projection*=Rotation_x;
+    Projection*=Rotation_y;
 }
 
 
@@ -148,37 +162,23 @@ void _gl_widget::change_observer()
 
 void _gl_widget::draw_objects()
 {
-    QMatrix4x4 Projection;
-    QMatrix4x4 Rotation_x;
-    QMatrix4x4 Rotation_y;
-    QMatrix4x4 Translation;
-
-    const float AspectRatio = GLfloat(width()) / GLfloat(height());
-    qDebug() << AspectRatio;
-    Projection.frustum(X_MIN * AspectRatio, X_MAX * AspectRatio, Y_MIN, Y_MAX , FRONT_PLANE_PERSPECTIVE, BACK_PLANE_PERSPECTIVE);
-    Rotation_x.rotate(Observer_angle_x, 1, 0, 0);
-    Rotation_y.rotate(Observer_angle_y, 0, 1, 0);
-    Translation.translate(0, 0, -Observer_distance);
-
-    Projection*=Translation;
-    Projection*=Rotation_x;
-    Projection*=Rotation_y;
-
     program->bind();
 
     // Draw axis
     VAO->bind();
     int matrixLocation = program->uniformLocation("matrix");
     program->setUniformValue(matrixLocation, Projection);
+    program->setUniformValue("BaseRendering", true);
 
     glDrawArrays(GL_LINES, 0, Axis.Vertices.size());
 
     VAO->release();
+
     // Draw 3D model
     VAO2->bind();
 
-    int matrixLocation2 = program->uniformLocation("matrix");
-    program->setUniformValue(matrixLocation2, Projection);
+    program->setUniformValue("BaseRendering", false);
+    glLineWidth(2.0f);
 
     if(Draw_point)
     {
@@ -200,13 +200,13 @@ void _gl_widget::draw_objects()
     VAO2->release();
     program->release();
 
+    // Draw wireframe
     program2->bind();
-    // Draw 3D model
     VAO3->bind();
 
     program2->setUniformValue("LineColor", QVector4D(0.0f, 0.5f, 1.0f, 1.0f));
     program2->setUniformValue("LineMode", true);
-    program2->setUniformValue(matrixLocation2, Projection);
+    program2->setUniformValue(matrixLocation, Projection);
 
     glDrawArrays(GL_LINES, 0, object3d.VerticesDrawArrays.size());
 
@@ -217,20 +217,6 @@ void _gl_widget::draw_objects()
 
 void _gl_widget::DrawTrianglesSelectionMode()
 {
-    QMatrix4x4 Projection;
-    QMatrix4x4 Rotation_x;
-    QMatrix4x4 Rotation_y;
-    QMatrix4x4 Translation;
-
-    Projection.frustum(X_MIN, X_MAX, Y_MIN, Y_MAX, FRONT_PLANE_PERSPECTIVE, BACK_PLANE_PERSPECTIVE);
-    Rotation_x.rotate(Observer_angle_x, 1, 0, 0);
-    Rotation_y.rotate(Observer_angle_y, 0, 1, 0);
-    Translation.translate(0, 0, -Observer_distance);
-
-    Projection*=Translation;
-    Projection*=Rotation_x;
-    Projection*=Rotation_y;
-
     clear_window();
     change_projection();
     change_observer();
@@ -294,7 +280,7 @@ void _gl_widget::initializeGL()
     context = new QOpenGLContext(this);
 
     makeCurrent();
-    Axis = _axis(500.0f);
+    Axis = _axis(1500.0f);
 
     object3d = _object3D(p);
 
@@ -317,10 +303,10 @@ void _gl_widget::initializeGL()
     program->setAttributeBuffer("vertex", GL_FLOAT, 0, 3);
     positionBuffer->release();
 
-    QOpenGLBuffer *colorBuffer = GenerateBuffer(Axis.Colors.data(), Axis.Colors.size() * sizeof(QVector3D));
+    QOpenGLBuffer *colorBuffer = GenerateBuffer(Axis.Colors.data(), Axis.Colors.size() * sizeof(QVector4D));
     colorBuffer->bind();
     program->enableAttributeArray("color");
-    program->setAttributeBuffer("color", GL_FLOAT, 0, 3);
+    program->setAttributeBuffer("color", GL_FLOAT, 0, 4);
     colorBuffer->release();
 
     VAO->release();
@@ -342,19 +328,11 @@ void _gl_widget::initializeGL()
     program->setAttributeBuffer("color", GL_FLOAT, 0, 4);
     colorBuffer->release();
 
-    qDebug() << object3d.Index;
-
     QOpenGLBuffer *VertexIndexBuffer = GenerateBuffer(object3d.Index.data(), object3d.Index.size() * sizeof(QVector3D));
     VertexIndexBuffer->bind();
     program->enableAttributeArray("indexes");
     program->setAttributeBuffer("indexes", GL_FLOAT, 0, 3);
     VertexIndexBuffer->release();
-
-    QOpenGLBuffer *FaceIndexBuffer = GenerateBuffer(object3d.PerFaceData.data(), object3d.PerFaceData.size() * sizeof(QVector4D));
-    FaceIndexBuffer->bind();
-    program->enableAttributeArray("faceIndexes");
-    program->setAttributeBuffer("faceIndexes", GL_FLOAT, 0, 4);
-    FaceIndexBuffer->release();
 
     for(uint i = 0; i< 1024; i++)
     {

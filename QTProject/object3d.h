@@ -59,6 +59,11 @@ class _object3D:public _basic_object3D
 
     ssbo_data ssbo;
 
+    QMatrix4x4 Projection;
+    QMatrix4x4 Rotation_x;
+    QMatrix4x4 Rotation_y;
+    QMatrix4x4 Translation;
+
 };
 
 #endif // OBJECT3D_H
