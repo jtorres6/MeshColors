@@ -11,6 +11,7 @@
 #include <QAction>
 #include <QMenuBar>
 #include <QFrame>
+#include <QWheelEvent>
 
 #include "window.h"
 #include "glwidget.h"
@@ -67,12 +68,45 @@ _window::_window()
   resize(800,800);
 }
 
+void _window::mousePressEvent(QMouseEvent *e)
+{
+    if(e->buttons() & Qt::LeftButton)
+    {
+        GL_widget->pick(e->pos().x(), height() - e->pos().y());
+    }
+}
+
 void _window::mouseMoveEvent(QMouseEvent *e)
 {
     if(e->buttons() & Qt::LeftButton)
     {
         GL_widget->pick(e->pos().x(), height() - e->pos().y());
     }
+
+    if(e->buttons() & Qt::RightButton)
+    {
+        if(MousePressed)
+        {
+            GL_widget->MoveCameraRightLeft(QPair<qint32, qint32>(e->pos().x() - PreviousPosition.first, e->pos().y() - PreviousPosition.second));
+        }
+        else
+        {
+            MousePressed = true;
+        }
+
+        PreviousPosition.first  = e->pos().x();
+        PreviousPosition.second = e->pos().y();
+    }
+}
+
+void _window::mouseReleaseEvent(QMouseEvent *event)
+{
+    MousePressed = false;
+}
+
+void _window::wheelEvent(QWheelEvent *event)
+{
+    GL_widget->AddCameraZoom(event->delta());
 }
 
 void _window::resizeEvent(QResizeEvent *event)

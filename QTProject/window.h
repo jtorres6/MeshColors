@@ -38,7 +38,14 @@ public:
 private:
   _gl_widget *GL_widget;
   void mouseMoveEvent(QMouseEvent *e);
+  void mousePressEvent(QMouseEvent *e);
+  void mouseReleaseEvent(QMouseEvent *event);
+  void wheelEvent(QWheelEvent *event);
   void resizeEvent(QResizeEvent *event);
+
+  QPair<int, int> PreviousPosition;
+
+  bool MousePressed = false;
 };
 
 #endif

@@ -1,6 +1,7 @@
 #version 450 core
 
 uniform mat4 matrix;
+
 in vec3 vertex;
 in vec4 color;
 in vec3 indexes;

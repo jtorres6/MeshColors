@@ -55,6 +55,8 @@ void _gl_widget::keyPressEvent(QKeyEvent *Keyevent)
   case Qt::Key_Down:Observer_angle_x+=ANGLE_STEP;break;
   case Qt::Key_PageUp:Observer_distance*=1.2;break;
   case Qt::Key_PageDown:Observer_distance/=1.2;break;
+  case Qt::Key_V:ColorLerpEnabled=!ColorLerpEnabled;
+      break;
 
   case Qt::Key_R:TriangleSelectionMode=!TriangleSelectionMode;
       break;
@@ -77,7 +79,7 @@ void _gl_widget::keyPressEvent(QKeyEvent *Keyevent)
       {
           object3d.Resolutions[SelectedTriangle] *= 2;
           object3d.UpdateResolutionsArray(object3d.Resolutions);
-          UpdateSSBO(ssbo, sizeof(object3d.ssbo), &object3d.ssbo);
+          UpdateSSBO(ssbo, sizeof(*object3d.ssbo), object3d.ssbo);
       }
       break;
 
@@ -87,7 +89,7 @@ void _gl_widget::keyPressEvent(QKeyEvent *Keyevent)
       {
           object3d.Resolutions[SelectedTriangle] /= 2;
           object3d.UpdateResolutionsArray(object3d.Resolutions);
-          UpdateSSBO(ssbo, sizeof(object3d.ssbo), &object3d.ssbo);
+          UpdateSSBO(ssbo, sizeof(*object3d.ssbo), object3d.ssbo);
       }
       break;
 
@@ -97,6 +99,19 @@ void _gl_widget::keyPressEvent(QKeyEvent *Keyevent)
 }
 
 
+void _gl_widget::MoveCameraRightLeft(QPair<qint32, qint32> InUnits)
+{
+    Observer_angle_y+=ANGLE_STEP*InUnits.first;
+    Observer_angle_x+=ANGLE_STEP*InUnits.second;
+    update();
+}
+
+
+void _gl_widget::AddCameraZoom(const float InValue)
+{
+    Observer_distance+=0.005f*InValue;
+    update();
+}
 /*****************************************************************************//**
  * Limpiar ventana
  *
@@ -163,7 +178,6 @@ void _gl_widget::change_observer()
 void _gl_widget::draw_objects()
 {
     program->bind();
-
     // Draw axis
     VAO->bind();
     int matrixLocation = program->uniformLocation("matrix");
@@ -191,6 +205,8 @@ void _gl_widget::draw_objects()
     }
     if(Draw_fill)
     {
+        program->setUniformValue("ColorLerpEnabled", ColorLerpEnabled);
+        program->setUniformValue("LightPos", LightPosition);
         context->extraFunctions()->glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, ssbo);
         context->functions()->glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
         glDrawArrays(GL_TRIANGLES,0, object3d.VerticesDrawArrays.size());
@@ -297,6 +313,8 @@ void _gl_widget::initializeGL()
     VAO->create();
     VAO->bind();
 
+
+
     QOpenGLBuffer *positionBuffer = GenerateBuffer(Axis.Vertices.data(), Axis.Vertices.size() * sizeof(QVector3D));
     positionBuffer->bind();
     program->enableAttributeArray("vertex");
@@ -343,11 +361,11 @@ void _gl_widget::initializeGL()
         pointsIndex[i] = *(new QVector3D(r/255.0f, g/255.0f, b/255.0f));
     }
 
-    program->setUniformValue("ColorLerpEnabled", true);
+    program->setUniformValue("ColorLerpEnabled", ColorLerpEnabled);
 
     context->functions()->glGenBuffers(1, &ssbo);
 
-    UpdateSSBO(ssbo, sizeof(object3d.ssbo), &object3d.ssbo);
+    UpdateSSBO(ssbo, sizeof(*object3d.ssbo), object3d.ssbo);
 
     VAO2->release();
     program->release();
@@ -415,13 +433,16 @@ void _gl_widget::initializeGL()
 
 void _gl_widget::pick(int Selection_position_x, int Selection_position_y)
 {
+    program->bind();
+    program->setUniformValue("ColorLerpEnabled", false);
+    program->release();
     if(!TriangleSelectionMode)
     {
         makeCurrent();
 
         object3d.UpdateMeshColorsArray(object3d.selectionPoints);
 
-        UpdateSSBO(ssbo, sizeof(object3d.ssbo), &object3d.ssbo);
+        UpdateSSBO(ssbo, sizeof(*object3d.ssbo), object3d.ssbo);
 
         update();
         paintGL();
@@ -446,14 +467,15 @@ void _gl_widget::pick(int Selection_position_x, int Selection_position_y)
             G * 256 +
             B * 256 * 256;
 
-        if(pickedID != -1 && pickedID < 1024)
+        if(pickedID != -1 && pickedID < object3d.points.size())
         {
             object3d.points[pickedID] = QVector4D(CurrentPaintingColor.red()/255.0f, CurrentPaintingColor.green()/255.0f, CurrentPaintingColor.blue()/255.0f, CurrentPaintingColor.alpha()/255.0f);
+            qDebug() << pickedID;
         }
 
         object3d.UpdateMeshColorsArray(object3d.points);
 
-        UpdateSSBO(ssbo, sizeof(object3d.ssbo), &object3d.ssbo);
+        UpdateSSBO(ssbo, sizeof(*object3d.ssbo), object3d.ssbo);
 
     }
     else
@@ -484,12 +506,15 @@ void _gl_widget::pick(int Selection_position_x, int Selection_position_y)
             G * 256 +
             B * 256 * 256;
 
-        if(pickedID != -1 && pickedID < 1024)
+        if(pickedID != -1)
         {
             SelectedTriangle = pickedID;
         }
         TriangleSelectionMode = false;
     }
+    program->bind();
+    program->setUniformValue("ColorLerpEnabled", ColorLerpEnabled);
+    program->release();
 }
 
 QOpenGLBuffer* _gl_widget::GenerateBuffer(const void *InData, int InCount)

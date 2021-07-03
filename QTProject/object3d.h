@@ -19,6 +19,14 @@
  *
  *****************************************************************************/
 
+
+typedef struct ssbo_data
+{
+    int Resolution[9000];
+    QVector4D Colors[9000][64];
+}ssbo_type;
+
+
 class _object3D:public _basic_object3D
 {
     public:
@@ -47,17 +55,11 @@ class _object3D:public _basic_object3D
 
     QVector<QVector4D> points, selectionPoints;
 
-    struct ssbo_data
-    {
-        int Resolution[132];
-        QVector4D Colors[132][256];
-    };
-
     QVector<ssbo_data> MeshColorArray;
     QVector<ssbo_data> MeshSelectionArray;
     QVector<QVector4D> ColorArray;
 
-    ssbo_data ssbo;
+    ssbo_data* ssbo;
 
     QMatrix4x4 Projection;
     QMatrix4x4 Rotation_x;

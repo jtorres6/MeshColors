@@ -35,7 +35,7 @@ namespace _gl_widget_ne {
   const float FRONT_PLANE_PERSPECTIVE=(X_MAX-X_MIN)/2;
   const float BACK_PLANE_PERSPECTIVE=1000;
   const float DEFAULT_DISTANCE=2;
-  const float ANGLE_STEP=1;
+  const float ANGLE_STEP=0.5f;
 
   typedef enum {MODE_DRAW_POINT,MODE_DRAW_LINE,MODE_DRAW_FILL,MODE_DRAW_CHESS} _mode_draw;
   typedef enum {OBJECT_TETRAHEDRON,OBJECT_CUBE,OBJECT_MESHCOLORS} _object;
@@ -66,12 +66,15 @@ public:
     void pick(int Selection_position_x, int Selection_position_y);
     void DrawTrianglesSelectionMode();
 
+    void MoveCameraRightLeft(QPair<qint32, qint32> InUnits);
+    void AddCameraZoom(const float InValue);
 
 protected:
     void resizeGL(int Width1, int Height1) Q_DECL_OVERRIDE;
     void paintGL() Q_DECL_OVERRIDE;
     void initializeGL() Q_DECL_OVERRIDE;
     void keyPressEvent(QKeyEvent *Keyevent) Q_DECL_OVERRIDE;
+
 
     QOpenGLBuffer* GenerateBuffer(const void *data, int count);
 
@@ -95,7 +98,7 @@ private:
     _axis Axis;
     _object3D object3d;
 
-    const char* p = "Models/cube.ply";
+    const char* p = "Models/ant.ply";
 
     _gl_widget_ne::_object Object;
 
@@ -108,6 +111,7 @@ private:
     float Observer_distance = 1;
 
     bool TriangleSelectionMode = false;
+    bool ColorLerpEnabled = false;
 
     int SelectedTriangle = -1;
 
@@ -119,6 +123,8 @@ private:
     GLuint ssbo;
 
     QColor CurrentPaintingColor = QColor(1.0f, 0.0f, 0.0f, 1.0f);
+
+    QVector3D LightPosition = QVector3D(10.0f, 1.0f, 10.0f);
 };
 
 #endif
