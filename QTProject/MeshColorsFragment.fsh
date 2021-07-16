@@ -8,7 +8,6 @@ layout(std430, binding = 3) buffer MeshColorsData
 uniform bool ColorLerpEnabled;
 uniform bool LightingEnabled;
 uniform vec3 LightPos;
-uniform bool BaseRendering;
 
 flat in int Index[3];
 in vec4 next_color;

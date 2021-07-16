@@ -85,7 +85,7 @@ private:
 
     QOpenGLShaderProgram* program;
     QOpenGLShaderProgram* program2;
-    QOpenGLVertexArrayObject *VAO, *VAO2, *VAO3;
+    QOpenGLVertexArrayObject *VAO, *VAO2, *VAO3, *VAO4;
     GLuint FBO;
     GLuint Color_texture;
     GLuint Depth_texture;

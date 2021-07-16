@@ -188,54 +188,51 @@ void _gl_widget::change_observer()
 void _gl_widget::draw_objects()
 {
     program->bind();
-    // Draw axis
-    VAO->bind();
+
     int matrixLocation = program->uniformLocation("matrix");
     program->setUniformValue(matrixLocation, Projection);
-    program->setUniformValue("BaseRendering", true);
-
-    glDrawArrays(GL_LINES, 0, Axis.Vertices.size());
-
-    VAO->release();
 
     // Draw 3D model
-    VAO2->bind();
+    VAO->bind();
 
     program->setUniformValue("BaseRendering", false);
     glLineWidth(2.0f);
 
-    if(Draw_point)
-    {
-        glPointSize(10);
-        glDrawArrays(GL_POINTS, 0, object3d.VerticesDrawArrays.size());
-    }
-    if(Draw_line)
-    {
-        glDrawArrays(GL_LINES, 0, object3d.VerticesDrawArrays.size());
-    }
-    if(Draw_fill)
-    {
-        program->setUniformValue("ColorLerpEnabled", ColorLerpEnabled);
-        program->setUniformValue("LightPos", LightPosition);
-        program->setUniformValue("LightingEnabled", true);
-        context->extraFunctions()->glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, ssbo);
-        context->functions()->glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
-        glDrawArrays(GL_TRIANGLES,0, object3d.VerticesDrawArrays.size());
-        context->functions()->glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0); // unbind
-    }
+    program->setUniformValue("ColorLerpEnabled", ColorLerpEnabled);
+    program->setUniformValue("LightPos", LightPosition);
+    program->setUniformValue("LightingEnabled", true);
+    context->extraFunctions()->glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, ssbo);
+    context->functions()->glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
+    glDrawArrays(GL_TRIANGLES,0, object3d.VerticesDrawArrays.size());
+    context->functions()->glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0); // unbind
 
-    VAO2->release();
+    VAO->release();
     program->release();
 
     // Draw wireframe
     program2->bind();
-    VAO3->bind();
+    VAO2->bind();
 
     program2->setUniformValue("LineColor", QVector4D(0.0f, 0.5f, 1.0f, 1.0f));
     program2->setUniformValue("LineMode", true);
     program2->setUniformValue(matrixLocation, Projection);
 
     glDrawArrays(GL_LINES, 0, object3d.VerticesDrawArrays.size());
+
+    VAO2->release();
+    program2->release();
+
+    // Draw wireframe
+    program2->bind();
+    VAO3->bind();
+
+    glLineWidth(1.0f);
+
+    program2->setUniformValue("LineColor", QVector4D(0.0f, 0.5f, 1.0f, 1.0f));
+    program2->setUniformValue("LineMode", false);
+    program2->setUniformValue(matrixLocation, Projection);
+
+    glDrawArrays(GL_LINES, 0, Axis.Vertices.size());
 
     VAO3->release();
     program2->release();
@@ -318,39 +315,18 @@ void _gl_widget::initializeGL()
     program->link();
     program->bind();
 
-     // VAO 1
+    // VAO 2
     VAO = new QOpenGLVertexArrayObject();
     VAO->create();
     VAO->bind();
 
-
-
-    QOpenGLBuffer *positionBuffer = GenerateBuffer(Axis.Vertices.data(), Axis.Vertices.size() * sizeof(QVector3D));
+    QOpenGLBuffer *positionBuffer = GenerateBuffer(object3d.VerticesDrawArrays.data(), object3d.VerticesDrawArrays.size() * sizeof(QVector3D));
     positionBuffer->bind();
     program->enableAttributeArray("vertex");
     program->setAttributeBuffer("vertex", GL_FLOAT, 0, 3);
     positionBuffer->release();
 
-    QOpenGLBuffer *colorBuffer = GenerateBuffer(Axis.Colors.data(), Axis.Colors.size() * sizeof(QVector4D));
-    colorBuffer->bind();
-    program->enableAttributeArray("color");
-    program->setAttributeBuffer("color", GL_FLOAT, 0, 4);
-    colorBuffer->release();
-
-    VAO->release();
-
-    // VAO 2
-    VAO2 = new QOpenGLVertexArrayObject();
-    VAO2->create();
-    VAO2->bind();
-
-    positionBuffer = GenerateBuffer(object3d.VerticesDrawArrays.data(), object3d.VerticesDrawArrays.size() * sizeof(QVector3D));
-    positionBuffer->bind();
-    program->enableAttributeArray("vertex");
-    program->setAttributeBuffer("vertex", GL_FLOAT, 0, 3);
-    positionBuffer->release();
-
-    colorBuffer = GenerateBuffer(object3d.Colors.data(), object3d.Colors.size() * sizeof(QVector4D));
+    QOpenGLBuffer *colorBuffer = GenerateBuffer(object3d.Colors.data(), object3d.Colors.size() * sizeof(QVector4D));
     colorBuffer->bind();
     program->enableAttributeArray("color");
     program->setAttributeBuffer("color", GL_FLOAT, 0, 4);
@@ -368,10 +344,8 @@ void _gl_widget::initializeGL()
 
     UpdateSSBO(ssbo, sizeof(*object3d.ssbo), object3d.ssbo);
 
-    VAO2->release();
-    program->release();
-
     VAO->release();
+    program->release();
 
     program2 = new QOpenGLShaderProgram(context);
 
@@ -380,10 +354,10 @@ void _gl_widget::initializeGL()
     program2->link();
     program2->bind();
 
-    // VAO 2
-    VAO3 = new QOpenGLVertexArrayObject();
-    VAO3->create();
-    VAO3->bind();
+    // VAO 3
+    VAO2 = new QOpenGLVertexArrayObject();
+    VAO2->create();
+    VAO2->bind();
 
     positionBuffer = GenerateBuffer(object3d.VerticesDrawArrays.data(), object3d.VerticesDrawArrays.size() * sizeof(QVector3D));
     positionBuffer->bind();
@@ -392,6 +366,25 @@ void _gl_widget::initializeGL()
     positionBuffer->release();
 
     colorBuffer = GenerateBuffer(object3d.TriangleSelectionColors.data(), object3d.TriangleSelectionColors.size() * sizeof(QVector4D));
+    colorBuffer->bind();
+    program2->enableAttributeArray("color");
+    program2->setAttributeBuffer("color", GL_FLOAT, 0, 4);
+    colorBuffer->release();
+
+    VAO2->release();
+
+    // VAO 4
+    VAO3 = new QOpenGLVertexArrayObject();
+    VAO3->create();
+    VAO3->bind();
+
+    positionBuffer = GenerateBuffer(Axis.Vertices.data(), Axis.Vertices.size() * sizeof(QVector3D));
+    positionBuffer->bind();
+    program2->enableAttributeArray("vertex");
+    program2->setAttributeBuffer("vertex", GL_FLOAT, 0, 3);
+    positionBuffer->release();
+
+    colorBuffer = GenerateBuffer(Axis.Colors.data(), Axis.Colors.size() * sizeof(QVector4D));
     colorBuffer->bind();
     program2->enableAttributeArray("color");
     program2->setAttributeBuffer("color", GL_FLOAT, 0, 4);
