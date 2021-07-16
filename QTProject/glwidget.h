@@ -98,7 +98,7 @@ private:
     _axis Axis;
     _object3D object3d;
 
-    const char* p = "Models/ant.ply";
+    const char* p = "Models/cube.ply";
 
     _gl_widget_ne::_object Object;
 
@@ -116,7 +116,6 @@ private:
     int SelectedTriangle = -1;
 
     QVector3D points[1024];
-    QVector3D pointsIndex[1024];
     QOpenGLTexture *text;
 
     QOpenGLContext *context;
@@ -124,7 +123,7 @@ private:
 
     QColor CurrentPaintingColor = QColor(1.0f, 0.0f, 0.0f, 1.0f);
 
-    QVector3D LightPosition = QVector3D(10.0f, 1.0f, 10.0f);
+    QVector3D LightPosition = QVector3D(10.0f, 1.0f, 100.0f);
 };
 
 #endif

@@ -27,7 +27,7 @@ void _object3D::ReadPlyFile(const char *Filename)
         Vertices.push_back(QVector3D(Coordinates[i],Coordinates[i+1],Coordinates[i+2]));
     }
 
-    int R = 8;
+    int R = 4;
     int index = Vertices.size() - 1;
     for(int i = 0; i <= Positions.size()-3; i+=3)
     {
@@ -35,6 +35,7 @@ void _object3D::ReadPlyFile(const char *Filename)
 
         // Colors per face:
         int faceindex = index;
+        //qDebug() << faceindex;
 
         index += ((R - 1) * (R - 2))/2;
         int edge1index = index;
@@ -53,7 +54,7 @@ void _object3D::ReadPlyFile(const char *Filename)
             EdgeIndexMap.insert(pair, edge1index);
         }
 
-        index += R;
+        index += R-1;
         int edge2index = index;
         pair =  qMakePair(Positions[i+1],Positions[i+2]);
 
@@ -78,7 +79,7 @@ void _object3D::ReadPlyFile(const char *Filename)
         }
 
         // Colors per edge (R-1)+1:
-        index += R;
+        index += R-1;
         int edge3index = index;
         if(EdgeIndexMap.contains(pair))
         {
@@ -88,9 +89,9 @@ void _object3D::ReadPlyFile(const char *Filename)
         {
             EdgeIndexMap.insert(pair, edge3index);
         }
-        index += R;
+        index += R-1;
 
-        PerFaceData.push_back(QVector4D(faceindex, edge1index, edge2index, edge3index));
+        PerFaceData.push_back(QVector4D(faceindex, edge2index, edge3index, edge1index));
     }
 }
 
@@ -113,28 +114,30 @@ _object3D::_object3D(const char *Filename)
 
     VerticesDrawArrays.resize(Triangles.size()*3);
 
-    QVector<QVector4D> ColorPerVertex;
-    for (size_t i= 0; i < Triangles.size(); i++)
-    {
-        ColorPerVertex.push_back(QVector4D((float)i/(float)Triangles.size(), 0.0f, 0.0f, 1.0f));
-    }
-
     for(size_t i = 0; i < 9000*64; i++)
     {
-        points.push_back(QVector4D(RandomFloat(0.0f, 1.0f), RandomFloat(0.0f, 1.0f), RandomFloat(0.0f, 1.0f), 1.0f));
-
         // Convert "i", the integer mesh ID, into an RGB color
         int r = (i & 0x000000FF) >>  0;
         int g = (i & 0x0000FF00) >>  8;
         int b = (i & 0x00FF0000) >> 16;
-        selectionPoints.push_back(QVector4D(r/255.0f, g/255.0f, b/255.0f, 1.0f));
+
+        if(i%2 == 0)
+        {
+            points.push_back(QVector4D(0.2f, 0.2f, 0.2f, 1.0f));
+        }
+        else
+        {
+            points.push_back(QVector4D(0.4f, 0.4f, 0.4f, 1.0f));
+        }
+
+        // TODO: This should be r/255.0f, but it only works with 254 somehow. CHECK THIS!
+        selectionPoints.push_back(QVector4D(r/254.0f, g/254.0f, b/254.0f, 1.0f));
     }
 
-    selectionPoints[5] = QVector4D(1.0f, 1.0f, 1.0f, 1.0f);
 
     for (size_t i= 0; i < Triangles.size(); i++)
     {
-        Resolutions.push_back(2);
+        Resolutions.push_back(4);
 
         VerticesDrawArrays[i*3]=Vertices[Triangles[i].x()];
         VerticesDrawArrays[i*3+1]=Vertices[Triangles[i].y()];
@@ -180,23 +183,20 @@ void _object3D::UpdateMeshColorsArray(QVector<QVector4D> p)
         int faceIndexOffset = 0;
         int edgeIndexOffset = 0;
 
-        for(int a = 1; a <= Res + 1; a++)
+        // Cij => C0k, Ck0, Ck(R-k) => 0 < k < R
+        for(int a = 1; a < Res; a++)
         {
-            ssbo->Colors[i][0 * (Res + 1) + a] = p[int(PerFaceData[i][2] + a)];
-            ssbo->Colors[i][a * (Res + 1) + 0] = p[int(PerFaceData[i][3] + a)];
+            ssbo->Colors[i][0 * (Res+1) + a]       = p[int(PerFaceData[i][1] + edgeIndexOffset)];
+            ssbo->Colors[i][a * (Res+1) + 0]       = p[int(PerFaceData[i][2] + edgeIndexOffset)];
+            ssbo->Colors[i][a * (Res+1) + (Res-a)] = p[int(PerFaceData[i][3] + edgeIndexOffset)];
+            edgeIndexOffset++;
 
-            for(int j = 1; j <= Res + 1; j++)
+            for(int j = 1; j < Res; j++)
             {
-                if(a + j == Res)
-                {
-                    ssbo->Colors[i][a * (Res + 1) + j] = p[int(PerFaceData[i][1] + edgeIndexOffset)];
-                    edgeIndexOffset += 1;
-
-                }
-                else
+                if(!(a + j == Res))
                 {
                     ssbo->Colors[i][a * (Res + 1) + j] = p[int(PerFaceData[i][0] + faceIndexOffset)];
-                    faceIndexOffset += 1;
+                    faceIndexOffset++;
                 }
             }
         }
@@ -205,8 +205,7 @@ void _object3D::UpdateMeshColorsArray(QVector<QVector4D> p)
 
 void _object3D::UpdateResolutionsArray(const QVector<int>& InNewResolutions)
 {
-    int s = Triangles.size();
-    for(size_t i = 0; i < s; i++)
+    for(size_t i = 0; i < Triangles.size(); i++)
     {
         if(i < InNewResolutions.size())
         {

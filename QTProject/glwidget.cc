@@ -67,7 +67,7 @@ void _gl_widget::keyPressEvent(QKeyEvent *Keyevent)
 
         if(NewColor.isValid())
         {
-        CurrentPaintingColor = NewColor;
+            CurrentPaintingColor = NewColor;
         }
 
         break;
@@ -91,6 +91,16 @@ void _gl_widget::keyPressEvent(QKeyEvent *Keyevent)
           object3d.UpdateResolutionsArray(object3d.Resolutions);
           UpdateSSBO(ssbo, sizeof(*object3d.ssbo), object3d.ssbo);
       }
+      break;
+
+  case Qt::Key_Semicolon:
+      object3d.UpdateMeshColorsArray(object3d.points);
+      UpdateSSBO(ssbo, sizeof(*object3d.ssbo), object3d.ssbo);
+      break;
+
+  case Qt::Key_Comma:
+      object3d.UpdateMeshColorsArray(object3d.selectionPoints);
+      UpdateSSBO(ssbo, sizeof(*object3d.ssbo), object3d.ssbo);
       break;
 
   }
@@ -207,6 +217,7 @@ void _gl_widget::draw_objects()
     {
         program->setUniformValue("ColorLerpEnabled", ColorLerpEnabled);
         program->setUniformValue("LightPos", LightPosition);
+        program->setUniformValue("LightingEnabled", true);
         context->extraFunctions()->glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, ssbo);
         context->functions()->glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
         glDrawArrays(GL_TRIANGLES,0, object3d.VerticesDrawArrays.size());
@@ -228,7 +239,6 @@ void _gl_widget::draw_objects()
 
     VAO3->release();
     program2->release();
-
 }
 
 void _gl_widget::DrawTrianglesSelectionMode()
@@ -352,15 +362,6 @@ void _gl_widget::initializeGL()
     program->setAttributeBuffer("indexes", GL_FLOAT, 0, 3);
     VertexIndexBuffer->release();
 
-    for(uint i = 0; i< 1024; i++)
-    {
-        // Convert "i", the integer mesh ID, into an RGB color
-        int r = (i & 0x000000FF) >>  0;
-        int g = (i & 0x0000FF00) >>  8;
-        int b = (i & 0x00FF0000) >> 16;
-        pointsIndex[i] = *(new QVector3D(r/255.0f, g/255.0f, b/255.0f));
-    }
-
     program->setUniformValue("ColorLerpEnabled", ColorLerpEnabled);
 
     context->functions()->glGenBuffers(1, &ssbo);
@@ -435,7 +436,9 @@ void _gl_widget::pick(int Selection_position_x, int Selection_position_y)
 {
     program->bind();
     program->setUniformValue("ColorLerpEnabled", false);
+    program->setUniformValue("LightingEnabled", false);
     program->release();
+
     if(!TriangleSelectionMode)
     {
         makeCurrent();
@@ -448,35 +451,25 @@ void _gl_widget::pick(int Selection_position_x, int Selection_position_y)
         paintGL();
 
         // get the pixel
-        int Color;
+        unsigned char data[4];
         glReadBuffer(GL_FRONT);
         glPixelStorei(GL_PACK_ALIGNMENT,1);
-        glReadPixels(Selection_position_x,Selection_position_y,1,1,GL_RGBA,GL_UNSIGNED_BYTE,&Color);
-
-        uint R = uint((Color & 0x000000FF));
-        uint G = uint((Color & 0x0000FF00) >> 8);
-        uint B = uint((Color & 0x00FF0000) >> 16);
-
-        uint Selected_triangle= (R << 16) + (G << 8) + B;
-
-        if (Selected_triangle==16777215) Selected_triangle=-1;
+        glReadPixels(Selection_position_x,Selection_position_y,1,1,GL_RGBA,GL_UNSIGNED_BYTE, data);
 
         // Convert the color back to an integer ID
         int pickedID =
-            R +
-            G * 256 +
-            B * 256 * 256;
+            data[0] +
+            data[1] * 256 +
+            data[2] * 256 * 256;
 
         if(pickedID != -1 && pickedID < object3d.points.size())
         {
             object3d.points[pickedID] = QVector4D(CurrentPaintingColor.red()/255.0f, CurrentPaintingColor.green()/255.0f, CurrentPaintingColor.blue()/255.0f, CurrentPaintingColor.alpha()/255.0f);
-            qDebug() << pickedID;
+            qDebug() << pickedID << data[0] << data[1] << data[2];
         }
 
         object3d.UpdateMeshColorsArray(object3d.points);
-
         UpdateSSBO(ssbo, sizeof(*object3d.ssbo), object3d.ssbo);
-
     }
     else
     {
@@ -492,9 +485,9 @@ void _gl_widget::pick(int Selection_position_x, int Selection_position_y)
         glPixelStorei(GL_PACK_ALIGNMENT,1);
         glReadPixels(Selection_position_x,Selection_position_y,1,1,GL_RGBA,GL_UNSIGNED_BYTE,&Color);
 
-        uint R = uint((Color & 0x000000FF));
-        uint G = uint((Color & 0x0000FF00) >> 8);
-        uint B = uint((Color & 0x00FF0000) >> 16);
+        uint R = ((Color & 0x000000FF));
+        uint G = ((Color & 0x0000FF00) >> 8);
+        uint B = ((Color & 0x00FF0000) >> 16);
 
         uint Selected_triangle= (R << 16) + (G << 8) + B;
 
@@ -514,6 +507,7 @@ void _gl_widget::pick(int Selection_position_x, int Selection_position_y)
     }
     program->bind();
     program->setUniformValue("ColorLerpEnabled", ColorLerpEnabled);
+    program->setUniformValue("LightingEnabled", true);
     program->release();
 }
 
