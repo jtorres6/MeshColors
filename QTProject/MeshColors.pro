@@ -23,6 +23,8 @@ DISTFILES += \
   BaseFragment.fsh \
   BaseVertex.vsh
 
+DEFINES += PLATFORM_WINDOWS=1
+
 LIBS += -L/usr/X11R6/lib64 -lopengl32 -lglu32
 
 

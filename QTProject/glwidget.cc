@@ -12,6 +12,7 @@
 #include <QColor>
 #include <QOpenGLTexture>
 #include <QColorDialog>
+#include <QFileDialog>
 
 using namespace std;
 using namespace _gl_widget_ne;
@@ -172,9 +173,6 @@ void _gl_widget::change_projection()
 
 void _gl_widget::change_observer()
 {
-
-
-
 }
 
 
@@ -305,7 +303,7 @@ void _gl_widget::initializeGL()
     makeCurrent();
     Axis = _axis(1500.0f);
 
-    object3d = _object3D(p);
+    object3d = _object3D(ModelFilePath);
 
     program = new QOpenGLShaderProgram(context);
 
@@ -521,4 +519,10 @@ void _gl_widget::UpdateSSBO(GLuint InSsbo, GLsizei InSize, void* InData)
     context->functions()->glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
     context->functions()->glBufferData(GL_SHADER_STORAGE_BUFFER, InSize, InData, GL_DYNAMIC_DRAW); //sizeof(data) only works for statically sized C/C++ arrays.
     context->functions()->glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0); // unbind
+}
+
+void _gl_widget::SetObjectPath(const char* InNewPath)
+{
+    ModelFilePath = InNewPath;
+    initializeGL();
 }

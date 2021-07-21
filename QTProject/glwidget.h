@@ -10,7 +10,9 @@
 #ifndef GLWIDGET_H
 #define GLWIDGET_H
 
+#if PLATFORM_WINDOWS
 #include "windows.h"
+#endif
 #include <GL/gl.h>
 #include <QOpenGLWidget>
 #include <QKeyEvent>
@@ -69,6 +71,8 @@ public:
     void MoveCameraRightLeft(QPair<qint32, qint32> InUnits);
     void AddCameraZoom(const float InValue);
 
+    void SetObjectPath(const char* InNewPath);
+
 protected:
     void resizeGL(int Width1, int Height1) Q_DECL_OVERRIDE;
     void paintGL() Q_DECL_OVERRIDE;
@@ -98,7 +102,7 @@ private:
     _axis Axis;
     _object3D object3d;
 
-    const char* p = "Models/cube.ply";
+    const char* ModelFilePath = "Models/cube.ply";
 
     _gl_widget_ne::_object Object;
 

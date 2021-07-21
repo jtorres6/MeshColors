@@ -35,6 +35,9 @@ class _window : public QMainWindow
 public:
     _window();
 
+public slots:
+    void OpenFileDialog();
+
 private:
   _gl_widget *GL_widget;
   void mouseMoveEvent(QMouseEvent *e);

@@ -58,8 +58,15 @@ _window::_window()
   Exit->setToolTip(tr("Exit the application"));
   connect(Exit, SIGNAL(triggered()), this, SLOT(close()));
 
+  // actions for file menu
+  QAction *FileOpen = new QAction(QIcon("./icons/exit.png"), tr("&Open file..."), this);
+  FileOpen->setShortcut(tr("Ctrl+E"));
+  FileOpen->setToolTip(tr("Exit the application"));
+  connect(FileOpen, SIGNAL(triggered()), this, SLOT(OpenFileDialog()));
+
   // menus
   QMenu *File_menu=menuBar()->addMenu(tr("&File"));
+  File_menu->addAction(FileOpen);
   File_menu->addAction(Exit);
   File_menu->setAttribute(Qt::WA_AlwaysShowToolTips);
 
@@ -115,4 +122,20 @@ void _window::resizeEvent(QResizeEvent *event)
     {
         GL_widget->resize(event->size().width(), event->size().height());
     }
+}
+
+void _window::OpenFileDialog()
+{
+
+    // Posible fix: https://blogs.kde.org/2009/03/26/how-crash-almost-every-qtkde-application-and-how-fix-it-0
+    QString fileName = QFileDialog::getOpenFileName(this,
+        tr("3D object location"), "",
+        tr("PLY objects (*.ply);;All Files (*)"), 0, QFileDialog::DontUseNativeDialog);
+
+    QDir dir(QDir::currentPath());
+
+    std::string FileNameStd = dir.relativeFilePath(fileName).toStdString();
+
+    const char *fileNameChar = FileNameStd.c_str();//dir.relativeFilePath(fileName).toUtf8().data();
+    GL_widget->SetObjectPath(fileNameChar);
 }

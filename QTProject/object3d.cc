@@ -134,7 +134,6 @@ _object3D::_object3D(const char *Filename)
         selectionPoints.push_back(QVector4D(r/254.0f, g/254.0f, b/254.0f, 1.0f));
     }
 
-
     for (size_t i= 0; i < Triangles.size(); i++)
     {
         Resolutions.push_back(4);
