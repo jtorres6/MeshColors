@@ -72,6 +72,7 @@ public:
     void AddCameraZoom(const float InValue);
 
     void SetObjectPath(const char* InNewPath);
+    void SetCurrentPaintingColor(const QColor& InNewColor);
 
 protected:
     void resizeGL(int Width1, int Height1) Q_DECL_OVERRIDE;

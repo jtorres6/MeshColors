@@ -1,6 +1,9 @@
-#version 450 core
+#version 460
+
 in vec4 next_color;
+out vec4 out_Color;
+
 void main(void)
 {
-    gl_FragColor = next_color;
+    out_Color = next_color;
 }

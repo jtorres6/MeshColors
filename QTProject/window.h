@@ -37,6 +37,7 @@ public:
 
 public slots:
     void OpenFileDialog();
+    void OpenColorDialog();
 
 private:
   _gl_widget *GL_widget;

@@ -26,6 +26,20 @@ typedef struct ssbo_data
     QVector4D Colors[9000][64];
 }ssbo_type;
 
+typedef struct face_data
+{
+    int FaceIndex;
+    QPair<int, bool> EdgeInfo[3];
+
+    face_data(int InFaceIndex, QPair<int, bool> (InEdgeInfo)[3])
+    {
+        FaceIndex = InFaceIndex;
+        EdgeInfo[0] = InEdgeInfo[0];
+        EdgeInfo[1] = InEdgeInfo[1];
+        EdgeInfo[2] = InEdgeInfo[2];
+    }
+};
+
 
 class _object3D:public _basic_object3D
 {
@@ -34,7 +48,7 @@ class _object3D:public _basic_object3D
     QVector<QVector3D> VerticesDrawArrays;
     QVector<QVector3D> MeshColorsData;
     QVector<QVector3D> Index;
-    QVector<QVector4D> PerFaceData;
+    QVector<face_data> PerFaceData;
     QVector<QVector4D> TriangleSelectionColors;
 
     QVector<int> Resolutions;

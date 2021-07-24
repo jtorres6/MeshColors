@@ -1,4 +1,5 @@
-#version 450 core
+#version 460
+
 layout(std430, binding = 3) buffer MeshColorsData
 {
     int Resolution[9000];
@@ -9,14 +10,14 @@ uniform bool ColorLerpEnabled;
 uniform bool LightingEnabled;
 uniform vec3 LightPos;
 
-flat in int Index[3];
-in vec4 next_color;
+layout(location = 0) flat in int Index[3];
+in vec4 fragment_Color;
 
 out vec4 out_Color;
 
 void main(void)
 {
-    vec4 color = next_color;
+    vec4 color = fragment_Color;
 
     const int SampleIndex = Index[0];
     int R = Resolution[SampleIndex];

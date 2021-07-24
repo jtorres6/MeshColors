@@ -29,21 +29,23 @@ void _object3D::ReadPlyFile(const char *Filename)
 
     int R = 4;
     int index = Vertices.size() - 1;
+    QPair<int, bool> EdgeInfo[3];
     for(int i = 0; i <= Positions.size()-3; i+=3)
     {
         Triangles.push_back(QVector3D(Positions[i],Positions[i+1],Positions[i+2]));
 
         // Colors per face:
         int faceindex = index;
-        //qDebug() << faceindex;
 
         index += ((R - 1) * (R - 2))/2;
         int edge1index = index;
+        bool IsInverted = false;
         QPair<int, int> pair = qMakePair(Positions[i],Positions[i+1]);
 
         if(pair.first > pair.second)
         {
             pair = qMakePair(pair.second, pair.first);
+            IsInverted = true;
         }
         if(EdgeIndexMap.contains(pair))
         {
@@ -53,6 +55,10 @@ void _object3D::ReadPlyFile(const char *Filename)
         {
             EdgeIndexMap.insert(pair, edge1index);
         }
+        EdgeInfo[0].first = edge1index;
+        EdgeInfo[0].second = IsInverted;
+
+        IsInverted = false;
 
         index += R-1;
         int edge2index = index;
@@ -61,6 +67,7 @@ void _object3D::ReadPlyFile(const char *Filename)
         if(pair.first > pair.second)
         {
             pair = qMakePair(pair.second, pair.first);
+            IsInverted = true;
         }
 
         if(EdgeIndexMap.contains(pair))
@@ -71,16 +78,22 @@ void _object3D::ReadPlyFile(const char *Filename)
         {
             EdgeIndexMap.insert(pair, edge2index);
         }
+        EdgeInfo[1].first = edge2index;
+        EdgeInfo[1].second = IsInverted;
+
+        IsInverted = false;
+
+        // Colors per edge (R-1)+1:
+        index += R-1;
+        int edge3index = index;
 
         pair =  qMakePair(Positions[i+2],Positions[i]);
         if(pair.first > pair.second)
         {
             pair = qMakePair(pair.second, pair.first);
+            IsInverted = true;
         }
 
-        // Colors per edge (R-1)+1:
-        index += R-1;
-        int edge3index = index;
         if(EdgeIndexMap.contains(pair))
         {
             edge3index = *EdgeIndexMap.find(pair);
@@ -89,9 +102,14 @@ void _object3D::ReadPlyFile(const char *Filename)
         {
             EdgeIndexMap.insert(pair, edge3index);
         }
+        EdgeInfo[2].first = edge3index;
+        EdgeInfo[2].second  = IsInverted;
+
+        IsInverted = false;
+
         index += R-1;
 
-        PerFaceData.push_back(QVector4D(faceindex, edge2index, edge3index, edge1index));
+        PerFaceData.push_back(face_data(faceindex, EdgeInfo));
     }
 }
 
@@ -182,19 +200,21 @@ void _object3D::UpdateMeshColorsArray(QVector<QVector4D> p)
         int faceIndexOffset = 0;
         int edgeIndexOffset = 0;
 
+        const int ColorsPerEdge = ((Resolutions[i] - 1) * (Resolutions[i] - 2))/2 - 1;
+
         // Cij => C0k, Ck0, Ck(R-k) => 0 < k < R
         for(int a = 1; a < Res; a++)
         {
-            ssbo->Colors[i][0 * (Res+1) + a]       = p[int(PerFaceData[i][1] + edgeIndexOffset)];
-            ssbo->Colors[i][a * (Res+1) + 0]       = p[int(PerFaceData[i][2] + edgeIndexOffset)];
-            ssbo->Colors[i][a * (Res+1) + (Res-a)] = p[int(PerFaceData[i][3] + edgeIndexOffset)];
+            ssbo->Colors[i][0 * (Res+1) + a]       = p[int(PerFaceData[i].EdgeInfo[1].first + (!PerFaceData[i].EdgeInfo[1].second ? ColorsPerEdge - edgeIndexOffset : edgeIndexOffset))];
+            ssbo->Colors[i][a * (Res+1) + 0]       = p[int(PerFaceData[i].EdgeInfo[2].first + (!PerFaceData[i].EdgeInfo[2].second ? ColorsPerEdge - edgeIndexOffset : edgeIndexOffset))];
+            ssbo->Colors[i][a * (Res+1) + (Res-a)] = p[int(PerFaceData[i].EdgeInfo[0].first + (!PerFaceData[i].EdgeInfo[0].second ? ColorsPerEdge - edgeIndexOffset : edgeIndexOffset))];
             edgeIndexOffset++;
 
             for(int j = 1; j < Res; j++)
             {
                 if(!(a + j == Res))
                 {
-                    ssbo->Colors[i][a * (Res + 1) + j] = p[int(PerFaceData[i][0] + faceIndexOffset)];
+                    ssbo->Colors[i][a * (Res + 1) + j] = p[int(PerFaceData[i].FaceIndex + faceIndexOffset)];
                     faceIndexOffset++;
                 }
             }
