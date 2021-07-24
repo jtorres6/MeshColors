@@ -74,6 +74,10 @@ public:
     void SetObjectPath(const char* InNewPath);
     void SetCurrentPaintingColor(const QColor& InNewColor);
 
+public slots:
+    void IncrementResolution();
+    void DecreaseResolution();
+
 protected:
     void resizeGL(int Width1, int Height1) Q_DECL_OVERRIDE;
     void paintGL() Q_DECL_OVERRIDE;

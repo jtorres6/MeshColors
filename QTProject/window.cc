@@ -72,6 +72,9 @@ _window::_window()
     GL_widget = new _gl_widget(this);
     GL_widget->setSizePolicy(Q);
 
+    connect(Increment_button, SIGNAL(pressed()), GL_widget, SLOT(IncrementResolution()));
+    connect(Decrease_button, SIGNAL(pressed()), GL_widget, SLOT(DecreaseResolution()));
+
     QHBoxLayout *Horizontal_frame = new QHBoxLayout();
     Horizontal_frame->setContentsMargins(1,1,1,1);
 

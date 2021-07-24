@@ -78,16 +78,6 @@ void _gl_widget::keyPressEvent(QKeyEvent *Keyevent)
       }
       break;
 
-  case Qt::Key_Minus:
-
-      if(SelectedTriangle >= 0 && object3d.Resolutions[SelectedTriangle] > 2)
-      {
-          object3d.Resolutions[SelectedTriangle] /= 2;
-          object3d.UpdateResolutionsArray(object3d.Resolutions);
-          UpdateSSBO(ssbo, sizeof(*object3d.ssbo), object3d.ssbo);
-      }
-      break;
-
   case Qt::Key_Semicolon:
       object3d.UpdateMeshColorsArray(object3d.points);
       UpdateSSBO(ssbo, sizeof(*object3d.ssbo), object3d.ssbo);
@@ -111,12 +101,12 @@ void _gl_widget::MoveCameraRightLeft(QPair<qint32, qint32> InUnits)
     update();
 }
 
-
 void _gl_widget::AddCameraZoom(const float InValue)
 {
     Observer_distance+=0.005f*InValue;
     update();
 }
+
 /*****************************************************************************//**
  * Limpiar ventana
  *
@@ -201,7 +191,6 @@ void _gl_widget::draw_objects()
     VAO->release();
     program->release();
 
-    // Draw wireframe
     program2->bind();
     VAO2->bind();
 
@@ -220,9 +209,10 @@ void _gl_widget::draw_objects()
 
     glLineWidth(1.0f);
 
+    matrixLocation = program2->uniformLocation("matrix");
+    program2->setUniformValue(matrixLocation, Projection);
     program2->setUniformValue("LineColor", QVector4D(0.0f, 0.5f, 1.0f, 1.0f));
     program2->setUniformValue("LineMode", false);
-    program2->setUniformValue(matrixLocation, Projection);
 
     glDrawArrays(GL_LINES, 0, Axis.Vertices.size());
 
@@ -237,18 +227,17 @@ void _gl_widget::DrawTrianglesSelectionMode()
     change_observer();
 
     program2->bind();
-    // Draw 3D model
-    VAO3->bind();
+    VAO2->bind();
 
-    int matrixLocation2 = program2->uniformLocation("matrix");
-    program2->setUniformValue(matrixLocation2, Projection);
+    int matrixLocation = program2->uniformLocation("matrix");
+    program2->setUniformValue(matrixLocation, Projection);
 
     program2->setUniformValue("LineColor", QVector4D(0.0f, 0.3f, 0.8f, 1.0f));
     program2->setUniformValue("LineMode", false);
 
     glDrawArrays(GL_TRIANGLES,0, object3d.VerticesDrawArrays.size());
 
-    VAO3->release();
+    VAO2->release();
     program2->release();
 }
 
@@ -341,7 +330,7 @@ void _gl_widget::initializeGL()
 
     program2 = new QOpenGLShaderProgram(context);
 
-    program2->addCacheableShaderFromSourceFile(QOpenGLShader::Vertex,  "../QTProject/BaseVertex.vsh");
+    program2->addCacheableShaderFromSourceFile(QOpenGLShader::Vertex,   "../QTProject/BaseVertex.vsh");
     program2->addCacheableShaderFromSourceFile(QOpenGLShader::Fragment, "../QTProject/BaseFragment.fsh");
     program2->link();
     program2->bind();
@@ -506,10 +495,9 @@ QOpenGLBuffer* _gl_widget::GenerateBuffer(const void *InData, int InCount)
     return Buffer;
 }
 
-
 void _gl_widget::UpdateSSBO(GLuint InSsbo, GLsizei InSize, void* InData)
 {
-    context->functions()->glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
+    context->functions()->glBindBuffer(GL_SHADER_STORAGE_BUFFER, InSsbo);
     context->functions()->glBufferData(GL_SHADER_STORAGE_BUFFER, InSize, InData, GL_DYNAMIC_DRAW); //sizeof(data) only works for statically sized C/C++ arrays.
     context->functions()->glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0); // unbind
 }
@@ -525,5 +513,27 @@ void _gl_widget::SetCurrentPaintingColor(const QColor &InNewColor)
     if(InNewColor.isValid())
     {
         CurrentPaintingColor = InNewColor;
+    }
+}
+
+void _gl_widget::IncrementResolution()
+{
+    if(SelectedTriangle >= 0 && object3d.Resolutions[SelectedTriangle] < 64)
+    {
+        object3d.Resolutions[SelectedTriangle] *= 2;
+        object3d.UpdateResolutionsArray(object3d.Resolutions);
+        UpdateSSBO(ssbo, sizeof(*object3d.ssbo), object3d.ssbo);
+        update();
+    }
+}
+
+void _gl_widget::DecreaseResolution()
+{
+    if(SelectedTriangle >= 0 && object3d.Resolutions[SelectedTriangle] > 2)
+    {
+        object3d.Resolutions[SelectedTriangle] /= 2;
+        object3d.UpdateResolutionsArray(object3d.Resolutions);
+        UpdateSSBO(ssbo, sizeof(*object3d.ssbo), object3d.ssbo);
+        update();
     }
 }
