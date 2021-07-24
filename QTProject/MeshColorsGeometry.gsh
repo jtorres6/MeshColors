@@ -6,7 +6,7 @@ layout (triangle_strip, max_vertices = 200) out;
 in int VertexIndex[];
 in vec4 geometry_Color[];
 
-layout(location = 0) flat out int Index[3];
+flat out int Index[3];
 out vec4 fragment_Color;
 
 void main(void)

@@ -103,7 +103,7 @@ private:
     _axis Axis;
     _object3D object3d;
 
-    const char* ModelFilePath = "Models/cube.ply";
+    const char* ModelFilePath = "../QTProject/Models/cube.ply";
 
     _gl_widget_ne::_object Object;
 

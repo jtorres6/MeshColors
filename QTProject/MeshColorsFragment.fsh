@@ -10,7 +10,7 @@ uniform bool ColorLerpEnabled;
 uniform bool LightingEnabled;
 uniform vec3 LightPos;
 
-layout(location = 0) flat in int Index[3];
+flat in int Index[3];
 in vec4 fragment_Color;
 
 out vec4 out_Color;

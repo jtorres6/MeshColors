@@ -301,9 +301,9 @@ void _gl_widget::initializeGL()
 
     program = new QOpenGLShaderProgram(context);
 
-    program->addCacheableShaderFromSourceFile(QOpenGLShader::Vertex, "MeshColorsVertex.vsh");
-    program->addCacheableShaderFromSourceFile(QOpenGLShader::Geometry, "MeshColorsGeometry.gsh");
-    program->addCacheableShaderFromSourceFile(QOpenGLShader::Fragment,"MeshColorsFragment.fsh");
+    program->addCacheableShaderFromSourceFile(QOpenGLShader::Vertex,   "../QTProject/MeshColorsVertex.vsh");
+    program->addCacheableShaderFromSourceFile(QOpenGLShader::Geometry, "../QTProject/MeshColorsGeometry.gsh");
+    program->addCacheableShaderFromSourceFile(QOpenGLShader::Fragment, "../QTProject/MeshColorsFragment.fsh");
     program->link();
     program->bind();
 
@@ -341,8 +341,8 @@ void _gl_widget::initializeGL()
 
     program2 = new QOpenGLShaderProgram(context);
 
-    program2->addCacheableShaderFromSourceFile(QOpenGLShader::Vertex, "BaseVertex.vsh");
-    program2->addCacheableShaderFromSourceFile(QOpenGLShader::Fragment,"BaseFragment.fsh");
+    program2->addCacheableShaderFromSourceFile(QOpenGLShader::Vertex,  "../QTProject/BaseVertex.vsh");
+    program2->addCacheableShaderFromSourceFile(QOpenGLShader::Fragment, "../QTProject/BaseFragment.fsh");
     program2->link();
     program2->bind();
 
