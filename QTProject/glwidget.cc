@@ -169,44 +169,50 @@ void _gl_widget::change_observer()
 
 void _gl_widget::draw_objects()
 {
-    program->bind();
-
     int matrixLocation = program->uniformLocation("matrix");
-    program->setUniformValue(matrixLocation, Projection);
 
-    // Draw 3D model
-    VAO->bind();
+    if(!TriangleSelectionMode)
+    {
+        program->bind();
 
-    program->setUniformValue("BaseRendering", false);
-    glLineWidth(2.0f);
+        program->setUniformValue(matrixLocation, Projection);
 
-    program->setUniformValue("ColorLerpEnabled", ColorLerpEnabled);
-    program->setUniformValue("LightPos", LightPosition);
-    program->setUniformValue("LightingEnabled", true);
-    context->extraFunctions()->glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, ssbo);
-    context->functions()->glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
-    glDrawArrays(GL_TRIANGLES,0, object3d.VerticesDrawArrays.size());
-    context->functions()->glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0); // unbind
+        // Draw 3D model
+        VAO->bind();
 
-    VAO->release();
-    program->release();
+        program->setUniformValue("BaseRendering", false);
+        glLineWidth(2.0f);
+
+        program->setUniformValue("ColorLerpEnabled", ColorLerpEnabled);
+        program->setUniformValue("LightPos", LightPosition);
+        program->setUniformValue("LightingEnabled", true);
+        context->extraFunctions()->glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, ssbo);
+        context->functions()->glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
+        glDrawArrays(GL_TRIANGLES, 0, object3d.VerticesDrawArrays.size());
+        context->functions()->glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0); // unbind
+
+        VAO->release();
+        program->release();
+    }
+    else
+    {
+        program2->bind();
+        VAO2->bind();
+
+        program2->setUniformValue("LineColor", QVector4D(0.0f, 0.5f, 1.0f, 1.0f));
+        program2->setUniformValue("LineMode", false);
+        program2->setUniformValue(matrixLocation, Projection);
+
+        glDrawArrays(GL_TRIANGLES, 0, object3d.VerticesDrawArrays.size());
+
+        VAO2->release();
+
+        // Draw axis
+        VAO3->bind();
+        program2->release();
+    }
 
     program2->bind();
-    VAO2->bind();
-
-    program2->setUniformValue("LineColor", QVector4D(0.0f, 0.5f, 1.0f, 1.0f));
-    program2->setUniformValue("LineMode", true);
-    program2->setUniformValue(matrixLocation, Projection);
-
-    glDrawArrays(GL_LINES, 0, object3d.VerticesDrawArrays.size());
-
-    VAO2->release();
-    program2->release();
-
-    // Draw wireframe
-    program2->bind();
-    VAO3->bind();
-
     glLineWidth(1.0f);
 
     matrixLocation = program2->uniformLocation("matrix");
@@ -217,6 +223,20 @@ void _gl_widget::draw_objects()
     glDrawArrays(GL_LINES, 0, Axis.Vertices.size());
 
     VAO3->release();
+
+    //VAO4->bind();
+    //
+    //glLineWidth(1.0f);
+    //
+    //matrixLocation = program2->uniformLocation("matrix");
+    //program2->setUniformValue(matrixLocation, Projection);
+    //program2->setUniformValue("LineColor", QVector4D(1.0f, 0.0f, 0.0f, 1.0f));
+    //program2->setUniformValue("LineMode", false);
+    //
+    //glDrawArrays(GL_TRIANGLES, 0, object3d.VerticesDrawArrays.size());
+    //glDrawArrays(GL_LINES, 0, 9);
+    //
+    //VAO4->release();
     program2->release();
 }
 
@@ -372,6 +392,25 @@ void _gl_widget::initializeGL()
     colorBuffer->release();
 
     VAO3->release();
+
+    // VAO 3
+    VAO4 = new QOpenGLVertexArrayObject();
+    VAO4->create();
+    VAO4->bind();
+
+    positionBuffer = GenerateBuffer(object3d.VerticesDrawArrays.data(), sizeof(QVector3D));
+    positionBuffer->bind();
+    program2->enableAttributeArray("vertex");
+    program2->setAttributeBuffer("vertex", GL_FLOAT, 0, 3);
+    positionBuffer->release();
+
+    colorBuffer = GenerateBuffer(object3d.TriangleSelectionColors.data(), sizeof(QVector4D));
+    colorBuffer->bind();
+    program2->enableAttributeArray("color");
+    program2->setAttributeBuffer("color", GL_FLOAT, 0, 4);
+    colorBuffer->release();
+
+    VAO4->release();
     program2->release();
 
     strm = glGetString(GL_VENDOR);
@@ -462,10 +501,6 @@ void _gl_widget::pick(int Selection_position_x, int Selection_position_y)
         uint G = ((Color & 0x0000FF00) >> 8);
         uint B = ((Color & 0x00FF0000) >> 16);
 
-        uint Selected_triangle= (R << 16) + (G << 8) + B;
-
-        if (Selected_triangle==16777215) Selected_triangle=-1;
-
         // Convert the color back to an integer ID
         uint pickedID =
             R +
@@ -476,8 +511,10 @@ void _gl_widget::pick(int Selection_position_x, int Selection_position_y)
         {
             SelectedTriangle = pickedID;
         }
+
         TriangleSelectionMode = false;
     }
+
     program->bind();
     program->setUniformValue("ColorLerpEnabled", ColorLerpEnabled);
     program->setUniformValue("LightingEnabled", true);
@@ -536,4 +573,9 @@ void _gl_widget::DecreaseResolution()
         UpdateSSBO(ssbo, sizeof(*object3d.ssbo), object3d.ssbo);
         update();
     }
+}
+
+void _gl_widget::EnableTriangleSelectionMode()
+{
+    TriangleSelectionMode = true;
 }

@@ -77,6 +77,7 @@ public:
 public slots:
     void IncrementResolution();
     void DecreaseResolution();
+    void EnableTriangleSelectionMode();
 
 protected:
     void resizeGL(int Width1, int Height1) Q_DECL_OVERRIDE;

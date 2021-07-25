@@ -51,9 +51,11 @@ _window::_window()
     Vertical_options->addStretch();
 
     QLabel *Label2 = new QLabel("Face resolution");
+    QPushButton *FaceSelection_button = new QPushButton("Enable face selection");
     QPushButton *Increment_button = new QPushButton("+");
     QPushButton *Decrease_button = new QPushButton("-");
     Vertical_options->addWidget(Label2);
+    Vertical_options->addWidget(FaceSelection_button);
     Vertical_options->addWidget(Increment_button);
     Vertical_options->addWidget(Decrease_button);
     Vertical_options->addStretch();
@@ -72,6 +74,7 @@ _window::_window()
     GL_widget = new _gl_widget(this);
     GL_widget->setSizePolicy(Q);
 
+    connect(FaceSelection_button, SIGNAL(pressed()), GL_widget, SLOT(EnableTriangleSelectionMode()));
     connect(Increment_button, SIGNAL(pressed()), GL_widget, SLOT(IncrementResolution()));
     connect(Decrease_button, SIGNAL(pressed()), GL_widget, SLOT(DecreaseResolution()));
 
