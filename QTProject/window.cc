@@ -149,12 +149,18 @@ void _window::mouseMoveEvent(QMouseEvent *e)
 
 void _window::mouseReleaseEvent(QMouseEvent *event)
 {
-    MousePressed = false;
+    if(event != nullptr)
+    {
+        MousePressed = false;
+    }
 }
 
 void _window::wheelEvent(QWheelEvent *event)
 {
-    GL_widget->AddCameraZoom(event->delta());
+    if(event != nullptr)
+    {
+        GL_widget->AddCameraZoom(event->angleDelta().y());
+    }
 }
 
 void _window::resizeEvent(QResizeEvent *event)

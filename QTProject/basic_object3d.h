@@ -11,7 +11,7 @@
 #define BASIC_OBJECT3D_H
 
 #include <vector>
-#if PLATFORM_WINDOWS
+#ifdef PLATFORM_WINDOWS
 #include "windows.h"
 #endif
 #include <GL/gl.h>

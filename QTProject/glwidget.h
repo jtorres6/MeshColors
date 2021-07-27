@@ -10,7 +10,7 @@
 #ifndef GLWIDGET_H
 #define GLWIDGET_H
 
-#if PLATFORM_WINDOWS
+#ifdef PLATFORM_WINDOWS
 #include "windows.h"
 #endif
 #include <GL/gl.h>

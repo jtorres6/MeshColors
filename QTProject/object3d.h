@@ -26,7 +26,7 @@ typedef struct ssbo_data
     QVector4D Colors[9000][64];
 }ssbo_type;
 
-typedef struct face_data
+struct face_data
 {
     int FaceIndex;
     QPair<int, bool> EdgeInfo[3];
@@ -39,7 +39,6 @@ typedef struct face_data
         EdgeInfo[2] = InEdgeInfo[2];
     }
 };
-
 
 class _object3D:public _basic_object3D
 {

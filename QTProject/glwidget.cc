@@ -65,6 +65,11 @@ void _gl_widget::keyPressEvent(QKeyEvent *Keyevent)
   {
         QColor NewColor = QColorDialog::getColor(Qt::yellow, this );
 
+        if(NewColor.isValid())
+        {
+            CurrentPaintingColor = NewColor;
+        }
+
         break;
   }
 
@@ -206,13 +211,13 @@ void _gl_widget::draw_objects()
         glDrawArrays(GL_TRIANGLES, 0, object3d.VerticesDrawArrays.size());
 
         VAO2->release();
-
-        // Draw axis
-        VAO3->bind();
         program2->release();
     }
 
     program2->bind();
+
+    // Draw axis
+    VAO3->bind();
     glLineWidth(1.0f);
 
     matrixLocation = program2->uniformLocation("matrix");
@@ -502,7 +507,7 @@ void _gl_widget::pick(int Selection_position_x, int Selection_position_y)
         uint B = ((Color & 0x00FF0000) >> 16);
 
         // Convert the color back to an integer ID
-        uint pickedID =
+        int pickedID =
             R +
             G * 256 +
             B * 256 * 256;
