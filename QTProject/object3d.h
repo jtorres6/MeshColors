@@ -19,11 +19,13 @@
  *
  *****************************************************************************/
 
+const int MAX_TRIANGLES = 9000;
+const int MAX_SAMPLES = 2000;
 
 typedef struct ssbo_data
 {
-    int Resolution[9000];
-    QVector4D Colors[9000][64];
+    int Resolution[MAX_TRIANGLES];
+    QVector4D Colors[MAX_TRIANGLES][MAX_SAMPLES];
 }ssbo_type;
 
 struct face_data
@@ -61,7 +63,7 @@ class _object3D:public _basic_object3D
 
     int SsboSize();
 
-    void UpdateMeshColorsArray(QVector<QVector4D> p);
+    void UpdateMeshColorsArray(const QVector<QVector4D>& InSamples);
     void UpdateResolutionsArray(const QVector<int>& InNewResolutions);
 
     bool TriangleSelectionMode = true;

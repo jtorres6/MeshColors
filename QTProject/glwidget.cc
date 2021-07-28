@@ -560,7 +560,7 @@ void _gl_widget::SetCurrentPaintingColor(const QColor &InNewColor)
 
 void _gl_widget::IncrementResolution()
 {
-    if(SelectedTriangle >= 0 && object3d.Resolutions[SelectedTriangle] < 64)
+    if(SelectedTriangle >= 0 && object3d.Resolutions[SelectedTriangle] < 32)
     {
         object3d.Resolutions[SelectedTriangle] *= 2;
         object3d.UpdateResolutionsArray(object3d.Resolutions);
