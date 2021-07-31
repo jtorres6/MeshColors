@@ -49,16 +49,27 @@ void _gl_widget::keyPressEvent(QKeyEvent *Keyevent)
   case Qt::Key_L:Draw_line=!Draw_line;break;
   case Qt::Key_F:Draw_fill=!Draw_fill;break;
 
-  case Qt::Key_Left:Observer_angle_y-=ANGLE_STEP;break;
-  case Qt::Key_Right:Observer_angle_y+=ANGLE_STEP;break;
-  case Qt::Key_Up:Observer_angle_x-=ANGLE_STEP;break;
-  case Qt::Key_Down:Observer_angle_x+=ANGLE_STEP;break;
-  case Qt::Key_PageUp:Observer_distance*=1.2;break;
-  case Qt::Key_PageDown:Observer_distance/=1.2;break;
+  //case Qt::Key_Left:Observer_angle_y-=ANGLE_STEP;break;
+  //case Qt::Key_Right:Observer_angle_y+=ANGLE_STEP;break;
+  //case Qt::Key_Up:Observer_angle_x-=ANGLE_STEP;break;
+  //case Qt::Key_Down:Observer_angle_x+=ANGLE_STEP;break;
+  //case Qt::Key_PageUp:Observer_distance*=1.2;break;
+  //case Qt::Key_PageDown:Observer_distance/=1.2;break
+
+  case Qt::Key_Left:Light_angle_y+=10.0f*ANGLE_STEP;break;
+  case Qt::Key_Right:Light_angle_y-=10.0f*ANGLE_STEP;break;
+  case Qt::Key_Up:Light_angle_x+=10.0f*ANGLE_STEP;break;
+  case Qt::Key_Down:Light_angle_x-=10.0f*ANGLE_STEP;break;
+  case Qt::Key_PageUp:Light_distance*=1.2;break;
+  case Qt::Key_PageDown:Light_distance/=1.2;break;
+
   case Qt::Key_V:ColorLerpEnabled=!ColorLerpEnabled;
       break;
 
   case Qt::Key_R:TriangleSelectionMode=!TriangleSelectionMode;
+      break;
+
+  case Qt::Key_M:LightingEnabled=!LightingEnabled;
       break;
 
   case Qt::Key_C:
@@ -149,6 +160,22 @@ void _gl_widget::change_projection()
     Projection*=Translation;
     Projection*=Rotation_x;
     Projection*=Rotation_y;
+
+    Projection_light  = QMatrix4x4();
+    Rotation_x_light  = QMatrix4x4();
+    Rotation_y_light  = QMatrix4x4();
+    Translation_light = QMatrix4x4();
+
+    Projection_light.frustum(X_MIN * AspectRatio, X_MAX * AspectRatio, Y_MIN, Y_MAX , FRONT_PLANE_PERSPECTIVE, BACK_PLANE_PERSPECTIVE);
+    Rotation_x_light.rotate(Light_angle_x, 1, 0, 0);
+    Rotation_y_light.rotate(Light_angle_y, 0, 1, 0);
+    Translation_light.translate(0, 0, -Light_distance);
+
+    Projection_light*=Translation_light;
+    Projection_light*=Rotation_x_light;
+    Projection_light*=Rotation_y_light;
+
+    LightPosition = QVector4D(1.0f,1.0f, 1.0f,1.0f) * Projection_light;
 }
 
 
@@ -188,9 +215,20 @@ void _gl_widget::draw_objects()
         program->setUniformValue("BaseRendering", false);
         glLineWidth(2.0f);
 
-        program->setUniformValue("ColorLerpEnabled", ColorLerpEnabled);
+
         program->setUniformValue("LightPos", LightPosition);
-        program->setUniformValue("LightingEnabled", true);
+
+        if(DrawingSamplesID)
+        {
+            program->setUniformValue("ColorLerpEnabled", false);
+            program->setUniformValue("LightingEnabled", false);
+        }
+        else
+        {
+            program->setUniformValue("ColorLerpEnabled", ColorLerpEnabled);
+            program->setUniformValue("LightingEnabled", LightingEnabled);
+        }
+
         context->extraFunctions()->glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, ssbo);
         context->functions()->glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
         glDrawArrays(GL_TRIANGLES, 0, object3d.VerticesDrawArrays.size());
@@ -307,6 +345,9 @@ void _gl_widget::initializeGL()
 {
     const GLubyte* strm;
     context = new QOpenGLContext(this);
+
+    //glEnable(GL_CULL_FACE);
+    //glCullFace(GL_FRONT);
 
     makeCurrent();
     Axis = _axis(1500.0f);
@@ -444,6 +485,10 @@ void _gl_widget::initializeGL()
     Observer_angle_y=0;
     Observer_distance=DEFAULT_DISTANCE;
 
+    Light_angle_x=0;
+    Light_angle_y=0;
+    Light_distance=DEFAULT_DISTANCE;
+
     Draw_point=false;
     Draw_line=true;
     Draw_fill=false;
@@ -459,6 +504,8 @@ void _gl_widget::pick(int Selection_position_x, int Selection_position_y)
 
     if(!TriangleSelectionMode)
     {
+        DrawingSamplesID = true;
+
         makeCurrent();
 
         object3d.UpdateMeshColorsArray(object3d.selectionPoints);
@@ -487,6 +534,7 @@ void _gl_widget::pick(int Selection_position_x, int Selection_position_y)
 
         object3d.UpdateMeshColorsArray(object3d.points);
         UpdateSSBO(ssbo, sizeof(*object3d.ssbo), object3d.ssbo);
+        DrawingSamplesID = false;
     }
     else
     {

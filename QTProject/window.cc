@@ -29,11 +29,9 @@
 
 _window::_window()
 {
-
     QSizePolicy Q(QSizePolicy::Expanding,QSizePolicy::Expanding);
 
     QWidget *Central_widget = new QWidget(this);
-
 
     QPalette Pal(palette());
     Pal.setColor(QPalette::Background, Qt::black);

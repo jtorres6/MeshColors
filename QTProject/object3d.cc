@@ -77,9 +77,9 @@ _object3D::_object3D(const char *Filename)
     {
         Resolutions.push_back(4);
 
-        VerticesDrawArrays[i*3]=Vertices[Triangles[i].x()];
+        VerticesDrawArrays[i*3]=Vertices[Triangles[i].z()];
         VerticesDrawArrays[i*3+1]=Vertices[Triangles[i].y()];
-        VerticesDrawArrays[i*3+2]=Vertices[Triangles[i].z()];
+        VerticesDrawArrays[i*3+2]=Vertices[Triangles[i].x()];
 
         Colors.push_back(QVector4D(1.0, 0.0, 0.0, 1.0));
         Colors.push_back(QVector4D(0.0, 1.0, 0.0, 1.0));
@@ -136,7 +136,7 @@ void _object3D::UpdateMeshColorsArray(const QVector<QVector4D>& InSamples)
 
         index += R-1;
         int edge2index = index;
-        pair =  qMakePair(Triangles[i].y(),Triangles[i].z());
+        pair = qMakePair(Triangles[i].y(),Triangles[i].z());
 
         EdgeIndexMap.insert(pair, edge2index);
         EdgeInfo[1].first = edge2index;
@@ -146,7 +146,7 @@ void _object3D::UpdateMeshColorsArray(const QVector<QVector4D>& InSamples)
         index += R-1;
         int edge3index = index;
 
-        pair =  qMakePair(Triangles[i].z(),Triangles[i].x());
+        pair = qMakePair(Triangles[i].z(),Triangles[i].x());
 
         EdgeIndexMap.insert(pair, edge3index);
         EdgeInfo[2].first = edge3index;
@@ -154,9 +154,11 @@ void _object3D::UpdateMeshColorsArray(const QVector<QVector4D>& InSamples)
 
         index = faceindex + MAX_SAMPLES;
 
-        qDebug() << i << faceindex << EdgeInfo[0].first << EdgeInfo[1].first << EdgeInfo[2].first;
-
         PerFaceData.push_back(face_data(faceindex, EdgeInfo));
+
+        const QVector3D& CrossProduct = QVector3D::crossProduct(Vertices[int(Triangles[i].y())] - Vertices[int(Triangles[i].z())], Vertices[int(Triangles[i].x())] - Vertices[int(Triangles[i].z())]);
+
+        ssbo->Normals[i] = QVector4D(CrossProduct.normalized(),1.0f);
     }
 
     for(int i = 0; i < Triangles.size(); i++)

@@ -25,6 +25,7 @@ const int MAX_SAMPLES = 2000;
 typedef struct ssbo_data
 {
     int Resolution[MAX_TRIANGLES];
+    QVector4D Normals[MAX_TRIANGLES];
     QVector4D Colors[MAX_TRIANGLES][MAX_SAMPLES];
 }ssbo_type;
 

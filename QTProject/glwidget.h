@@ -105,6 +105,11 @@ private:
     QMatrix4x4 Rotation_y;
     QMatrix4x4 Translation;
 
+    QMatrix4x4 Projection_light;
+    QMatrix4x4 Rotation_x_light;
+    QMatrix4x4 Rotation_y_light;
+    QMatrix4x4 Translation_light;
+
     _axis Axis;
     _object3D object3d;
 
@@ -120,8 +125,15 @@ private:
     float Observer_angle_y = 0;
     float Observer_distance = 1;
 
+    float Light_angle_x = 0;
+    float Light_angle_y = 0;
+    float Light_distance = 1;
+
     bool TriangleSelectionMode = false;
     bool ColorLerpEnabled = false;
+
+    bool LightingEnabled = true;
+    bool DrawingSamplesID = false;
 
     int SelectedTriangle = -1;
 
@@ -133,7 +145,7 @@ private:
 
     QColor CurrentPaintingColor = QColor(1.0f, 0.0f, 0.0f, 1.0f);
 
-    QVector3D LightPosition = QVector3D(10.0f, 1.0f, 100.0f);
+    QVector4D LightPosition = QVector4D(0.0f, 0.0f, 0.0f, 0.0f);
 };
 
 #endif
