@@ -74,6 +74,8 @@ public:
     void SetObjectPath(const char* InNewPath);
     void SetCurrentPaintingColor(const QColor& InNewColor);
 
+    void InitializeBuffer(void* InData, const int InSize, const char* InName, const GLenum InType, const int InOffset, const int InStride);
+
 public slots:
     void IncrementResolution();
     void DecreaseResolution();
@@ -89,6 +91,10 @@ protected:
     QOpenGLBuffer* GenerateBuffer(const void *data, int count);
 
     void UpdateSSBO(GLuint InSsbo, GLsizei InSize, void* InData);
+
+    void LoadProgram();
+    void CreateBuffers();
+    void LogGlInfo();
 
 private:
     _window *Window;
@@ -114,12 +120,6 @@ private:
     _object3D object3d;
 
     const char* ModelFilePath = "../QTProject/Models/cube.ply";
-
-    _gl_widget_ne::_object Object;
-
-    bool Draw_point;
-    bool Draw_line;
-    bool Draw_fill;
 
     float Observer_angle_x = 0;
     float Observer_angle_y = 0;

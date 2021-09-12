@@ -41,21 +41,6 @@ _gl_widget::_gl_widget(_window *Window1):Window(Window1)
 void _gl_widget::keyPressEvent(QKeyEvent *Keyevent)
 {
   switch(Keyevent->key()){
-  case Qt::Key_1:Object=OBJECT_TETRAHEDRON;break;
-  case Qt::Key_2:Object=OBJECT_CUBE;break;
-  case Qt::Key_3:Object=OBJECT_MESHCOLORS;break;
-
-  case Qt::Key_P:Draw_point=!Draw_point;break;
-  case Qt::Key_L:Draw_line=!Draw_line;break;
-  case Qt::Key_F:Draw_fill=!Draw_fill;break;
-
-  //case Qt::Key_Left:Observer_angle_y-=ANGLE_STEP;break;
-  //case Qt::Key_Right:Observer_angle_y+=ANGLE_STEP;break;
-  //case Qt::Key_Up:Observer_angle_x-=ANGLE_STEP;break;
-  //case Qt::Key_Down:Observer_angle_x+=ANGLE_STEP;break;
-  //case Qt::Key_PageUp:Observer_distance*=1.2;break;
-  //case Qt::Key_PageDown:Observer_distance/=1.2;break
-
   case Qt::Key_Left:Light_angle_y+=10.0f*ANGLE_STEP;break;
   case Qt::Key_Right:Light_angle_y-=10.0f*ANGLE_STEP;break;
   case Qt::Key_Up:Light_angle_x+=10.0f*ANGLE_STEP;break;
@@ -95,11 +80,15 @@ void _gl_widget::keyPressEvent(QKeyEvent *Keyevent)
       break;
 
   case Qt::Key_Semicolon:
+      DrawingSamplesID = false;
+
+      // TO-DO: This can be One method.
       object3d.UpdateMeshColorsArray(object3d.points);
       UpdateSSBO(ssbo, sizeof(*object3d.ssbo), object3d.ssbo);
       break;
 
   case Qt::Key_Comma:
+      DrawingSamplesID = true;
       object3d.UpdateMeshColorsArray(object3d.selectionPoints);
       UpdateSSBO(ssbo, sizeof(*object3d.ssbo), object3d.ssbo);
       break;
@@ -160,22 +149,6 @@ void _gl_widget::change_projection()
     Projection*=Translation;
     Projection*=Rotation_x;
     Projection*=Rotation_y;
-
-    Projection_light  = QMatrix4x4();
-    Rotation_x_light  = QMatrix4x4();
-    Rotation_y_light  = QMatrix4x4();
-    Translation_light = QMatrix4x4();
-
-    Projection_light.frustum(X_MIN * AspectRatio, X_MAX * AspectRatio, Y_MIN, Y_MAX , FRONT_PLANE_PERSPECTIVE, BACK_PLANE_PERSPECTIVE);
-    Rotation_x_light.rotate(Light_angle_x, 1, 0, 0);
-    Rotation_y_light.rotate(Light_angle_y, 0, 1, 0);
-    Translation_light.translate(0, 0, -Light_distance);
-
-    Projection_light*=Translation_light;
-    Projection_light*=Rotation_x_light;
-    Projection_light*=Rotation_y_light;
-
-    LightPosition = QVector4D(1.0f,1.0f, 1.0f,1.0f) * Projection_light;
 }
 
 
@@ -189,6 +162,22 @@ void _gl_widget::change_projection()
 
 void _gl_widget::change_observer()
 {
+    Projection_light  = QMatrix4x4();
+    Rotation_x_light  = QMatrix4x4();
+    Rotation_y_light  = QMatrix4x4();
+    Translation_light = QMatrix4x4();
+
+    const float AspectRatio = GLfloat(width()) / GLfloat(height());
+    Projection_light.frustum(X_MIN * AspectRatio, X_MAX * AspectRatio, Y_MIN, Y_MAX , FRONT_PLANE_PERSPECTIVE, BACK_PLANE_PERSPECTIVE);
+    Rotation_x_light.rotate(Light_angle_x, 1, 0, 0);
+    Rotation_y_light.rotate(Light_angle_y, 0, 1, 0);
+    Translation_light.translate(0, 0, -Light_distance);
+
+    Projection_light*=Translation_light;
+    Projection_light*=Rotation_x_light;
+    Projection_light*=Rotation_y_light;
+
+    LightPosition = QVector4D(1.0f,1.0f, 1.0f,1.0f) * Projection_light;
 }
 
 
@@ -215,19 +204,10 @@ void _gl_widget::draw_objects()
         program->setUniformValue("BaseRendering", false);
         glLineWidth(2.0f);
 
-
         program->setUniformValue("LightPos", LightPosition);
 
-        if(DrawingSamplesID)
-        {
-            program->setUniformValue("ColorLerpEnabled", false);
-            program->setUniformValue("LightingEnabled", false);
-        }
-        else
-        {
-            program->setUniformValue("ColorLerpEnabled", ColorLerpEnabled);
-            program->setUniformValue("LightingEnabled", LightingEnabled);
-        }
+        program->setUniformValue("ColorLerpEnabled", !DrawingSamplesID && ColorLerpEnabled);
+        program->setUniformValue("LightingEnabled", !DrawingSamplesID &&LightingEnabled);
 
         context->extraFunctions()->glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, ssbo);
         context->functions()->glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
@@ -343,9 +323,6 @@ void _gl_widget::resizeGL(int Width1, int Height1)
 
 void _gl_widget::initializeGL()
 {
-    const GLubyte* strm;
-    context = new QOpenGLContext(this);
-
     //glEnable(GL_CULL_FACE);
     //glCullFace(GL_FRONT);
 
@@ -354,129 +331,11 @@ void _gl_widget::initializeGL()
 
     object3d = _object3D(ModelFilePath);
 
-    program = new QOpenGLShaderProgram(context);
+    LoadProgram();
 
-    program->addCacheableShaderFromSourceFile(QOpenGLShader::Vertex,   "../QTProject/MeshColorsVertex.vsh");
-    program->addCacheableShaderFromSourceFile(QOpenGLShader::Geometry, "../QTProject/MeshColorsGeometry.gsh");
-    program->addCacheableShaderFromSourceFile(QOpenGLShader::Fragment, "../QTProject/MeshColorsFragment.fsh");
-    program->link();
-    program->bind();
+    CreateBuffers();
 
-    // VAO 2
-    VAO = new QOpenGLVertexArrayObject();
-    VAO->create();
-    VAO->bind();
-
-    QOpenGLBuffer *positionBuffer = GenerateBuffer(object3d.VerticesDrawArrays.data(), object3d.VerticesDrawArrays.size() * sizeof(QVector3D));
-    positionBuffer->bind();
-    program->enableAttributeArray("vertex");
-    program->setAttributeBuffer("vertex", GL_FLOAT, 0, 3);
-    positionBuffer->release();
-
-    QOpenGLBuffer *colorBuffer = GenerateBuffer(object3d.Colors.data(), object3d.Colors.size() * sizeof(QVector4D));
-    colorBuffer->bind();
-    program->enableAttributeArray("color");
-    program->setAttributeBuffer("color", GL_FLOAT, 0, 4);
-    colorBuffer->release();
-
-    QOpenGLBuffer *VertexIndexBuffer = GenerateBuffer(object3d.Index.data(), object3d.Index.size() * sizeof(QVector3D));
-    VertexIndexBuffer->bind();
-    program->enableAttributeArray("indexes");
-    program->setAttributeBuffer("indexes", GL_FLOAT, 0, 3);
-    VertexIndexBuffer->release();
-
-    program->setUniformValue("ColorLerpEnabled", ColorLerpEnabled);
-
-    context->functions()->glGenBuffers(1, &ssbo);
-
-    UpdateSSBO(ssbo, sizeof(*object3d.ssbo), object3d.ssbo);
-
-    VAO->release();
-    program->release();
-
-    program2 = new QOpenGLShaderProgram(context);
-
-    program2->addCacheableShaderFromSourceFile(QOpenGLShader::Vertex,   "../QTProject/BaseVertex.vsh");
-    program2->addCacheableShaderFromSourceFile(QOpenGLShader::Fragment, "../QTProject/BaseFragment.fsh");
-    program2->link();
-    program2->bind();
-
-    // VAO 3
-    VAO2 = new QOpenGLVertexArrayObject();
-    VAO2->create();
-    VAO2->bind();
-
-    positionBuffer = GenerateBuffer(object3d.VerticesDrawArrays.data(), object3d.VerticesDrawArrays.size() * sizeof(QVector3D));
-    positionBuffer->bind();
-    program2->enableAttributeArray("vertex");
-    program2->setAttributeBuffer("vertex", GL_FLOAT, 0, 3);
-    positionBuffer->release();
-
-    colorBuffer = GenerateBuffer(object3d.TriangleSelectionColors.data(), object3d.TriangleSelectionColors.size() * sizeof(QVector4D));
-    colorBuffer->bind();
-    program2->enableAttributeArray("color");
-    program2->setAttributeBuffer("color", GL_FLOAT, 0, 4);
-    colorBuffer->release();
-
-    VAO2->release();
-
-    // VAO 4
-    VAO3 = new QOpenGLVertexArrayObject();
-    VAO3->create();
-    VAO3->bind();
-
-    positionBuffer = GenerateBuffer(Axis.Vertices.data(), Axis.Vertices.size() * sizeof(QVector3D));
-    positionBuffer->bind();
-    program2->enableAttributeArray("vertex");
-    program2->setAttributeBuffer("vertex", GL_FLOAT, 0, 3);
-    positionBuffer->release();
-
-    colorBuffer = GenerateBuffer(Axis.Colors.data(), Axis.Colors.size() * sizeof(QVector4D));
-    colorBuffer->bind();
-    program2->enableAttributeArray("color");
-    program2->setAttributeBuffer("color", GL_FLOAT, 0, 4);
-    colorBuffer->release();
-
-    VAO3->release();
-
-    // VAO 3
-    VAO4 = new QOpenGLVertexArrayObject();
-    VAO4->create();
-    VAO4->bind();
-
-    positionBuffer = GenerateBuffer(object3d.VerticesDrawArrays.data(), sizeof(QVector3D));
-    positionBuffer->bind();
-    program2->enableAttributeArray("vertex");
-    program2->setAttributeBuffer("vertex", GL_FLOAT, 0, 3);
-    positionBuffer->release();
-
-    colorBuffer = GenerateBuffer(object3d.TriangleSelectionColors.data(), sizeof(QVector4D));
-    colorBuffer->bind();
-    program2->enableAttributeArray("color");
-    program2->setAttributeBuffer("color", GL_FLOAT, 0, 4);
-    colorBuffer->release();
-
-    VAO4->release();
-    program2->release();
-
-    strm = glGetString(GL_VENDOR);
-    std::cerr << "Vendor: " << strm << "\n";
-    strm = glGetString(GL_RENDERER);
-    std::cerr << "Renderer: " << strm << "\n";
-    strm = glGetString(GL_VERSION);
-    std::cerr << "OpenGL Version: " << strm << "\n";
-
-    if (strm[0] == '1'){
-        std::cerr << "Only OpenGL 1.X supported!\n";
-        exit(-1);
-    }
-
-    strm = glGetString(GL_SHADING_LANGUAGE_VERSION);
-    std::cerr << "GLSL Version: " << strm << "\n";
-
-    int Max_texture_size=0;
-    glGetIntegerv(GL_MAX_TEXTURE_SIZE, &Max_texture_size);
-    std::cerr << "Max texture size: " << Max_texture_size << "\n";
+    LogGlInfo();
 
     glClearColor(1.0,1.0,1.0,1.0);
     glEnable(GL_DEPTH_TEST);
@@ -488,10 +347,6 @@ void _gl_widget::initializeGL()
     Light_angle_x=0;
     Light_angle_y=0;
     Light_distance=DEFAULT_DISTANCE;
-
-    Draw_point=false;
-    Draw_line=true;
-    Draw_fill=false;
 }
 
 
@@ -577,11 +432,13 @@ void _gl_widget::pick(int Selection_position_x, int Selection_position_y)
 QOpenGLBuffer* _gl_widget::GenerateBuffer(const void *InData, int InCount)
 {
     QOpenGLBuffer* Buffer = new QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
+
     Buffer->create();
     Buffer->setUsagePattern(QOpenGLBuffer::StaticDraw);
     Buffer->bind();
     Buffer->allocate(InData, InCount);
     Buffer->release();
+
     return Buffer;
 }
 
@@ -631,4 +488,108 @@ void _gl_widget::DecreaseResolution()
 void _gl_widget::EnableTriangleSelectionMode()
 {
     TriangleSelectionMode = true;
+}
+
+void _gl_widget::LoadProgram()
+{
+    context = new QOpenGLContext(this);
+    program = new QOpenGLShaderProgram(context);
+
+    program->addCacheableShaderFromSourceFile(QOpenGLShader::Vertex,   "../QTProject/MeshColorsVertex.vsh");
+    program->addCacheableShaderFromSourceFile(QOpenGLShader::Geometry, "../QTProject/MeshColorsGeometry.gsh");
+    program->addCacheableShaderFromSourceFile(QOpenGLShader::Fragment, "../QTProject/MeshColorsFragment.fsh");
+    program->link();
+}
+
+void _gl_widget::CreateBuffers()
+{
+    program->bind();
+
+    // VAO 2
+    VAO = new QOpenGLVertexArrayObject();
+    VAO->create();
+    VAO->bind();
+
+    InitializeBuffer(object3d.VerticesDrawArrays.data(), object3d.VerticesDrawArrays.size() * sizeof(QVector3D),"vertex", GL_FLOAT, 0, 3);
+    InitializeBuffer(object3d.Colors.data(), object3d.Colors.size() * sizeof(QVector4D), "color", GL_FLOAT, 0, 4);
+    InitializeBuffer(object3d.Index.data(), object3d.Index.size() * sizeof(QVector3D), "indexes", GL_FLOAT, 0, 3);
+
+    program->setUniformValue("ColorLerpEnabled", ColorLerpEnabled);
+
+    context->functions()->glGenBuffers(1, &ssbo);
+
+    UpdateSSBO(ssbo, sizeof(*object3d.ssbo), object3d.ssbo);
+
+    VAO->release();
+    program->release();
+
+    program2 = new QOpenGLShaderProgram(context);
+
+    program2->addCacheableShaderFromSourceFile(QOpenGLShader::Vertex,   "../QTProject/BaseVertex.vsh");
+    program2->addCacheableShaderFromSourceFile(QOpenGLShader::Fragment, "../QTProject/BaseFragment.fsh");
+    program2->link();
+    program2->bind();
+
+    // VAO 3
+    VAO2 = new QOpenGLVertexArrayObject();
+    VAO2->create();
+    VAO2->bind();
+
+    InitializeBuffer(object3d.VerticesDrawArrays.data(), object3d.VerticesDrawArrays.size() * sizeof(QVector3D),"vertex", GL_FLOAT, 0, 3);
+    InitializeBuffer(object3d.Colors.data(), object3d.Colors.size() * sizeof(QVector4D), "color", GL_FLOAT, 0, 4);
+
+    VAO2->release();
+
+    // VAO 4
+    VAO3 = new QOpenGLVertexArrayObject();
+    VAO3->create();
+    VAO3->bind();
+
+    InitializeBuffer(object3d.VerticesDrawArrays.data(), object3d.VerticesDrawArrays.size() * sizeof(QVector3D),"vertex", GL_FLOAT, 0, 3);
+    InitializeBuffer(object3d.Colors.data(), object3d.Colors.size() * sizeof(QVector4D), "color", GL_FLOAT, 0, 4);
+
+    VAO3->release();
+
+    // VAO 3
+    VAO4 = new QOpenGLVertexArrayObject();
+    VAO4->create();
+    VAO4->bind();
+
+    InitializeBuffer(object3d.VerticesDrawArrays.data(), object3d.VerticesDrawArrays.size() * sizeof(QVector3D),"vertex", GL_FLOAT, 0, 3);
+    InitializeBuffer(object3d.Colors.data(), object3d.Colors.size() * sizeof(QVector4D), "color", GL_FLOAT, 0, 4);
+
+    VAO4->release();
+    program2->release();
+}
+
+void _gl_widget::LogGlInfo()
+{
+    const GLubyte* strm;
+    strm = glGetString(GL_VENDOR);
+    std::cerr << "Vendor: " << strm << "\n";
+    strm = glGetString(GL_RENDERER);
+    std::cerr << "Renderer: " << strm << "\n";
+    strm = glGetString(GL_VERSION);
+    std::cerr << "OpenGL Version: " << strm << "\n";
+
+    if (strm[0] == '1'){
+        std::cerr << "Only OpenGL 1.X supported!\n";
+        exit(-1);
+    }
+
+    strm = glGetString(GL_SHADING_LANGUAGE_VERSION);
+    std::cerr << "GLSL Version: " << strm << "\n";
+
+    int Max_texture_size=0;
+    glGetIntegerv(GL_MAX_TEXTURE_SIZE, &Max_texture_size);
+    std::cerr << "Max texture size: " << Max_texture_size << "\n";
+}
+
+void _gl_widget::InitializeBuffer(void* InData, const int InSize, const char* InName, const GLenum InType, const int InOffset, const int InStride)
+{
+    QOpenGLBuffer *positionBuffer = GenerateBuffer(InData, InSize);
+    positionBuffer->bind();
+    program->enableAttributeArray(InName);
+    program->setAttributeBuffer(InName, InType, InOffset, InStride);
+    positionBuffer->release();
 }
