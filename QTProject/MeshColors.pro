@@ -29,7 +29,7 @@ win32 {
 }
 
 unix {
-   LIBS += -L/usr/X11R6/lib64 -lopengl32 -lglu32
+   LIBS += opengl
 }
 
 CONFIG += c++11 --stack 40000
