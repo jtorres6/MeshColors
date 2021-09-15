@@ -29,7 +29,7 @@ win32 {
 }
 
 unix {
-   LIBS += opengl
+   QT += opengl
 }
 
 CONFIG += c++11 --stack 40000
