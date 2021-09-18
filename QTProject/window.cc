@@ -17,6 +17,7 @@
 #include <QColorDialog>
 #include <QSpinBox>
 #include <QGLFormat>
+#include <debugtools.h>
 
 #include "window.h"
 #include "glwidget.h"

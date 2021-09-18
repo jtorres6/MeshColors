@@ -12,6 +12,7 @@
 #include <QColor>
 #include <QOpenGLTexture>
 #include <QColorDialog>
+#include <debugtools.h>
 
 using namespace std;
 using namespace _gl_widget_ne;
@@ -368,6 +369,10 @@ void _gl_widget::pick(int Selection_position_x, int Selection_position_y)
         if(pickedID != -1 && pickedID < object3d.points.size())
         {
             object3d.points[pickedID] = QVector4D(CurrentPaintingColor.red()/255.0f, CurrentPaintingColor.green()/255.0f, CurrentPaintingColor.blue()/255.0f, CurrentPaintingColor.alpha()/255.0f);
+
+            DebugTools::DrawDebugString(Window, "Selected index-->" + QString::number(pickedID),
+                            15, 0, 500, 100,
+                            "QLabel { color : red; }");
         }
 
         object3d.UpdateMeshColorsArray(object3d.points);

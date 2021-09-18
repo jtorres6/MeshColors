@@ -95,9 +95,10 @@ protected:
     void LoadProgram();
     void CreateBuffers();
     void LogGlInfo();
+public:
+    _window *Window;
 
 private:
-    _window *Window;
 
     QOpenGLShaderProgram* program;
     QOpenGLShaderProgram* program2;

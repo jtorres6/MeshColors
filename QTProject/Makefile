@@ -273,6 +273,7 @@ Makefile: MeshColors.pro ../../../Qt/5.15.1/mingw81_64/mkspecs/win32-g++/qmake.c
 		../../../Qt/5.15.1/mingw81_64/mkspecs/features/yacc.prf \
 		../../../Qt/5.15.1/mingw81_64/mkspecs/features/lex.prf \
 		MeshColors.pro \
+		../../../Qt/5.15.1/mingw81_64/lib/Qt5OpenGL.prl \
 		../../../Qt/5.15.1/mingw81_64/lib/Qt5Widgets.prl \
 		../../../Qt/5.15.1/mingw81_64/lib/Qt5Gui.prl \
 		../../../Qt/5.15.1/mingw81_64/lib/Qt5Core.prl \
@@ -482,6 +483,7 @@ Makefile: MeshColors.pro ../../../Qt/5.15.1/mingw81_64/mkspecs/win32-g++/qmake.c
 ../../../Qt/5.15.1/mingw81_64/mkspecs/features/yacc.prf:
 ../../../Qt/5.15.1/mingw81_64/mkspecs/features/lex.prf:
 MeshColors.pro:
+../../../Qt/5.15.1/mingw81_64/lib/Qt5OpenGL.prl:
 ../../../Qt/5.15.1/mingw81_64/lib/Qt5Widgets.prl:
 ../../../Qt/5.15.1/mingw81_64/lib/Qt5Gui.prl:
 ../../../Qt/5.15.1/mingw81_64/lib/Qt5Core.prl:
