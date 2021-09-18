@@ -16,6 +16,7 @@
 #include <QLabel>
 #include <QColorDialog>
 #include <QSpinBox>
+#include <QGLFormat>
 
 #include "window.h"
 #include "glwidget.h"
@@ -68,6 +69,12 @@ _window::_window()
     Framed_widget->setSizePolicy(Q);
     Framed_widget->setFrameStyle(QFrame::Panel);
     Framed_widget->setLineWidth(3);
+
+    // That is, no old-school fixed pipeline functionality
+    QGLFormat glFormat;
+    glFormat.setVersion( 3, 3 );
+    glFormat.setProfile( QGLFormat::CoreProfile ); // Requires >=Qt-4.8.0
+    glFormat.setSampleBuffers( true );
 
     GL_widget = new _gl_widget(this);
     GL_widget->setSizePolicy(Q);

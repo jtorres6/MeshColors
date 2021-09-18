@@ -246,20 +246,6 @@ void _gl_widget::draw_objects()
     glDrawArrays(GL_LINES, 0, Axis.Vertices.size());
 
     VAO3->release();
-
-    //VAO4->bind();
-    //
-    //glLineWidth(1.0f);
-    //
-    //matrixLocation = program2->uniformLocation("matrix");
-    //program2->setUniformValue(matrixLocation, Projection);
-    //program2->setUniformValue("LineColor", QVector4D(1.0f, 0.0f, 0.0f, 1.0f));
-    //program2->setUniformValue("LineMode", false);
-    //
-    //glDrawArrays(GL_TRIANGLES, 0, object3d.VerticesDrawArrays.size());
-    //glDrawArrays(GL_LINES, 0, 9);
-    //
-    //VAO4->release();
     program2->release();
 }
 
@@ -323,9 +309,6 @@ void _gl_widget::resizeGL(int Width1, int Height1)
 
 void _gl_widget::initializeGL()
 {
-    //glEnable(GL_CULL_FACE);
-    //glCullFace(GL_FRONT);
-
     makeCurrent();
     Axis = _axis(1500.0f);
 
