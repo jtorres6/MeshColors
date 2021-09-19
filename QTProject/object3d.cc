@@ -165,9 +165,9 @@ void _object3D::UpdateMeshColorsArray(const QVector<QVector4D>& InSamples)
     {
         int Res = ssbo->Resolution[i];
 
-        ssbo->Colors[i][Res * (Res + 1) + 0] = InSamples[int(Triangles[1].x())];
-        ssbo->Colors[i][Res]                 = InSamples[int(Triangles[1].y())];
-        ssbo->Colors[i][0]                   = InSamples[int(Triangles[1].z())];
+        ssbo->Colors[i][Res * (Res + 1) + 0] = InSamples[int(Triangles[i].x())];
+        ssbo->Colors[i][Res]                 = InSamples[int(Triangles[i].y())];
+        ssbo->Colors[i][0]                   = InSamples[int(Triangles[i].z())];
 
         int faceIndexOffset = 0;
         int edgeIndexOffset = 0;
@@ -175,9 +175,13 @@ void _object3D::UpdateMeshColorsArray(const QVector<QVector4D>& InSamples)
         // Cij => C0k, Ck0, Ck(R-k) => 0 < k < R
         for(int a = 1; a < Res; a++)
         {
-            ssbo->Colors[i][a * (Res+1) + (Res-a)] = InSamples[int(PerFaceData[1].EdgeInfo[0].first + edgeIndexOffset)];
-            ssbo->Colors[i][0 * (Res+1) + a]       = InSamples[int(PerFaceData[1].EdgeInfo[1].first + edgeIndexOffset)];
-            ssbo->Colors[i][a * (Res+1) + 0]       = InSamples[int(PerFaceData[1].EdgeInfo[2].first + edgeIndexOffset)];
+            int i1 = int(PerFaceData[i].EdgeInfo[0].first);
+            int i2 = int(PerFaceData[i].EdgeInfo[1].first);
+            int i3 = int(PerFaceData[i].EdgeInfo[2].first);
+
+            ssbo->Colors[i][a * (Res+1) + (Res-a)] = InSamples[int(i1 + edgeIndexOffset)];
+            ssbo->Colors[i][0 * (Res+1) + a]       = InSamples[int(i2 + edgeIndexOffset)];
+            ssbo->Colors[i][a * (Res+1) + 0]       = InSamples[int(i3 + edgeIndexOffset)];
 
             edgeIndexOffset++;
 
@@ -185,7 +189,7 @@ void _object3D::UpdateMeshColorsArray(const QVector<QVector4D>& InSamples)
             {
                 if(!(a + j == Res))
                 {
-                    ssbo->Colors[i][a * (Res + 1) + j] = InSamples[int(PerFaceData[1].FaceIndex + faceIndexOffset)];
+                    ssbo->Colors[i][a * (Res + 1) + j] = InSamples[int(PerFaceData[i].FaceIndex + faceIndexOffset)];
                     faceIndexOffset++;
                 }
             }

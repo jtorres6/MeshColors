@@ -74,7 +74,7 @@ public:
     void SetObjectPath(const char* InNewPath);
     void SetCurrentPaintingColor(const QColor& InNewColor);
 
-    void InitializeBuffer(void* InData, const int InSize, const char* InName, const GLenum InType, const int InOffset, const int InStride);
+    void InitializeBuffer(QOpenGLShaderProgram* InShader, void* InData, const int InSize, const char* InName, const GLenum InType, const int InOffset, const int InStride);
 
 public slots:
     void IncrementResolution();

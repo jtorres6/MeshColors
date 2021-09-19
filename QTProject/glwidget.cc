@@ -223,11 +223,13 @@ void _gl_widget::draw_objects()
         program2->bind();
         VAO2->bind();
 
-        program2->setUniformValue("LineColor", QVector4D(0.0f, 0.5f, 1.0f, 1.0f));
-        program2->setUniformValue("LineMode", false);
+        int matrixLocation = program2->uniformLocation("matrix");
         program2->setUniformValue(matrixLocation, Projection);
 
-        glDrawArrays(GL_TRIANGLES, 0, object3d.VerticesDrawArrays.size());
+        program2->setUniformValue("LineColor", QVector4D(0.0f, 0.3f, 0.8f, 1.0f));
+        program2->setUniformValue("LineMode", false);
+
+        glDrawArrays(GL_TRIANGLES,0, object3d.VerticesDrawArrays.size());
 
         VAO2->release();
         program2->release();
@@ -247,6 +249,7 @@ void _gl_widget::draw_objects()
     glDrawArrays(GL_LINES, 0, Axis.Vertices.size());
 
     VAO3->release();
+
     program2->release();
 }
 
@@ -368,9 +371,13 @@ void _gl_widget::pick(int Selection_position_x, int Selection_position_y)
 
         if(pickedID != -1 && pickedID < object3d.points.size())
         {
+            if(data[0] >= 128) pickedID -= 1;
+
             object3d.points[pickedID] = QVector4D(CurrentPaintingColor.red()/255.0f, CurrentPaintingColor.green()/255.0f, CurrentPaintingColor.blue()/255.0f, CurrentPaintingColor.alpha()/255.0f);
 
-            DebugTools::DrawDebugString(Window, "Selected index-->" + QString::number(pickedID),
+            DebugTools::DrawDebugString(Window, "Selected index --> " + QString::number(pickedID) + " = " + QString::number(data[0]) + " + " +
+                   QString::number( data[1])+ " * 256 + " +
+                    QString::number(data[2]) + " * 256 * 256",
                             15, 0, 500, 100,
                             "QLabel { color : red; }");
         }
@@ -453,7 +460,7 @@ void _gl_widget::SetCurrentPaintingColor(const QColor &InNewColor)
 
 void _gl_widget::IncrementResolution()
 {
-    if(SelectedTriangle >= 0 && object3d.Resolutions[SelectedTriangle] < 32)
+    if(SelectedTriangle >= 0 && SelectedTriangle < object3d.Resolutions.size() && object3d.Resolutions[SelectedTriangle] < 32)
     {
         object3d.Resolutions[SelectedTriangle] *= 2;
         object3d.UpdateResolutionsArray(object3d.Resolutions);
@@ -464,7 +471,7 @@ void _gl_widget::IncrementResolution()
 
 void _gl_widget::DecreaseResolution()
 {
-    if(SelectedTriangle >= 0 && object3d.Resolutions[SelectedTriangle] > 2)
+    if(SelectedTriangle >= 0 && SelectedTriangle < object3d.Resolutions.size() && SelectedTriangle >= 0 && object3d.Resolutions[SelectedTriangle] > 2)
     {
         object3d.Resolutions[SelectedTriangle] /= 2;
         object3d.UpdateResolutionsArray(object3d.Resolutions);
@@ -493,14 +500,13 @@ void _gl_widget::CreateBuffers()
 {
     program->bind();
 
-    // VAO 2
     VAO = new QOpenGLVertexArrayObject();
     VAO->create();
     VAO->bind();
 
-    InitializeBuffer(object3d.VerticesDrawArrays.data(), object3d.VerticesDrawArrays.size() * sizeof(QVector3D),"vertex", GL_FLOAT, 0, 3);
-    InitializeBuffer(object3d.Colors.data(), object3d.Colors.size() * sizeof(QVector4D), "color", GL_FLOAT, 0, 4);
-    InitializeBuffer(object3d.Index.data(), object3d.Index.size() * sizeof(QVector3D), "indexes", GL_FLOAT, 0, 3);
+    InitializeBuffer(program, object3d.VerticesDrawArrays.data(), object3d.VerticesDrawArrays.size() * sizeof(QVector3D),"vertex", GL_FLOAT, 0, 3);
+    InitializeBuffer(program, object3d.Colors.data(), object3d.Colors.size() * sizeof(QVector4D), "color", GL_FLOAT, 0, 4);
+    InitializeBuffer(program,object3d.Index.data(), object3d.Index.size() * sizeof(QVector3D), "indexes", GL_FLOAT, 0, 3);
 
     program->setUniformValue("ColorLerpEnabled", ColorLerpEnabled);
 
@@ -518,35 +524,23 @@ void _gl_widget::CreateBuffers()
     program2->link();
     program2->bind();
 
-    // VAO 3
     VAO2 = new QOpenGLVertexArrayObject();
     VAO2->create();
     VAO2->bind();
 
-    InitializeBuffer(object3d.VerticesDrawArrays.data(), object3d.VerticesDrawArrays.size() * sizeof(QVector3D),"vertex", GL_FLOAT, 0, 3);
-    InitializeBuffer(object3d.Colors.data(), object3d.Colors.size() * sizeof(QVector4D), "color", GL_FLOAT, 0, 4);
+    InitializeBuffer(program2, object3d.VerticesDrawArrays.data(), object3d.VerticesDrawArrays.size() * sizeof(QVector3D),"vertex", GL_FLOAT, 0, 3);
+    InitializeBuffer(program2, object3d.TriangleSelectionColors.data(), object3d.TriangleSelectionColors.size() * sizeof(QVector4D), "color", GL_FLOAT, 0, 4);
 
     VAO2->release();
 
-    // VAO 4
     VAO3 = new QOpenGLVertexArrayObject();
     VAO3->create();
     VAO3->bind();
 
-    InitializeBuffer(object3d.VerticesDrawArrays.data(), object3d.VerticesDrawArrays.size() * sizeof(QVector3D),"vertex", GL_FLOAT, 0, 3);
-    InitializeBuffer(object3d.Colors.data(), object3d.Colors.size() * sizeof(QVector4D), "color", GL_FLOAT, 0, 4);
+    InitializeBuffer(program2, Axis.Vertices.data(), Axis.Vertices.size() * sizeof(QVector3D),"vertex", GL_FLOAT, 0, 3);
+    InitializeBuffer(program2, Axis.Colors.data(), Axis.Colors.size() * sizeof(QVector4D), "color", GL_FLOAT, 0, 4);
 
     VAO3->release();
-
-    // VAO 3
-    VAO4 = new QOpenGLVertexArrayObject();
-    VAO4->create();
-    VAO4->bind();
-
-    InitializeBuffer(object3d.VerticesDrawArrays.data(), object3d.VerticesDrawArrays.size() * sizeof(QVector3D),"vertex", GL_FLOAT, 0, 3);
-    InitializeBuffer(object3d.Colors.data(), object3d.Colors.size() * sizeof(QVector4D), "color", GL_FLOAT, 0, 4);
-
-    VAO4->release();
     program2->release();
 }
 
@@ -573,11 +567,11 @@ void _gl_widget::LogGlInfo()
     std::cerr << "Max texture size: " << Max_texture_size << "\n";
 }
 
-void _gl_widget::InitializeBuffer(void* InData, const int InSize, const char* InName, const GLenum InType, const int InOffset, const int InStride)
+void _gl_widget::InitializeBuffer(QOpenGLShaderProgram* InShader, void* InData, const int InSize, const char* InName, const GLenum InType, const int InOffset, const int InStride)
 {
-    QOpenGLBuffer *positionBuffer = GenerateBuffer(InData, InSize);
-    positionBuffer->bind();
-    program->enableAttributeArray(InName);
-    program->setAttributeBuffer(InName, InType, InOffset, InStride);
-    positionBuffer->release();
+    QOpenGLBuffer *buffer = GenerateBuffer(InData, InSize);
+    buffer->bind();
+    InShader->enableAttributeArray(InName);
+    InShader->setAttributeBuffer(InName, InType, InOffset, InStride);
+    buffer->release();
 }
