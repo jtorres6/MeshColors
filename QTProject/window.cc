@@ -109,13 +109,28 @@ _window::_window()
     connect(Exit, SIGNAL(triggered()), this, SLOT(close()));
 
     // actions for file menu
-    QAction *FileOpen = new QAction(QIcon("./icons/exit.png"), tr("&Open file..."), this);
+    QAction *FileOpen = new QAction(tr("&Open file..."), this);
     FileOpen->setShortcut(tr("Ctrl+E"));
-    FileOpen->setToolTip(tr("Exit the application"));
     connect(FileOpen, SIGNAL(triggered()), this, SLOT(OpenFileDialog()));
+
+    // actions for file menu
+    QAction *SaveTexture = new QAction(tr("&Save image"), this);
+    SaveTexture->setShortcut(tr("Ctrl+S"));
+    connect(SaveTexture, SIGNAL(triggered()), this, SLOT(close()));
+
+    QAction *SaveTextureAs = new QAction(tr("&Save image as..."), this);
+    SaveTextureAs->setShortcut(tr("Ctrl+Shift+S"));
+    connect(SaveTextureAs, SIGNAL(triggered()), this, SLOT(SaveImage()));
+
+    // actions for file menu
+    QAction *LoadTexture = new QAction(tr("Load image"), this);
+    connect(LoadTexture, SIGNAL(triggered()), this, SLOT(LoadMeshColorsFile()));
 
     // menus
     QMenu *File_menu=menuBar()->addMenu(tr("&File"));
+    File_menu->addAction(SaveTexture);
+    File_menu->addAction(SaveTextureAs);
+    File_menu->addAction(LoadTexture);
     File_menu->addAction(FileOpen);
     File_menu->addAction(Exit);
     File_menu->setAttribute(Qt::WA_AlwaysShowToolTips);
@@ -191,8 +206,55 @@ void _window::OpenFileDialog()
 
     std::string FileNameStd = dir.relativeFilePath(fileName).toStdString();
 
-    const char *fileNameChar = FileNameStd.c_str();//dir.relativeFilePath(fileName).toUtf8().data();
+    const char *fileNameChar = FileNameStd.c_str();
     GL_widget->SetObjectPath(fileNameChar);
+}
+
+void _window::SaveImage()
+{
+    QString fileName = QFileDialog::getSaveFileName(this,
+        tr("Mesh Colors file location"), "",
+        tr("Mesh colors map (*.mcm);;All Files (*)"), 0, QFileDialog::DontUseNativeDialog);
+
+    if (fileName.isEmpty())
+        return;
+
+    QFile file(fileName);
+    if (!file.open(QIODevice::WriteOnly))
+    {
+        QMessageBox::information(this, tr("Unable to open file"),
+            file.errorString());
+        return;
+    }
+
+    QDataStream out(&file);
+    out.setVersion(QDataStream::Qt_5_15);
+    out << GL_widget->GetMeshColorsArray();
+}
+
+void _window::LoadMeshColorsFile()
+{
+    // Posible fix: https://blogs.kde.org/2009/03/26/how-crash-almost-every-qtkde-application-and-how-fix-it-0
+    QString fileName = QFileDialog::getOpenFileName(this,
+        tr("Mesh Colors file location"), "",
+        tr("Mesh colors map (*.mcm);;All Files (*)"), 0, QFileDialog::DontUseNativeDialog);
+
+    if (fileName.isEmpty())
+        return;
+
+    QFile file(fileName);
+
+    if (!file.open(QIODevice::ReadOnly)) {
+        QMessageBox::information(this, tr("Unable to open file"),
+            file.errorString());
+        return;
+    }
+
+    QDataStream in(&file);
+    in.setVersion(QDataStream::Qt_5_15);
+    QVector<QVector4D> array;
+    in >> array;
+    GL_widget->SetMeshColorsArray(array);
 }
 
 void _window::OpenColorDialog()

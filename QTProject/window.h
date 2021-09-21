@@ -38,6 +38,8 @@ public:
 public slots:
     void OpenFileDialog();
     void OpenColorDialog();
+    void SaveImage();
+    void LoadMeshColorsFile();
 
 private:
   _gl_widget *GL_widget;

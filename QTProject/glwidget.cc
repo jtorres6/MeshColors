@@ -453,6 +453,17 @@ void _gl_widget::SetObjectPath(const char* InNewPath)
     initializeGL();
 }
 
+void _gl_widget::SetMeshColorsArray(QVector<QVector4D> InColors)
+{
+    object3d.UpdateMeshColorsArray(InColors);
+    UpdateSSBO(ssbo, sizeof(*object3d.ssbo), object3d.ssbo);
+}
+
+const QVector<QVector4D> _gl_widget::GetMeshColorsArray() const
+{
+    return object3d.points;
+}
+
 void _gl_widget::SetCurrentPaintingColor(const QColor &InNewColor)
 {
     if(InNewColor.isValid())

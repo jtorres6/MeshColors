@@ -72,6 +72,9 @@ public:
     void AddCameraZoom(const float InValue);
 
     void SetObjectPath(const char* InNewPath);
+    void SetMeshColorsArray(QVector<QVector4D> InColors);
+    const QVector<QVector4D> GetMeshColorsArray() const;
+
     void SetCurrentPaintingColor(const QColor& InNewColor);
 
     void InitializeBuffer(QOpenGLShaderProgram* InShader, void* InData, const int InSize, const char* InName, const GLenum InType, const int InOffset, const int InStride);
