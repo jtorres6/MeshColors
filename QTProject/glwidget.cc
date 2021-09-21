@@ -455,6 +455,7 @@ void _gl_widget::SetObjectPath(const char* InNewPath)
 
 void _gl_widget::SetMeshColorsArray(QVector<QVector4D> InColors)
 {
+    object3d.points = InColors;
     object3d.UpdateMeshColorsArray(InColors);
     UpdateSSBO(ssbo, sizeof(*object3d.ssbo), object3d.ssbo);
 }
