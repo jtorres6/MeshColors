@@ -17,6 +17,7 @@
 #include <QColorDialog>
 #include <QSpinBox>
 #include <QGLFormat>
+#include <QSlider>
 #include <debugtools.h>
 
 #include "window.h"
@@ -60,6 +61,13 @@ _window::_window()
     Vertical_options->addWidget(Decrease_button);
     Vertical_options->addStretch();
 
+    QLabel *Label3 = new QLabel("Pencil size");
+    QSlider* PencilSize_widget = new QSlider(Qt::Horizontal);
+    PencilSize_widget->setMinimum(1);
+    PencilSize_widget->setMaximum(32);
+    Vertical_options->addWidget(Label3);
+    Vertical_options->addWidget(PencilSize_widget);
+
     Options_widget->setLayout(Vertical_options);
 
     QTabWidget *Tab_widget = new QTabWidget;
@@ -71,18 +79,13 @@ _window::_window()
     Framed_widget->setFrameStyle(QFrame::Panel);
     Framed_widget->setLineWidth(3);
 
-    // That is, no old-school fixed pipeline functionality
-    QGLFormat glFormat;
-    glFormat.setVersion( 3, 3 );
-    glFormat.setProfile( QGLFormat::CoreProfile ); // Requires >=Qt-4.8.0
-    glFormat.setSampleBuffers( true );
-
     GL_widget = new _gl_widget(this);
     GL_widget->setSizePolicy(Q);
 
     connect(FaceSelection_button, SIGNAL(pressed()), GL_widget, SLOT(EnableTriangleSelectionMode()));
     connect(Increment_button, SIGNAL(pressed()), GL_widget, SLOT(IncrementResolution()));
     connect(Decrease_button, SIGNAL(pressed()), GL_widget, SLOT(DecreaseResolution()));
+    connect(PencilSize_widget, SIGNAL(valueChanged(int)), GL_widget, SLOT(UpdatePencilSize(int)));
 
     QHBoxLayout *Horizontal_frame = new QHBoxLayout();
     Horizontal_frame->setContentsMargins(1,1,1,1);

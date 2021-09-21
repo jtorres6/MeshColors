@@ -208,7 +208,7 @@ void _gl_widget::draw_objects()
         program->setUniformValue("LightPos", LightPosition);
 
         program->setUniformValue("ColorLerpEnabled", !DrawingSamplesID && ColorLerpEnabled);
-        program->setUniformValue("LightingEnabled", !DrawingSamplesID &&LightingEnabled);
+        program->setUniformValue("LightingEnabled", !DrawingSamplesID && LightingEnabled && false);
 
         context->extraFunctions()->glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, ssbo);
         context->functions()->glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
@@ -358,28 +358,31 @@ void _gl_widget::pick(int Selection_position_x, int Selection_position_y)
         paintGL();
 
         // get the pixel
-        unsigned char data[4];
+        unsigned char data[PencilSize*PencilSize][4];
         glReadBuffer(GL_FRONT);
         glPixelStorei(GL_PACK_ALIGNMENT,1);
-        glReadPixels(Selection_position_x,Selection_position_y,1,1,GL_RGBA,GL_UNSIGNED_BYTE, data);
+        glReadPixels(Selection_position_x,Selection_position_y, PencilSize, PencilSize, GL_RGBA, GL_UNSIGNED_BYTE, data);
 
         // Convert the color back to an integer ID
-        int pickedID =
-            data[0] +
-            data[1] * 256 +
-            data[2] * 256 * 256;
-
-        if(pickedID != -1 && pickedID < object3d.points.size())
+        for(size_t i = 0; i < PencilSize*PencilSize; i++)
         {
-            if(data[0] >= 128) pickedID -= 1;
+            int pickedID =
+                data[i][0] +
+                data[i][1] * 256 +
+                data[i][2] * 256 * 256;
 
-            object3d.points[pickedID] = QVector4D(CurrentPaintingColor.red()/255.0f, CurrentPaintingColor.green()/255.0f, CurrentPaintingColor.blue()/255.0f, CurrentPaintingColor.alpha()/255.0f);
+            if(pickedID != -1 && pickedID < object3d.points.size())
+            {
+                if(data[i][0] >= 128) pickedID -= 1;
 
-            DebugTools::DrawDebugString(Window, "Selected index --> " + QString::number(pickedID) + " = " + QString::number(data[0]) + " + " +
-                   QString::number( data[1])+ " * 256 + " +
-                    QString::number(data[2]) + " * 256 * 256",
-                            15, 0, 500, 100,
-                            "QLabel { color : red; }");
+                object3d.points[pickedID] = QVector4D(CurrentPaintingColor.red()/255.0f, CurrentPaintingColor.green()/255.0f, CurrentPaintingColor.blue()/255.0f, CurrentPaintingColor.alpha()/255.0f);
+
+                DebugTools::DrawDebugString(Window, "Selected index --> " + QString::number(pickedID) + " = " + QString::number(data[0][0]) + " + " +
+                       QString::number( data[i][1])+ " * 256 + " +
+                        QString::number(data[i][2]) + " * 256 * 256",
+                                15, 0, 500, 100,
+                                "QLabel { color : red; }");
+            }
         }
 
         object3d.UpdateMeshColorsArray(object3d.points);
@@ -483,6 +486,11 @@ void _gl_widget::DecreaseResolution()
 void _gl_widget::EnableTriangleSelectionMode()
 {
     TriangleSelectionMode = true;
+}
+
+void _gl_widget::UpdatePencilSize(const int InValue)
+{
+    PencilSize = InValue;
 }
 
 void _gl_widget::LoadProgram()

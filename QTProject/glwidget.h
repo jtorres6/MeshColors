@@ -80,6 +80,7 @@ public slots:
     void IncrementResolution();
     void DecreaseResolution();
     void EnableTriangleSelectionMode();
+    void UpdatePencilSize(const int InValue);
 
 protected:
     void resizeGL(int Width1, int Height1) Q_DECL_OVERRIDE;
@@ -137,6 +138,7 @@ private:
     bool DrawingSamplesID = false;
 
     int SelectedTriangle = -1;
+    int PencilSize = 1;
 
     QVector3D points[1024];
     QOpenGLTexture *text;
