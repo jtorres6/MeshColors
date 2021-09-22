@@ -70,7 +70,7 @@ _object3D::_object3D(const char *Filename)
         int b = (i & 0x00FF0000) >> 16;
 
         // TODO: This should be r/255.0f, but it only works with 254 somehow. CHECK THIS!
-        selectionPoints.push_back(QVector4D(r/254.0f, g/254.0f, b/254.0f, 1.0f));
+        selectionPoints.push_back(QVector4D(r/255.0f, g/255.0f, b/255.0f, 1.0f));
     }
 
     for (int i= 0; i < Triangles.length(); i++)

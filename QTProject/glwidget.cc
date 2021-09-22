@@ -364,7 +364,7 @@ void _gl_widget::pick(int Selection_position_x, int Selection_position_y)
         glReadPixels(Selection_position_x,Selection_position_y, PencilSize, PencilSize, GL_RGBA, GL_UNSIGNED_BYTE, data);
 
         // Convert the color back to an integer ID
-        for(size_t i = 0; i < PencilSize*PencilSize; i++)
+        for(int i = 0; i < PencilSize*PencilSize; i++)
         {
             int pickedID =
                 data[i][0] +
@@ -373,7 +373,6 @@ void _gl_widget::pick(int Selection_position_x, int Selection_position_y)
 
             if(pickedID != -1 && pickedID < object3d.points.size())
             {
-                if(data[i][0] >= 128) pickedID -= 1;
 
                 object3d.points[pickedID] = QVector4D(CurrentPaintingColor.red()/255.0f, CurrentPaintingColor.green()/255.0f, CurrentPaintingColor.blue()/255.0f, CurrentPaintingColor.alpha()/255.0f);
 
