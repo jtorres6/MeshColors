@@ -165,9 +165,9 @@ void _object3D::UpdateMeshColorsArray(const QVector<QVector4D>& InSamples)
     {
         int Res = ssbo->Resolution[i];
 
-        ssbo->Colors[i][Res * (Res + 1) + 0] = InSamples[int(Triangles[i].x())];
+        ssbo->Colors[i][Res * (Res + 1) + 0] = InSamples[int(Triangles[i].z())];
         ssbo->Colors[i][Res]                 = InSamples[int(Triangles[i].y())];
-        ssbo->Colors[i][0]                   = InSamples[int(Triangles[i].z())];
+        ssbo->Colors[i][0]                   = InSamples[int(Triangles[i].x())];
 
         int faceIndexOffset = 0;
         int edgeIndexOffset = 0;
