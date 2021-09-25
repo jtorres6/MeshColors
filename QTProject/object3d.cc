@@ -90,9 +90,10 @@ _object3D::_object3D(const char *Filename)
         int g = (i & 0x0000FF00) >>  8;
         int b = (i & 0x00FF0000) >> 16;
 
-        TriangleSelectionColors.push_back(QVector4D(r/255.0f, g/255.0f, b/255.0f, 1.0f));
-        TriangleSelectionColors.push_back(QVector4D(r/255.0f, g/255.0f, b/255.0f, 1.0f));
-        TriangleSelectionColors.push_back(QVector4D(r/255.0f, g/255.0f, b/255.0f, 1.0f));
+        QVector4D TriangleID = QVector4D(r/255.0f, g/255.0f, b/255.0f, 1.0f); // QVector4D(RandomFloat(0.01f, 1.0f), RandomFloat(0.01f, 1.0f), RandomFloat(0.01f, 1.0f), 1.0f); //
+        TriangleSelectionColors.push_back(TriangleID);
+        TriangleSelectionColors.push_back(TriangleID);
+        TriangleSelectionColors.push_back(TriangleID);
 
         Index.push_back(QVector3D(i, i, i));
         Index.push_back(QVector3D(i, i, i));

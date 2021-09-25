@@ -90,6 +90,7 @@ protected:
     void paintGL() Q_DECL_OVERRIDE;
     void initializeGL() Q_DECL_OVERRIDE;
     void keyPressEvent(QKeyEvent *Keyevent) Q_DECL_OVERRIDE;
+    void keyReleaseEvent(QKeyEvent *Keyevent) Q_DECL_OVERRIDE;
 
 
     QOpenGLBuffer* GenerateBuffer(const void *data, int count);
@@ -128,6 +129,8 @@ private:
 
     float Observer_angle_x = 0;
     float Observer_angle_y = 0;
+    float Observer_pos_x = 0;
+    float Observer_pos_y = 0;
     float Observer_distance = 1;
 
     float Light_angle_x = 0;
@@ -139,6 +142,8 @@ private:
 
     bool LightingEnabled = true;
     bool DrawingSamplesID = false;
+
+    bool ControlPressed = false;
 
     int SelectedTriangle = -1;
     int PencilSize = 1;

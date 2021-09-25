@@ -39,6 +39,14 @@ _gl_widget::_gl_widget(_window *Window1):Window(Window1)
  *
  *****************************************************************************/
 
+void _gl_widget::keyReleaseEvent(QKeyEvent *Keyevent)
+{
+    if(Keyevent->key() == Qt::Key_Control)
+    {
+        ControlPressed = false;
+    }
+}
+
 void _gl_widget::keyPressEvent(QKeyEvent *Keyevent)
 {
   switch(Keyevent->key()){
@@ -94,7 +102,19 @@ void _gl_widget::keyPressEvent(QKeyEvent *Keyevent)
       UpdateSSBO(ssbo, sizeof(*object3d.ssbo), object3d.ssbo);
       break;
 
+  case Qt::Key_Control:
+      ControlPressed = true;
+      break;
+
+  case Qt::Key_F:
+      Observer_pos_x = 0.0f;
+      Observer_pos_y = 0.0f;
+      Observer_angle_y = 0.0f;
+      Observer_angle_x = 0.0f;
+      Observer_distance = 10.0f;
+      break;
   }
+
 
   update();
 }
@@ -102,14 +122,22 @@ void _gl_widget::keyPressEvent(QKeyEvent *Keyevent)
 
 void _gl_widget::MoveCameraRightLeft(QPair<qint32, qint32> InUnits)
 {
-    Observer_angle_y+=ANGLE_STEP*InUnits.first;
-    Observer_angle_x+=ANGLE_STEP*InUnits.second;
+    if(ControlPressed)
+    {
+        Observer_pos_x+=0.005f*InUnits.first;
+        Observer_pos_y-=0.005f*InUnits.second;
+    }
+    else
+    {
+        Observer_angle_y+=ANGLE_STEP*InUnits.first;
+        Observer_angle_x+=ANGLE_STEP*InUnits.second;
+    }
     update();
 }
 
 void _gl_widget::AddCameraZoom(const float InValue)
 {
-    Observer_distance+=0.005f*InValue;
+    Observer_distance+=(0.005f*(Observer_distance/20.0f))*InValue;
     update();
 }
 
@@ -145,7 +173,7 @@ void _gl_widget::change_projection()
     Projection.frustum(X_MIN * AspectRatio, X_MAX * AspectRatio, Y_MIN, Y_MAX , FRONT_PLANE_PERSPECTIVE, BACK_PLANE_PERSPECTIVE);
     Rotation_x.rotate(Observer_angle_x, 1, 0, 0);
     Rotation_y.rotate(Observer_angle_y, 0, 1, 0);
-    Translation.translate(0, 0, -Observer_distance);
+    Translation.translate(Observer_pos_x, Observer_pos_y, -Observer_distance);
 
     Projection*=Translation;
     Projection*=Rotation_x;
@@ -226,6 +254,8 @@ void _gl_widget::draw_objects()
         int matrixLocation = program2->uniformLocation("matrix");
         program2->setUniformValue(matrixLocation, Projection);
 
+        program->setUniformValue("ColorLerpEnabled", false);
+        program->setUniformValue("LightingEnabled", false);
         program2->setUniformValue("LineColor", QVector4D(0.0f, 0.3f, 0.8f, 1.0f));
         program2->setUniformValue("LineMode", false);
 
@@ -261,17 +291,20 @@ void _gl_widget::DrawTrianglesSelectionMode()
 
     program2->bind();
     VAO2->bind();
-
-    int matrixLocation = program2->uniformLocation("matrix");
-    program2->setUniformValue(matrixLocation, Projection);
-
-    program2->setUniformValue("LineColor", QVector4D(0.0f, 0.3f, 0.8f, 1.0f));
-    program2->setUniformValue("LineMode", false);
-
-    glDrawArrays(GL_TRIANGLES,0, object3d.VerticesDrawArrays.size());
-
-    VAO2->release();
-    program2->release();
+    draw_objects();
+    //int matrixLocation = program2->uniformLocation("matrix");
+    //program2->setUniformValue(matrixLocation, Projection);
+    //
+    //program->setUniformValue("ColorLerpEnabled", false);
+    //program->setUniformValue("LightingEnabled", false);
+    //
+    //program2->setUniformValue("LineColor", QVector4D(0.0f, 0.3f, 0.8f, 1.0f));
+    //program2->setUniformValue("LineMode", false);
+    //
+    //glDrawArrays(GL_TRIANGLES,0, object3d.VerticesDrawArrays.size());
+    //
+    //VAO2->release();
+    //program2->release();
 }
 
 
@@ -373,12 +406,11 @@ void _gl_widget::pick(int Selection_position_x, int Selection_position_y)
 
             if(pickedID != -1 && pickedID < object3d.points.size())
             {
-
                 object3d.points[pickedID] = QVector4D(CurrentPaintingColor.red()/255.0f, CurrentPaintingColor.green()/255.0f, CurrentPaintingColor.blue()/255.0f, CurrentPaintingColor.alpha()/255.0f);
 
                 DebugTools::DrawDebugString(Window, "Selected index --> " + QString::number(pickedID) + " = " + QString::number(data[0][0]) + " + " +
                        QString::number( data[i][1])+ " * 256 + " +
-                        QString::number(data[i][2]) + " * 256 * 256",
+                        QString::number(data[i][2]) + " * 256 * 256"+ "\n Pos: " + QString::number(Selection_position_x) + " " + QString::number(Selection_position_y),
                                 15, 0, 500, 100,
                                 "QLabel { color : red; }");
             }
@@ -397,23 +429,30 @@ void _gl_widget::pick(int Selection_position_x, int Selection_position_y)
         DrawTrianglesSelectionMode();
 
         // get the pixel
+        unsigned char data[4];
         int Color;
         glReadBuffer(GL_FRONT);
         glPixelStorei(GL_PACK_ALIGNMENT,1);
         glReadPixels(Selection_position_x,Selection_position_y,1,1,GL_RGBA,GL_UNSIGNED_BYTE,&Color);
-
         uint R = ((Color & 0x000000FF));
         uint G = ((Color & 0x0000FF00) >> 8);
         uint B = ((Color & 0x00FF0000) >> 16);
 
-        // Convert the color back to an integer ID
         int pickedID =
-            R +
-            G * 256 +
-            B * 256 * 256;
+           R +
+           G * 256 +
+           B * 256 * 256;
+            //data[0] +
+            //data[1] * 256 +
+            //data[2] * 256 * 256;
 
         if(pickedID != -1)
         {
+            DebugTools::DrawDebugString(Window, "#\n|\n|\n Previous --> " +   QString::number(SelectedTriangle) + "\n Selected index --> " + QString::number(pickedID) + " = " + QString::number(R) + " + " +
+                    QString::number(G)+ " * 256 + " +
+                     QString::number(B) + " * 256 * 256"+ "\n Pos: " + QString::number(Selection_position_x) + " " + QString::number(Selection_position_y),
+                             Selection_position_x, Window->height() - Selection_position_y, 500, 100,
+                             "QLabel { color : red; }");
             SelectedTriangle = pickedID;
         }
 
@@ -497,6 +536,7 @@ void _gl_widget::DecreaseResolution()
 void _gl_widget::EnableTriangleSelectionMode()
 {
     TriangleSelectionMode = true;
+    update();
 }
 
 void _gl_widget::UpdatePencilSize(const int InValue)
