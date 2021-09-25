@@ -47,8 +47,13 @@ _window::_window()
     Color_selection->setPalette(Pal);
     connect(Color_selection, SIGNAL(pressed()), this, SLOT(OpenColorDialog()));
 
+    QPushButton *Lighting_button = new QPushButton("Toggle lighting");
+    QPushButton *Lerp_button = new QPushButton("Toggle color inerpolation");
+
     Vertical_options->addWidget(Label1);
     Vertical_options->addWidget(Color_selection);
+    Vertical_options->addWidget(Lighting_button);
+    Vertical_options->addWidget(Lerp_button);
     Vertical_options->addStretch();
 
     QLabel *Label2 = new QLabel("Face resolution");
@@ -85,6 +90,8 @@ _window::_window()
     connect(FaceSelection_button, SIGNAL(pressed()), GL_widget, SLOT(EnableTriangleSelectionMode()));
     connect(Increment_button, SIGNAL(pressed()), GL_widget, SLOT(IncrementResolution()));
     connect(Decrease_button, SIGNAL(pressed()), GL_widget, SLOT(DecreaseResolution()));
+    connect(Lighting_button, SIGNAL(pressed()), GL_widget, SLOT(ToggleLighting()));
+    connect(Lerp_button, SIGNAL(pressed()), GL_widget, SLOT(ToggleColorInterpolation()));
     connect(PencilSize_widget, SIGNAL(valueChanged(int)), GL_widget, SLOT(UpdatePencilSize(int)));
 
     QHBoxLayout *Horizontal_frame = new QHBoxLayout();

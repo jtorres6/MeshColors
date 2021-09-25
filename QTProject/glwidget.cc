@@ -236,7 +236,7 @@ void _gl_widget::draw_objects()
         program->setUniformValue("LightPos", LightPosition);
 
         program->setUniformValue("ColorLerpEnabled", !DrawingSamplesID && ColorLerpEnabled);
-        program->setUniformValue("LightingEnabled", !DrawingSamplesID && LightingEnabled && false);
+        program->setUniformValue("LightingEnabled", !DrawingSamplesID && LightingEnabled);
 
         context->extraFunctions()->glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, ssbo);
         context->functions()->glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
@@ -542,6 +542,18 @@ void _gl_widget::EnableTriangleSelectionMode()
 void _gl_widget::UpdatePencilSize(const int InValue)
 {
     PencilSize = InValue;
+}
+
+void _gl_widget::ToggleLighting()
+{
+    LightingEnabled = !LightingEnabled;
+    update();
+}
+
+void _gl_widget::ToggleColorInterpolation()
+{
+    ColorLerpEnabled = !ColorLerpEnabled;
+    update();
 }
 
 void _gl_widget::LoadProgram()

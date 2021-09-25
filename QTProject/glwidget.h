@@ -84,6 +84,8 @@ public slots:
     void DecreaseResolution();
     void EnableTriangleSelectionMode();
     void UpdatePencilSize(const int InValue);
+    void ToggleLighting();
+    void ToggleColorInterpolation();
 
 protected:
     void resizeGL(int Width1, int Height1) Q_DECL_OVERRIDE;
