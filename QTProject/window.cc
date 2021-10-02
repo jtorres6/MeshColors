@@ -236,8 +236,36 @@ void _window::SaveImage()
 
     QDataStream out(&file);
     out.setVersion(QDataStream::Qt_5_15);
-    out << GL_widget->GetResolutionsArray();
-    out << GL_widget->GetMeshColorsArray();
+
+    const int nFaces = GL_widget->GetObject3D()->Triangles.size();
+
+    QVector<int> Res;
+    QVector<QVector4D> Colors;
+    int counter = 0;
+
+    for(int j = 0; j < GL_widget->GetObject3D()->Vertices.size()-1; j++)
+    {
+        Colors.push_back(GL_widget->GetMeshColorsArray()[j]);
+        counter++;
+    }
+
+    for(int i = 0; i < nFaces; i++)
+    {
+        Res.push_back(GL_widget->GetResolutionsArray()[i]);
+
+        int nColors = 3 * (GL_widget->GetResolutionsArray()[i] - 1) +
+                ((GL_widget->GetResolutionsArray()[i] - 1) * (GL_widget->GetResolutionsArray()[i] - 2)) / 2;
+
+        for(int j = 0; j < nColors; j++)
+        {
+            Colors.push_back(GL_widget->GetMeshColorsArray()[counter+j]);
+        }
+
+        counter += 2000;
+    }
+
+    out << Res;
+    out << Colors;
 }
 
 void _window::LoadMeshColorsFile()
@@ -262,10 +290,42 @@ void _window::LoadMeshColorsFile()
     in.setVersion(QDataStream::Qt_5_15);
     QVector<int> resolutions;
     QVector<QVector4D> array;
+
     in >> resolutions;
     in >> array;
+
+    QVector<int> Res;
+    QVector<QVector4D> Colors;
+    const int nFaces = GL_widget->GetObject3D()->Triangles.size();
+
+    int counter = 0;
+
+    for(int i = 0; i < GL_widget->GetObject3D()->Vertices.size() - 1; i++)
+    {
+        Colors.push_back(array[i]);
+        counter++;
+    }
+
+    for(int i = 0; i < nFaces; i++)
+    {
+        int nColors = 3 * (resolutions[i] - 1) + ((resolutions[i] - 1) * (resolutions[i] - 2)) / 2;
+
+        for(int j = 0; j < 2000; j++)
+        {
+            if(j < nColors)
+            {
+                Colors.push_back(array[counter]);
+                counter++;
+            }
+            else
+            {
+                Colors.push_back(QVector4D(1.0f, 1.0f, 1.0f, 0.0f));
+            }
+        }
+    }
+
     GL_widget->SetResolutionsArray(resolutions);
-    GL_widget->SetMeshColorsArray(array);
+    GL_widget->SetMeshColorsArray(Colors);
 }
 
 void _window::OpenColorDialog()

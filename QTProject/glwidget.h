@@ -75,8 +75,9 @@ public:
     void SetMeshColorsArray(QVector<QVector4D> InColors);
     void SetResolutionsArray(QVector<int> InRes);
 
-    const QVector<QVector4D> GetMeshColorsArray() const;
-    const QVector<int> GetResolutionsArray() const;
+    const QVector<QVector4D>& GetMeshColorsArray() const;
+    const QVector<int>& GetResolutionsArray() const;
+    const _object3D *GetObject3D() const;
 
     void SetCurrentPaintingColor(const QColor& InNewColor);
 
