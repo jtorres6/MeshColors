@@ -236,6 +236,7 @@ void _window::SaveImage()
 
     QDataStream out(&file);
     out.setVersion(QDataStream::Qt_5_15);
+    out << GL_widget->GetResolutionsArray();
     out << GL_widget->GetMeshColorsArray();
 }
 
@@ -259,8 +260,11 @@ void _window::LoadMeshColorsFile()
 
     QDataStream in(&file);
     in.setVersion(QDataStream::Qt_5_15);
+    QVector<int> resolutions;
     QVector<QVector4D> array;
+    in >> resolutions;
     in >> array;
+    GL_widget->SetResolutionsArray(resolutions);
     GL_widget->SetMeshColorsArray(array);
 }
 

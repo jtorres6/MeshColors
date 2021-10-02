@@ -508,9 +508,21 @@ void _gl_widget::SetMeshColorsArray(QVector<QVector4D> InColors)
     UpdateSSBO(ssbo, sizeof(*object3d.ssbo), object3d.ssbo);
 }
 
+void _gl_widget::SetResolutionsArray(QVector<int> InRes)
+{
+    object3d.Resolutions = InRes;
+    object3d.UpdateResolutionsArray(InRes);
+    UpdateSSBO(ssbo, sizeof(*object3d.ssbo), object3d.ssbo);
+}
+
 const QVector<QVector4D> _gl_widget::GetMeshColorsArray() const
 {
     return object3d.points;
+}
+
+const QVector<int> _gl_widget::GetResolutionsArray() const
+{
+    return object3d.Resolutions;
 }
 
 void _gl_widget::SetCurrentPaintingColor(const QColor &InNewColor)

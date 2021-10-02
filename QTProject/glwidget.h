@@ -73,7 +73,10 @@ public:
 
     void SetObjectPath(const char* InNewPath);
     void SetMeshColorsArray(QVector<QVector4D> InColors);
+    void SetResolutionsArray(QVector<int> InRes);
+
     const QVector<QVector4D> GetMeshColorsArray() const;
+    const QVector<int> GetResolutionsArray() const;
 
     void SetCurrentPaintingColor(const QColor& InNewColor);
 
