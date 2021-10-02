@@ -321,6 +321,7 @@ void _gl_widget::paintGL()
   change_projection();
   change_observer();
   draw_objects();
+  DebugTools::Update();
 }
 
 
@@ -372,10 +373,15 @@ void _gl_widget::initializeGL()
 
 void _gl_widget::pick(int Selection_position_x, int Selection_position_y)
 {
+    if(program == nullptr)
+        return;
+
     program->bind();
     program->setUniformValue("ColorLerpEnabled", false);
     program->setUniformValue("LightingEnabled", false);
     program->release();
+
+    QList<int> Indexes;
 
     if(!TriangleSelectionMode)
     {
@@ -408,11 +414,15 @@ void _gl_widget::pick(int Selection_position_x, int Selection_position_y)
             {
                 object3d.points[pickedID] = QVector4D(CurrentPaintingColor.red()/255.0f, CurrentPaintingColor.green()/255.0f, CurrentPaintingColor.blue()/255.0f, CurrentPaintingColor.alpha()/255.0f);
 
-                DebugTools::DrawDebugString(Window, "Selected index --> " + QString::number(pickedID) + " = " + QString::number(data[0][0]) + " + " +
-                       QString::number( data[i][1])+ " * 256 + " +
-                        QString::number(data[i][2]) + " * 256 * 256"+ "\n Pos: " + QString::number(Selection_position_x) + " " + QString::number(Selection_position_y),
-                                15, 0, 500, 100,
-                                "QLabel { color : red; }");
+                if(!Indexes.contains(pickedID))
+                {
+                    DebugTools::DrawDebugString(Window, "#\n|\n|\nSelected index --> " + QString::number(pickedID) + " (" + QString::number(data[i][0]) + ", " +
+                            QString::number(data[i][1])+ ", " +
+                             QString::number(data[i][2]) + ")"+ "\n Pos: " + QString::number(Selection_position_x) + " " + QString::number(Selection_position_y),
+                                     Selection_position_x, Window->height() - Selection_position_y, 500, 100,
+                                     "QLabel { color : red; }", 0.1f);
+                    Indexes.append(i);
+                }
             }
         }
 
@@ -452,7 +462,7 @@ void _gl_widget::pick(int Selection_position_x, int Selection_position_y)
                     QString::number(G)+ " * 256 + " +
                      QString::number(B) + " * 256 * 256"+ "\n Pos: " + QString::number(Selection_position_x) + " " + QString::number(Selection_position_y),
                              Selection_position_x, Window->height() - Selection_position_y, 500, 100,
-                             "QLabel { color : red; }");
+                             "QLabel { color : red; }", 0.1f);
             SelectedTriangle = pickedID;
         }
 

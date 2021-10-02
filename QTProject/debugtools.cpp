@@ -2,16 +2,15 @@
 
 #include <QLabel>
 
-
 static DebugTools* instance;
 
 DebugTools::DebugTools()
 {
-    label = new QLabel();
+    timer.start();
 }
 
 
-const DebugTools* DebugTools::GetInstance()
+DebugTools* DebugTools::GetInstance()
 {
     if(instance == nullptr)
     {
@@ -20,18 +19,37 @@ const DebugTools* DebugTools::GetInstance()
 
     return instance;
 }
-void DebugTools::DrawDebugString(QWidget* parent, const QString& InText, const int InPosX, const int InPosY, const int InHeight, const int InWidht, const QString& InColor)
+
+void DebugTools::Update()
 {
-    if(GetInstance() == nullptr)
-        return;
+    QVector<FDebugLabel>& DebugLabels = GetInstance()->labels;
 
-    if(instance->label == nullptr)
-        return;
+    for(int i = 0; i < DebugLabels.size(); i++)
+    {
+        const float ElapsedTime = float(GetInstance()->timer.elapsed() * 0.001f) - DebugLabels[i].SpawnTime;
+        if(ElapsedTime > DebugLabels[i].Duration)
+        {
+            DebugLabels[i].Label->clear();
+            DebugLabels.remove(i);
+        }
+        else
+        {
+            DebugLabels[i].Label->show();
+        }
+    }
+}
 
-    instance->label->clear();
-    instance->label->setParent(parent);
-    instance->label->setGeometry(InPosX, InPosY, InHeight, InWidht);
-    instance->label->setStyleSheet(InColor);
-    instance->label->setText(InText);
-    instance->label->show();
+void DebugTools::DrawDebugString(QWidget* parent, const QString& InText, const int InPosX, const int InPosY, const int InHeight, const int InWidht, const QString& InColor, const float InDuration /*= 0.0f*/)
+{
+    QLabel* label = new QLabel();
+
+    label->clear();
+    label->setParent(parent);
+    label->setGeometry(InPosX, InPosY, InHeight, InWidht);
+    label->setStyleSheet(InColor);
+    label->setText(InText);
+    label->show();
+
+    FDebugLabel debugLabel(label, float(GetInstance()->timer.elapsed() * 0.001f), InDuration);
+    GetInstance()->labels.append(debugLabel);
 }

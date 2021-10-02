@@ -2,17 +2,36 @@
 #define DEBUGTOOLS_H
 
 #include <QLabel>
+#include <QElapsedTimer>
+
+struct FDebugLabel
+{
+    QLabel* Label;
+    float SpawnTime;
+    float Duration;
+
+    FDebugLabel(QLabel* InLabel, float InSpawnTime, float InDuration)
+        : Label(InLabel)
+        , SpawnTime(InSpawnTime)
+        , Duration(InDuration)
+    {
+    }
+};
 
 class DebugTools
 {
 public:
 
-    const static DebugTools* GetInstance();
+    static DebugTools* GetInstance();
 
-    void static DrawDebugString(QWidget* parent, const QString& InText, const int InPosX, const int InPosY, const int InHeight, const int InWidht, const QString& InColor);
+    void static Update();
+
+    void static DrawDebugString(QWidget* parent, const QString& InText, const int InPosX, const int InPosY, const int InHeight, const int InWidht, const QString& InColor, const float InDuration = 0.0f);
 private:
-    QLabel *label;
     DebugTools();
+
+    QVector<FDebugLabel> labels;
+    QElapsedTimer timer;
 };
 
 #endif // DEBUGTOOLS_H
