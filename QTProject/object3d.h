@@ -20,12 +20,11 @@
  *****************************************************************************/
 
 const int MAX_TRIANGLES = 9000;
-const int MAX_SAMPLES = 2000;
+const int MAX_SAMPLES = 562;
 
 typedef struct ssbo_data
 {
     int Resolution[MAX_TRIANGLES];
-    QVector4D Normals[MAX_TRIANGLES];
     QVector4D Colors[MAX_TRIANGLES][MAX_SAMPLES];
 }ssbo_type;
 
@@ -52,6 +51,7 @@ class _object3D:public _basic_object3D
     QVector<QVector3D> Index;
     QVector<face_data> PerFaceData;
     QVector<QVector4D> TriangleSelectionColors;
+    QVector<QVector4D> VerticesNormals;
 
     QVector<int> Resolutions;
 

@@ -98,6 +98,14 @@ _object3D::_object3D(const char *Filename)
         Index.push_back(QVector3D(i, i, i));
         Index.push_back(QVector3D(i, i, i));
         Index.push_back(QVector3D(i, i, i));
+
+        const QVector3D& CrossProduct = QVector3D::crossProduct(Vertices[int(Triangles[i].y())] - Vertices[int(Triangles[i].z())], Vertices[int(Triangles[i].x())] - Vertices[int(Triangles[i].z())]);
+
+        QVector4D Normal = QVector4D(CrossProduct.normalized(),1.0f);
+
+        VerticesNormals.push_back(Normal);
+        VerticesNormals.push_back(Normal);
+        VerticesNormals.push_back(Normal);
     }
 
     UpdateResolutionsArray(Resolutions);
@@ -156,10 +164,6 @@ void _object3D::UpdateMeshColorsArray(const QVector<QVector4D>& InSamples)
         index = faceindex + MAX_SAMPLES;
 
         PerFaceData.push_back(face_data(faceindex, EdgeInfo));
-
-        const QVector3D& CrossProduct = QVector3D::crossProduct(Vertices[int(Triangles[i].y())] - Vertices[int(Triangles[i].z())], Vertices[int(Triangles[i].x())] - Vertices[int(Triangles[i].z())]);
-
-        ssbo->Normals[i] = QVector4D(CrossProduct.normalized(),1.0f);
     }
 
     for(int i = 0; i < Triangles.size(); i++)

@@ -1,10 +1,9 @@
-#version 460
+#version 430
 
 layout(std430, binding = 3) buffer MeshColorsData
 {
     int Resolution[9000];
-    vec4 Normals[9000];
-    vec4 Colors[9000][2000];
+    vec4 Colors[9000][562];
 };
 
 uniform bool ColorLerpEnabled;
@@ -12,6 +11,7 @@ uniform bool LightingEnabled;
 uniform vec4 LightPos;
 
 flat in int Index[3];
+flat in vec4 Normal[3];
 in vec4 fragment_Color;
 
 out vec4 out_Color;
@@ -93,7 +93,7 @@ void main(void)
     if(LightingEnabled)
     {
         vec3 LightColor = vec3(1.0f, 1.0f, 1.0f);
-        float diff = max(dot(normalize(Normals[SampleIndex].xyz), normalize(LightPos.xyz)), 0.0);
+        float diff = max(dot(normalize(Normal[0].xyz), normalize(LightPos.xyz)), 0.0);
         vec3 diffuse = diff * LightColor;
 
         out_Color = vec4(diffuse * c.xyz,1.0f);
