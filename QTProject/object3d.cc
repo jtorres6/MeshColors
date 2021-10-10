@@ -77,13 +77,9 @@ _object3D::_object3D(const char *Filename)
     {
         Resolutions.push_back(4);
 
-        VerticesDrawArrays[i*3]=Vertices[Triangles[i].z()];
-        VerticesDrawArrays[i*3+1]=Vertices[Triangles[i].y()];
-        VerticesDrawArrays[i*3+2]=Vertices[Triangles[i].x()];
-
-        Colors.push_back(QVector4D(1.0, 0.0, 0.0, 1.0));
-        Colors.push_back(QVector4D(0.0, 1.0, 0.0, 1.0));
-        Colors.push_back(QVector4D(0.0, 0.0, 1.0, 1.0));
+        VerticesDrawArrays[i*3]   = Vertices[Triangles[i].z()];
+        VerticesDrawArrays[i*3+1] = Vertices[Triangles[i].y()];
+        VerticesDrawArrays[i*3+2] = Vertices[Triangles[i].x()];
 
         // Convert "i", the integer mesh ID, into an RGB color
         int r = (i & 0x000000FF) >>  0;
@@ -119,10 +115,10 @@ int _object3D::SsboSize()
 
 void _object3D::UpdateMeshColorsArray(const QVector<QVector4D>& InSamples)
 {
+    QMap<QPair<int,int>, int> EdgeIndexMap;
+    face_data TriangleData;
+
     int index = Vertices.size() - 1;
-    QPair<int, bool> EdgeInfo[3];
-    EdgeIndexMap.clear();
-    PerFaceData.clear();
 
     for(size_t i = 0; i < Triangles.size(); i++)
     {
@@ -134,59 +130,58 @@ void _object3D::UpdateMeshColorsArray(const QVector<QVector4D>& InSamples)
         {
             R = ssbo->Resolution[i];
         }
+
         index += ((R - 1) * (R - 2))/2;
-        int edge1index = index;
-        bool IsInverted = false;
-        QPair<int, int> pair = qMakePair(Triangles[i].x(),Triangles[i].y());
 
-        EdgeIndexMap.insert(pair, edge1index);
-        EdgeInfo[0].first = edge1index;
-        EdgeInfo[0].second = IsInverted;
+        QPair<int, int> Edges[3];
+        Edges[0] = qMakePair(Triangles[i].z(),Triangles[i].y());
+        Edges[1] = qMakePair(Triangles[i].y(),Triangles[i].x());
+        Edges[2] = qMakePair(Triangles[i].x(),Triangles[i].z());
 
-        index += R-1;
-        int edge2index = index;
-        pair = qMakePair(Triangles[i].y(),Triangles[i].z());
+        for(size_t i = 0; i < 3; i++)
+        {
+            int edgeindex = index;
 
-        EdgeIndexMap.insert(pair, edge2index);
-        EdgeInfo[1].first = edge2index;
-        EdgeInfo[1].second = IsInverted;
+            QPair<int, int> invertedPair = qMakePair(Edges[i].second, Edges[i].first);
 
-        // Colors per edge (R-1)+1:
-        index += R-1;
-        int edge3index = index;
+            const bool IsInverted = EdgeIndexMap.contains(invertedPair);
 
-        pair = qMakePair(Triangles[i].z(),Triangles[i].x());
+            if(IsInverted)
+            {
+                edgeindex = *EdgeIndexMap.find(invertedPair);
+            }
+            else
+            {
+                EdgeIndexMap.insert(Edges[i], edgeindex);
+            }
 
-        EdgeIndexMap.insert(pair, edge3index);
-        EdgeInfo[2].first = edge3index;
-        EdgeInfo[2].second = IsInverted;
+            TriangleData.EdgeInfo[i].first = edgeindex;
+            TriangleData.EdgeInfo[i].second = IsInverted;
+
+            index += R-1;
+        }
 
         index = faceindex + MAX_SAMPLES;
 
-        PerFaceData.push_back(face_data(faceindex, EdgeInfo));
-    }
+        TriangleData.FaceIndex = faceindex;
 
-    for(int i = 0; i < Triangles.size(); i++)
-    {
         int Res = ssbo->Resolution[i];
 
-        ssbo->Colors[i][Res * (Res + 1) + 0] = InSamples[int(Triangles[i].z())];
+        ssbo->Colors[i][Res * (Res + 1) + 0] = InSamples[int(Triangles[i].x())];
         ssbo->Colors[i][Res]                 = InSamples[int(Triangles[i].y())];
-        ssbo->Colors[i][0]                   = InSamples[int(Triangles[i].x())];
+        ssbo->Colors[i][0]                   = InSamples[int(Triangles[i].z())];
 
         int faceIndexOffset = 0;
         int edgeIndexOffset = 0;
 
+        const int ColorsPerEdge = ((Resolutions[i] - 1) * (Resolutions[i] - 2))/2 - 1;
+
         // Cij => C0k, Ck0, Ck(R-k) => 0 < k < R
         for(int a = 1; a < Res; a++)
         {
-            int i1 = int(PerFaceData[i].EdgeInfo[0].first);
-            int i2 = int(PerFaceData[i].EdgeInfo[1].first);
-            int i3 = int(PerFaceData[i].EdgeInfo[2].first);
-
-            ssbo->Colors[i][a * (Res+1) + (Res-a)] = InSamples[int(i1 + edgeIndexOffset)];
-            ssbo->Colors[i][0 * (Res+1) + a]       = InSamples[int(i2 + edgeIndexOffset)];
-            ssbo->Colors[i][a * (Res+1) + 0]       = InSamples[int(i3 + edgeIndexOffset)];
+            ssbo->Colors[i][0 * (Res+1) + a]       = InSamples[int(TriangleData.EdgeInfo[0].first + (TriangleData.EdgeInfo[0].second ? ColorsPerEdge - edgeIndexOffset : edgeIndexOffset))];
+            ssbo->Colors[i][a * (Res+1) + (Res-a)] = InSamples[int(TriangleData.EdgeInfo[1].first + (TriangleData.EdgeInfo[1].second ? ColorsPerEdge - edgeIndexOffset : edgeIndexOffset))];
+            ssbo->Colors[i][a * (Res+1) + 0]       = InSamples[int(TriangleData.EdgeInfo[2].first + (!TriangleData.EdgeInfo[2].second ? ColorsPerEdge - edgeIndexOffset : edgeIndexOffset))];
 
             edgeIndexOffset++;
 
@@ -194,7 +189,7 @@ void _object3D::UpdateMeshColorsArray(const QVector<QVector4D>& InSamples)
             {
                 if(!(a + j == Res))
                 {
-                    ssbo->Colors[i][a * (Res + 1) + j] = InSamples[int(PerFaceData[i].FaceIndex + faceIndexOffset)];
+                    ssbo->Colors[i][a * (Res + 1) + j] = InSamples[int(TriangleData.FaceIndex + faceIndexOffset)];
                     faceIndexOffset++;
                 }
             }

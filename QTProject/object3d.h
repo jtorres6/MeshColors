@@ -40,6 +40,14 @@ struct face_data
         EdgeInfo[1] = InEdgeInfo[1];
         EdgeInfo[2] = InEdgeInfo[2];
     }
+
+    face_data()
+    {
+        FaceIndex = -1;
+        EdgeInfo[0] = QPair<int, bool>(0,false);
+        EdgeInfo[1] = QPair<int, bool>(0,false);
+        EdgeInfo[2] = QPair<int, bool>(0,false);
+    }
 };
 
 class _object3D:public _basic_object3D
@@ -49,13 +57,10 @@ class _object3D:public _basic_object3D
     QVector<QVector3D> VerticesDrawArrays;
     QVector<QVector3D> MeshColorsData;
     QVector<QVector3D> Index;
-    QVector<face_data> PerFaceData;
     QVector<QVector4D> TriangleSelectionColors;
     QVector<QVector4D> VerticesNormals;
 
     QVector<int> Resolutions;
-
-    QMap<QPair<int,int>, int> EdgeIndexMap;
 
     _object3D();
     _object3D(const char *Filename);
