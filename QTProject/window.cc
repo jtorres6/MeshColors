@@ -129,11 +129,11 @@ _window::_window()
     connect(FileOpen, SIGNAL(triggered()), this, SLOT(OpenFileDialog()));
 
     // actions for file menu
-    QAction *SaveTexture = new QAction(tr("&Save image"), this);
+    QAction *SaveTexture = new QAction(tr("&Save texture"), this);
     SaveTexture->setShortcut(tr("Ctrl+S"));
     connect(SaveTexture, SIGNAL(triggered()), this, SLOT(close()));
 
-    QAction *SaveTextureAs = new QAction(tr("&Save image as..."), this);
+    QAction *SaveTextureAs = new QAction(tr("&Save texture as..."), this);
     SaveTextureAs->setShortcut(tr("Ctrl+Shift+S"));
     connect(SaveTextureAs, SIGNAL(triggered()), this, SLOT(SaveImage()));
 
@@ -143,10 +143,10 @@ _window::_window()
 
     // menus
     QMenu *File_menu=menuBar()->addMenu(tr("&File"));
+    File_menu->addAction(FileOpen);
     File_menu->addAction(SaveTexture);
     File_menu->addAction(SaveTextureAs);
     File_menu->addAction(LoadTexture);
-    File_menu->addAction(FileOpen);
     File_menu->addAction(Exit);
     File_menu->setAttribute(Qt::WA_AlwaysShowToolTips);
 
