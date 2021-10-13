@@ -132,7 +132,7 @@ private:
     _axis Axis;
     _object3D object3d;
 
-    const char* ModelFilePath = "../QTProject/Models/cube.ply";
+    const char* ModelFilePath = "";
 
     float Observer_angle_x = 0;
     float Observer_angle_y = 0;

@@ -13,6 +13,7 @@
 #include <QOpenGLTexture>
 #include <QColorDialog>
 #include <debugtools.h>
+#include <QtMath>
 
 using namespace std;
 using namespace _gl_widget_ne;
@@ -219,6 +220,9 @@ void _gl_widget::change_observer()
 
 void _gl_widget::draw_objects()
 {
+    //glEnable(GL_CULL_FACE);
+    //glCullFace(GL_FRONT);
+
     int matrixLocation = program->uniformLocation("matrix");
 
     if(!TriangleSelectionMode)
@@ -400,28 +404,46 @@ void _gl_widget::pick(int Selection_position_x, int Selection_position_y)
         unsigned char data[PencilSize*PencilSize][4];
         glReadBuffer(GL_FRONT);
         glPixelStorei(GL_PACK_ALIGNMENT,1);
-        glReadPixels(Selection_position_x,Selection_position_y, PencilSize, PencilSize, GL_RGBA, GL_UNSIGNED_BYTE, data);
+
+        int PosX = Selection_position_x - 12.5 - (PencilSize*0.5f);
+        int PosY = Selection_position_y - 12.5 - (PencilSize*0.5f);
+
+        glReadPixels(PosX, PosY, PencilSize, PencilSize, GL_RGBA, GL_UNSIGNED_BYTE, data);
+
+
+        QMap<int, float> SelectedIDs;
 
         // Convert the color back to an integer ID
         for(int i = 0; i < PencilSize*PencilSize; i++)
         {
-            int pickedID =
+            const int pickedID =
                 data[i][0] +
                 data[i][1] * 256 +
                 data[i][2] * 256 * 256;
 
+            const float DistanceToCenter = qFabs(0.5f - i/(PencilSize*PencilSize));///qFabs((PencilSize*PencilSize)/2.0f - i)/((PencilSize*PencilSize));
+
             if(pickedID != -1 && pickedID < object3d.points.size())
             {
-                object3d.points[pickedID] = QVector4D(CurrentPaintingColor.red()/255.0f, CurrentPaintingColor.green()/255.0f, CurrentPaintingColor.blue()/255.0f, CurrentPaintingColor.alpha()/255.0f);
-
-                if(!Indexes.contains(pickedID))
+                if(!SelectedIDs.contains(pickedID))
                 {
-                    DebugTools::DrawDebugString(Window, "#\n|\n|\nSelected index --> " + QString::number(pickedID) + " (" + QString::number(data[i][0]) + ", " +
-                            QString::number(data[i][1])+ ", " +
-                             QString::number(data[i][2]) + ")"+ "\n Pos: " + QString::number(Selection_position_x) + " " + QString::number(Selection_position_y),
-                                     Selection_position_x, Window->height() - Selection_position_y, 500, 100,
-                                     "QLabel { color : red; }", 0.1f);
-                    Indexes.append(i);
+                    SelectedIDs.insert(pickedID, DistanceToCenter);
+                    object3d.points[pickedID] = DistanceToCenter * object3d.points[pickedID] + (1.0f - DistanceToCenter) * QVector4D(CurrentPaintingColor.red()/255.0f, CurrentPaintingColor.green()/255.0f, CurrentPaintingColor.blue()/255.0f, CurrentPaintingColor.alpha()/255.0f);
+
+                    //if(!Indexes.contains(pickedID))
+                    //{
+                    //    DebugTools::DrawDebugString(Window, "#\n|\n|\nSelected index --> " + QString::number(pickedID) + " (" + QString::number(data[i][0]) + ", " +
+                    //            QString::number(data[i][1])+ ", " +
+                    //             QString::number(data[i][2]) + ")"+ "\n Pos: " + QString::number(Selection_position_x) + " " + QString::number(Selection_position_y),
+                    //                     Selection_position_x-(PencilSize), Window->height() -  Selection_position_y-(PencilSize), 500, 100,
+                    //                     "QLabel { color : red; }", 0.1f);
+                    //    Indexes.append(i);
+                    //}
+                }
+                else if(SelectedIDs.find(pickedID).value() > DistanceToCenter)
+                {
+                    SelectedIDs.find(pickedID).value() = DistanceToCenter;
+                    object3d.points[pickedID] = DistanceToCenter * object3d.points[pickedID] + (1.0f - DistanceToCenter) * QVector4D(CurrentPaintingColor.red()/255.0f, CurrentPaintingColor.green()/255.0f, CurrentPaintingColor.blue()/255.0f, CurrentPaintingColor.alpha()/255.0f);
                 }
             }
         }
@@ -540,7 +562,7 @@ void _gl_widget::SetCurrentPaintingColor(const QColor &InNewColor)
 
 void _gl_widget::IncrementResolution()
 {
-    if(SelectedTriangle >= 0 && SelectedTriangle < object3d.Resolutions.size() && object3d.Resolutions[SelectedTriangle] < 32)
+    if(SelectedTriangle >= 0 && SelectedTriangle < object3d.Resolutions.size() && object3d.Resolutions[SelectedTriangle] < 64)
     {
         object3d.Resolutions[SelectedTriangle] *= 2;
         object3d.UpdateResolutionsArray(object3d.Resolutions);
