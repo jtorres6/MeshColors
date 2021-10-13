@@ -42,7 +42,15 @@ _window::_window()
     QWidget *Options_widget = new QWidget;
     QVBoxLayout *Vertical_options = new QVBoxLayout;
     QLabel *Label1 = new QLabel("Select color");
-    QPushButton *Color_selection = new QPushButton("");
+    Color_selection = new QPushButton("");
+
+    QColor SelectedColor = Qt::black;
+    if(SelectedColor.isValid())
+    {
+        QString qss = QString("background-color: %1").arg(SelectedColor.name());
+        Color_selection->setStyleSheet(qss);
+    }
+
     Color_selection->setAutoFillBackground(true);
     Color_selection->setPalette(Pal);
     connect(Color_selection, SIGNAL(pressed()), this, SLOT(OpenColorDialog()));
@@ -331,5 +339,12 @@ void _window::LoadMeshColorsFile()
 void _window::OpenColorDialog()
 {
      QColor NewColor = QColorDialog::getColor(Qt::yellow, this );
-     GL_widget->SetCurrentPaintingColor(NewColor);
+
+     if(NewColor.isValid())
+     {
+         GL_widget->SetCurrentPaintingColor(NewColor);
+
+         QString qss = QString("background-color: %1").arg(NewColor.name());
+         Color_selection->setStyleSheet(qss);
+     }
 }

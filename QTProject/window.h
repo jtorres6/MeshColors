@@ -50,6 +50,7 @@ private:
   void resizeEvent(QResizeEvent *event);
 
   QPair<int, int> PreviousPosition;
+  QPushButton *Color_selection;
 
   bool MousePressed = false;
 };
