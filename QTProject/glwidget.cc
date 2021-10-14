@@ -116,7 +116,6 @@ void _gl_widget::keyPressEvent(QKeyEvent *Keyevent)
       break;
   }
 
-
   update();
 }
 
@@ -151,7 +150,7 @@ void _gl_widget::AddCameraZoom(const float InValue)
 
 void _gl_widget::clear_window()
 {
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 }
 
 
@@ -249,6 +248,19 @@ void _gl_widget::draw_objects()
 
         VAO->release();
         program->release();
+
+        program2->bind();
+        VAO4->bind();
+
+        matrixLocation = program2->uniformLocation("matrix");
+        program2->setUniformValue(matrixLocation, Projection);
+        program2->setUniformValue("LineColor", QVector4D(0.0f, 0.3f, 0.8f, 1.0f));
+        program2->setUniformValue("LineMode", true);
+
+        glDrawArrays(GL_LINES,0, object3d.VerticesDrawArrays.size());
+
+        VAO4->release();
+        program2->release();
     }
     else
     {
@@ -296,19 +308,6 @@ void _gl_widget::DrawTrianglesSelectionMode()
     program2->bind();
     VAO2->bind();
     draw_objects();
-    //int matrixLocation = program2->uniformLocation("matrix");
-    //program2->setUniformValue(matrixLocation, Projection);
-    //
-    //program->setUniformValue("ColorLerpEnabled", false);
-    //program->setUniformValue("LightingEnabled", false);
-    //
-    //program2->setUniformValue("LineColor", QVector4D(0.0f, 0.3f, 0.8f, 1.0f));
-    //program2->setUniformValue("LineMode", false);
-    //
-    //glDrawArrays(GL_TRIANGLES,0, object3d.VerticesDrawArrays.size());
-    //
-    //VAO2->release();
-    //program2->release();
 }
 
 
@@ -474,9 +473,6 @@ void _gl_widget::pick(int Selection_position_x, int Selection_position_y)
            R +
            G * 256 +
            B * 256 * 256;
-            //data[0] +
-            //data[1] * 256 +
-            //data[2] * 256 * 256;
 
         if(pickedID != -1)
         {
@@ -663,6 +659,16 @@ void _gl_widget::CreateBuffers()
 
     VAO3->release();
     program2->release();
+
+    VAO4 = new QOpenGLVertexArrayObject();
+    VAO4->create();
+    VAO4->bind();
+
+    InitializeBuffer(program2, object3d.VerticesDrawArrays.data(), object3d.VerticesDrawArrays.size() * sizeof(QVector3D),"vertex", GL_FLOAT, 0, 3);
+    InitializeBuffer(program2, object3d.TriangleSelectionColors.data(), object3d.TriangleSelectionColors.size() * sizeof(QVector4D), "color", GL_FLOAT, 0, 4);
+
+    VAO4->release();
+
 }
 
 void _gl_widget::LogGlInfo()
