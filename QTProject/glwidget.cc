@@ -81,9 +81,9 @@ void _gl_widget::keyPressEvent(QKeyEvent *Keyevent)
 
   case Qt::Key_Plus:
 
-      if(SelectedTriangle >= 0 && object3d.Resolutions[SelectedTriangle] < 64)
+      if(SelectedTriangleID >= 0 && object3d.Resolutions[SelectedTriangleID] < 64)
       {
-          object3d.Resolutions[SelectedTriangle] *= 2;
+          object3d.Resolutions[SelectedTriangleID] *= 2;
           object3d.UpdateResolutionsArray(object3d.Resolutions);
           UpdateSSBO(ssbo, sizeof(*object3d.ssbo), object3d.ssbo);
       }
@@ -289,13 +289,28 @@ void _gl_widget::draw_objects()
 
     matrixLocation = program2->uniformLocation("matrix");
     program2->setUniformValue(matrixLocation, Projection);
-    program2->setUniformValue("LineColor", QVector4D(0.0f, 0.5f, 1.0f, 1.0f));
+    program2->setUniformValue("LineColor", QVector4D(0.0f, 0.7f, 1.0f, 1.0f));
     program2->setUniformValue("LineMode", false);
 
     glDrawArrays(GL_LINES, 0, Axis.Vertices.size());
 
     VAO3->release();
 
+    if(VAO5 != nullptr && SelectedTriangleDrawArray.size() > 0)
+    {
+        // Draw axis
+        VAO5->bind();
+        glLineWidth(7.5f);
+
+        matrixLocation = program2->uniformLocation("matrix");
+        program2->setUniformValue(matrixLocation, Projection);
+        program2->setUniformValue("LineColor", QVector4D(1.0f, 0.0f, 0.0f, 1.0f));
+        program2->setUniformValue("LineMode", true);
+
+        glDrawArrays(GL_LINES, 0, SelectedTriangleDrawArray.size());
+
+        VAO5->release();
+    }
     program2->release();
 }
 
@@ -354,6 +369,8 @@ void _gl_widget::initializeGL()
     Axis = _axis(1500.0f);
 
     object3d = _object3D(ModelFilePath);
+    SelectedTriangleDrawArray.clear();
+    TriangleSelectionMode = false;
 
     LoadProgram();
 
@@ -361,7 +378,7 @@ void _gl_widget::initializeGL()
 
     LogGlInfo();
 
-    glClearColor(1.0,1.0,1.0,1.0);
+    glClearColor(0.22f, 0.22f, 0.22f, 1.0f);
     glEnable(GL_DEPTH_TEST);
 
     Observer_angle_x=0;
@@ -420,7 +437,7 @@ void _gl_widget::pick(int Selection_position_x, int Selection_position_y)
                 data[i][1] * 256 +
                 data[i][2] * 256 * 256;
 
-            const float DistanceToCenter = qFabs(0.5f - i/(PencilSize*PencilSize));///qFabs((PencilSize*PencilSize)/2.0f - i)/((PencilSize*PencilSize));
+            const float DistanceToCenter = qFabs(0.5f - i/(PencilSize*PencilSize));
 
             if(pickedID != -1 && pickedID < object3d.points.size())
             {
@@ -429,15 +446,15 @@ void _gl_widget::pick(int Selection_position_x, int Selection_position_y)
                     SelectedIDs.insert(pickedID, DistanceToCenter);
                     object3d.points[pickedID] = DistanceToCenter * object3d.points[pickedID] + (1.0f - DistanceToCenter) * QVector4D(CurrentPaintingColor.red()/255.0f, CurrentPaintingColor.green()/255.0f, CurrentPaintingColor.blue()/255.0f, CurrentPaintingColor.alpha()/255.0f);
 
-                    //if(!Indexes.contains(pickedID))
-                    //{
-                    //    DebugTools::DrawDebugString(Window, "#\n|\n|\nSelected index --> " + QString::number(pickedID) + " (" + QString::number(data[i][0]) + ", " +
-                    //            QString::number(data[i][1])+ ", " +
-                    //             QString::number(data[i][2]) + ")"+ "\n Pos: " + QString::number(Selection_position_x) + " " + QString::number(Selection_position_y),
-                    //                     Selection_position_x-(PencilSize), Window->height() -  Selection_position_y-(PencilSize), 500, 100,
-                    //                     "QLabel { color : red; }", 0.1f);
-                    //    Indexes.append(i);
-                    //}
+                    if(!Indexes.contains(pickedID))
+                    {
+                        DebugTools::DrawDebugString(Window, "#\n|\n|\nSelected index --> " + QString::number(pickedID) + " (" + QString::number(data[i][0]) + ", " +
+                                QString::number(data[i][1])+ ", " +
+                                 QString::number(data[i][2]) + ")"+ "\n Pos: " + QString::number(Selection_position_x) + " " + QString::number(Selection_position_y),
+                                         Selection_position_x-(PencilSize), Window->height() -  Selection_position_y-(PencilSize), 500, 100,
+                                         "QLabel { color : red; }", 0.1f);
+                        Indexes.append(i);
+                    }
                 }
                 else if(SelectedIDs.find(pickedID).value() > DistanceToCenter)
                 {
@@ -474,14 +491,34 @@ void _gl_widget::pick(int Selection_position_x, int Selection_position_y)
            G * 256 +
            B * 256 * 256;
 
-        if(pickedID != -1)
+        if(pickedID >= 0 && SelectedTriangleID < object3d.Resolutions.size())
         {
-            DebugTools::DrawDebugString(Window, "#\n|\n|\n Previous --> " +   QString::number(SelectedTriangle) + "\n Selected index --> " + QString::number(pickedID) + " = " + QString::number(R) + " + " +
+            DebugTools::DrawDebugString(Window, "#\n|\n|\n Previous --> " +   QString::number(SelectedTriangleID) + "\n Selected index --> " + QString::number(pickedID) + " = " + QString::number(R) + " + " +
                     QString::number(G)+ " * 256 + " +
                      QString::number(B) + " * 256 * 256"+ "\n Pos: " + QString::number(Selection_position_x) + " " + QString::number(Selection_position_y),
                              Selection_position_x, Window->height() - Selection_position_y, 500, 100,
                              "QLabel { color : red; }", 0.1f);
-            SelectedTriangle = pickedID;
+
+            SelectedTriangleID = pickedID;
+            SelectedTriangle = object3d.Triangles[SelectedTriangleID];
+
+            VAO5 = new QOpenGLVertexArrayObject();
+            VAO5->create();
+            VAO5->bind();
+
+            SelectedTriangleDrawArray.clear();
+
+            SelectedTriangleDrawArray.push_back(object3d.Vertices[SelectedTriangle.z()]);
+            SelectedTriangleDrawArray.push_back(object3d.Vertices[SelectedTriangle.y()]);
+            SelectedTriangleDrawArray.push_back(object3d.Vertices[SelectedTriangle.y()]);
+            SelectedTriangleDrawArray.push_back(object3d.Vertices[SelectedTriangle.x()]);
+            SelectedTriangleDrawArray.push_back(object3d.Vertices[SelectedTriangle.x()]);
+            SelectedTriangleDrawArray.push_back(object3d.Vertices[SelectedTriangle.z()]);
+
+            InitializeBuffer(program2, SelectedTriangleDrawArray.data(), SelectedTriangleDrawArray.size() * sizeof(QVector3D),"vertex", GL_FLOAT, 0, 3);
+            InitializeBuffer(program2, new QVector4D(1.0f, 0.0f, 0.0f, 1.0f), sizeof(QVector4D), "color", GL_FLOAT, 0, 4);
+
+            VAO5->release();
         }
 
         TriangleSelectionMode = false;
@@ -558,9 +595,9 @@ void _gl_widget::SetCurrentPaintingColor(const QColor &InNewColor)
 
 void _gl_widget::IncrementResolution()
 {
-    if(SelectedTriangle >= 0 && SelectedTriangle < object3d.Resolutions.size() && object3d.Resolutions[SelectedTriangle] < 64)
+    if(SelectedTriangleID >= 0 && SelectedTriangleID < object3d.Resolutions.size() && object3d.Resolutions[SelectedTriangleID] < 64)
     {
-        object3d.Resolutions[SelectedTriangle] *= 2;
+        object3d.Resolutions[SelectedTriangleID] *= 2;
         object3d.UpdateResolutionsArray(object3d.Resolutions);
         UpdateSSBO(ssbo, sizeof(*object3d.ssbo), object3d.ssbo);
         update();
@@ -569,9 +606,9 @@ void _gl_widget::IncrementResolution()
 
 void _gl_widget::DecreaseResolution()
 {
-    if(SelectedTriangle >= 0 && SelectedTriangle < object3d.Resolutions.size() && SelectedTriangle >= 0 && object3d.Resolutions[SelectedTriangle] > 2)
+    if(SelectedTriangleID >= 0 && SelectedTriangleID < object3d.Resolutions.size() && SelectedTriangleID >= 0 && object3d.Resolutions[SelectedTriangleID] >= 2)
     {
-        object3d.Resolutions[SelectedTriangle] /= 2;
+        object3d.Resolutions[SelectedTriangleID] /= 2;
         object3d.UpdateResolutionsArray(object3d.Resolutions);
         UpdateSSBO(ssbo, sizeof(*object3d.ssbo), object3d.ssbo);
         update();
@@ -580,7 +617,7 @@ void _gl_widget::DecreaseResolution()
 
 void _gl_widget::EnableTriangleSelectionMode()
 {
-    TriangleSelectionMode = true;
+    TriangleSelectionMode = !TriangleSelectionMode;
     update();
 }
 
@@ -701,4 +738,8 @@ void _gl_widget::InitializeBuffer(QOpenGLShaderProgram* InShader, void* InData, 
     InShader->enableAttributeArray(InName);
     InShader->setAttributeBuffer(InName, InType, InOffset, InStride);
     buffer->release();
+}
+
+void _gl_widget::MouseMove(const int InPosX, const int InPosY)
+{
 }

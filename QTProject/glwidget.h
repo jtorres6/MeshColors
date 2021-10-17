@@ -66,6 +66,7 @@ public:
     void draw_objects();
 
     void pick(int Selection_position_x, int Selection_position_y);
+    void MouseMove(const int InPosX, const int InPosY);
     void DrawTrianglesSelectionMode();
 
     void MoveCameraRightLeft(QPair<qint32, qint32> InUnits);
@@ -114,7 +115,7 @@ private:
 
     QOpenGLShaderProgram* program;
     QOpenGLShaderProgram* program2;
-    QOpenGLVertexArrayObject *VAO, *VAO2, *VAO3, *VAO4;
+    QOpenGLVertexArrayObject *VAO, *VAO2, *VAO3, *VAO4, *VAO5;
     GLuint FBO;
     GLuint Color_texture;
     GLuint Depth_texture;
@@ -152,7 +153,10 @@ private:
 
     bool ControlPressed = false;
 
-    int SelectedTriangle = -1;
+    int SelectedTriangleID = -1;
+    QVector3D SelectedTriangle;
+    QVector<QVector3D> SelectedTriangleDrawArray;
+
     int PencilSize = 1;
 
     QVector3D points[1024];
