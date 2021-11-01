@@ -1,4 +1,4 @@
-#version 430
+#version 420
 
 layout(std430, binding = 3) buffer MeshColorsData
 {
