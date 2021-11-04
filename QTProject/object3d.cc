@@ -25,7 +25,7 @@ void _object3D::ReadPlyFile(const char *Filename)
 
     for(size_t i = 0; i <= Coordinates.size()-3; i+=3)
     {
-        Vertices.push_back(QVector3D(Coordinates[i],Coordinates[i+1],Coordinates[i+2]));
+        vertices.push_back(QVector3D(Coordinates[i],Coordinates[i+1],Coordinates[i+2]));
     }
 
     for(size_t i = 0; i <= Positions.size()-3; i+=3)
@@ -77,9 +77,9 @@ _object3D::_object3D(const char *Filename)
     {
         Resolutions.push_back(4);
 
-        VerticesDrawArrays[i*3]   = Vertices[Triangles[i].z()];
-        VerticesDrawArrays[i*3+1] = Vertices[Triangles[i].y()];
-        VerticesDrawArrays[i*3+2] = Vertices[Triangles[i].x()];
+        VerticesDrawArrays[i*3]   = vertices[Triangles[i].z()];
+        VerticesDrawArrays[i*3+1] = vertices[Triangles[i].y()];
+        VerticesDrawArrays[i*3+2] = vertices[Triangles[i].x()];
 
         // Convert "i", the integer mesh ID, into an RGB color
         int r = (i & 0x000000FF) >>  0;
@@ -95,7 +95,7 @@ _object3D::_object3D(const char *Filename)
         Index.push_back(QVector3D(i, i, i));
         Index.push_back(QVector3D(i, i, i));
 
-        const QVector3D& CrossProduct = QVector3D::crossProduct(Vertices[int(Triangles[i].y())] - Vertices[int(Triangles[i].z())], Vertices[int(Triangles[i].x())] - Vertices[int(Triangles[i].z())]);
+        const QVector3D& CrossProduct = QVector3D::crossProduct(vertices[int(Triangles[i].y())] - vertices[int(Triangles[i].z())], vertices[int(Triangles[i].x())] - vertices[int(Triangles[i].z())]);
 
         QVector4D Normal = QVector4D(CrossProduct.normalized(),1.0f);
 
@@ -118,7 +118,7 @@ void _object3D::UpdateMeshColorsArray(const QVector<QVector4D>& InSamples)
     QMap<QPair<int,int>, int> EdgeIndexMap;
     face_data TriangleData;
 
-    int index = Vertices.size() - 1;
+    int index = vertices.size() - 1;
 
     for(size_t i = 0; i < Triangles.size(); i++)
     {

@@ -30,6 +30,8 @@ _gl_widget::_gl_widget(_window *Window1):Window(Window1)
 {
   setMinimumSize(300, 300);
   setFocusPolicy(Qt::StrongFocus);
+  camera = MovableObject();
+  light = MovableObject();
 }
 
 
@@ -51,12 +53,12 @@ void _gl_widget::keyReleaseEvent(QKeyEvent *Keyevent)
 void _gl_widget::keyPressEvent(QKeyEvent *Keyevent)
 {
   switch(Keyevent->key()){
-  case Qt::Key_Left:Light_angle_y+=10.0f*ANGLE_STEP;break;
-  case Qt::Key_Right:Light_angle_y-=10.0f*ANGLE_STEP;break;
-  case Qt::Key_Up:Light_angle_x+=10.0f*ANGLE_STEP;break;
-  case Qt::Key_Down:Light_angle_x-=10.0f*ANGLE_STEP;break;
-  case Qt::Key_PageUp:Light_distance*=1.2;break;
-  case Qt::Key_PageDown:Light_distance/=1.2;break;
+  case Qt::Key_Left:lightAngleY+=10.0f*ANGLE_STEP;break;
+  case Qt::Key_Right:lightAngleY-=10.0f*ANGLE_STEP;break;
+  case Qt::Key_Up:lightAngleX+=10.0f*ANGLE_STEP;break;
+  case Qt::Key_Down:lightAngleX-=10.0f*ANGLE_STEP;break;
+  case Qt::Key_PageUp:lightDistance*=1.2;break;
+  case Qt::Key_PageDown:lightDistance/=1.2;break;
 
   case Qt::Key_V:ColorLerpEnabled=!ColorLerpEnabled;
       break;
@@ -164,23 +166,14 @@ void _gl_widget::clear_window()
 
 void _gl_widget::change_projection()
 {
-    Projection  = QMatrix4x4();
-    Rotation_x  = QMatrix4x4();
-    Rotation_y  = QMatrix4x4();
-    Translation = QMatrix4x4();
+    camera.reset();
 
     const float AspectRatio = GLfloat(width()) / GLfloat(height());
-    Projection.frustum(X_MIN * AspectRatio, X_MAX * AspectRatio, Y_MIN, Y_MAX , FRONT_PLANE_PERSPECTIVE, BACK_PLANE_PERSPECTIVE);
-    Rotation_x.rotate(Observer_angle_x, 1, 0, 0);
-    Rotation_y.rotate(Observer_angle_y, 0, 1, 0);
-    Translation.translate(Observer_pos_x, Observer_pos_y, -Observer_distance);
-
-    Projection*=Translation;
-    Projection*=Rotation_x;
-    Projection*=Rotation_y;
+    camera.projection.frustum(X_MIN * AspectRatio, X_MAX * AspectRatio, Y_MIN, Y_MAX , FRONT_PLANE_PERSPECTIVE, BACK_PLANE_PERSPECTIVE);
+    camera.move(Observer_pos_x, Observer_pos_y, -Observer_distance);
+    camera.rotate(Observer_angle_x, 1, 0, 0);
+    camera.rotate(Observer_angle_y, 0, 1, 0);
 }
-
-
 
 /*****************************************************************************//**
  * Funcion para definir la transformación de vista (posicionar la camara)
@@ -191,22 +184,10 @@ void _gl_widget::change_projection()
 
 void _gl_widget::change_observer()
 {
-    Projection_light  = QMatrix4x4();
-    Rotation_x_light  = QMatrix4x4();
-    Rotation_y_light  = QMatrix4x4();
-    Translation_light = QMatrix4x4();
-
-    const float AspectRatio = GLfloat(width()) / GLfloat(height());
-    Projection_light.frustum(X_MIN * AspectRatio, X_MAX * AspectRatio, Y_MIN, Y_MAX , FRONT_PLANE_PERSPECTIVE, BACK_PLANE_PERSPECTIVE);
-    Rotation_x_light.rotate(Light_angle_x, 1, 0, 0);
-    Rotation_y_light.rotate(Light_angle_y, 0, 1, 0);
-    Translation_light.translate(0, 0, -Light_distance);
-
-    Projection_light*=Translation_light;
-    Projection_light*=Rotation_x_light;
-    Projection_light*=Rotation_y_light;
-
-    LightPosition = QVector4D(1.0f,1.0f, 1.0f,1.0f) * Projection_light;
+    light.reset();
+    light.move(0, 0, -lightDistance);
+    light.rotate(lightAngleX, 1, 0, 0);
+    light.rotate(lightAngleY, 0, 1, 0);
 }
 
 
@@ -228,7 +209,7 @@ void _gl_widget::draw_objects()
     {
         program->bind();
 
-        program->setUniformValue(matrixLocation, Projection);
+        program->setUniformValue(matrixLocation, camera.getProjectedTransform());
 
         // Draw 3D model
         VAO->bind();
@@ -236,7 +217,7 @@ void _gl_widget::draw_objects()
         program->setUniformValue("BaseRendering", false);
         glLineWidth(2.0f);
 
-        program->setUniformValue("LightPos", LightPosition);
+        program->setUniformValue("LightPos", light.getLocation());
 
         program->setUniformValue("ColorLerpEnabled", !DrawingSamplesID && ColorLerpEnabled);
         program->setUniformValue("LightingEnabled", !DrawingSamplesID && LightingEnabled);
@@ -253,7 +234,7 @@ void _gl_widget::draw_objects()
         VAO4->bind();
 
         matrixLocation = program2->uniformLocation("matrix");
-        program2->setUniformValue(matrixLocation, Projection);
+        program2->setUniformValue(matrixLocation, camera.getProjectedTransform());
         program2->setUniformValue("LineColor", QVector4D(0.0f, 0.3f, 0.8f, 1.0f));
         program2->setUniformValue("LineMode", true);
 
@@ -268,7 +249,7 @@ void _gl_widget::draw_objects()
         VAO2->bind();
 
         int matrixLocation = program2->uniformLocation("matrix");
-        program2->setUniformValue(matrixLocation, Projection);
+        program2->setUniformValue(matrixLocation, camera.getProjectedTransform());
 
         program->setUniformValue("ColorLerpEnabled", false);
         program->setUniformValue("LightingEnabled", false);
@@ -288,11 +269,11 @@ void _gl_widget::draw_objects()
     glLineWidth(1.0f);
 
     matrixLocation = program2->uniformLocation("matrix");
-    program2->setUniformValue(matrixLocation, Projection);
+    program2->setUniformValue(matrixLocation, camera.getProjectedTransform());
     program2->setUniformValue("LineColor", QVector4D(0.0f, 0.7f, 1.0f, 1.0f));
     program2->setUniformValue("LineMode", false);
 
-    glDrawArrays(GL_LINES, 0, Axis.Vertices.size());
+    glDrawArrays(GL_LINES, 0, Axis.vertices.size());
 
     VAO3->release();
 
@@ -303,7 +284,7 @@ void _gl_widget::draw_objects()
         glLineWidth(7.5f);
 
         matrixLocation = program2->uniformLocation("matrix");
-        program2->setUniformValue(matrixLocation, Projection);
+        program2->setUniformValue(matrixLocation, camera.getProjectedTransform());
         program2->setUniformValue("LineColor", QVector4D(1.0f, 0.0f, 0.0f, 1.0f));
         program2->setUniformValue("LineMode", true);
 
@@ -311,6 +292,7 @@ void _gl_widget::draw_objects()
 
         VAO5->release();
     }
+
     program2->release();
 }
 
@@ -385,9 +367,9 @@ void _gl_widget::initializeGL()
     Observer_angle_y=0;
     Observer_distance=DEFAULT_DISTANCE;
 
-    Light_angle_x=0;
-    Light_angle_y=0;
-    Light_distance=DEFAULT_DISTANCE;
+    lightAngleX=0;
+    lightAngleY=0;
+    lightDistance=DEFAULT_DISTANCE;
 }
 
 
@@ -425,7 +407,6 @@ void _gl_widget::pick(int Selection_position_x, int Selection_position_y)
         int PosY = Selection_position_y - 12.5 - (PencilSize*0.5f);
 
         glReadPixels(PosX, PosY, PencilSize, PencilSize, GL_RGBA, GL_UNSIGNED_BYTE, data);
-
 
         QMap<int, float> SelectedIDs;
 
@@ -508,12 +489,12 @@ void _gl_widget::pick(int Selection_position_x, int Selection_position_y)
 
             SelectedTriangleDrawArray.clear();
 
-            SelectedTriangleDrawArray.push_back(object3d.Vertices[SelectedTriangle.z()]);
-            SelectedTriangleDrawArray.push_back(object3d.Vertices[SelectedTriangle.y()]);
-            SelectedTriangleDrawArray.push_back(object3d.Vertices[SelectedTriangle.y()]);
-            SelectedTriangleDrawArray.push_back(object3d.Vertices[SelectedTriangle.x()]);
-            SelectedTriangleDrawArray.push_back(object3d.Vertices[SelectedTriangle.x()]);
-            SelectedTriangleDrawArray.push_back(object3d.Vertices[SelectedTriangle.z()]);
+            SelectedTriangleDrawArray.push_back(object3d.vertices[SelectedTriangle.z()]);
+            SelectedTriangleDrawArray.push_back(object3d.vertices[SelectedTriangle.y()]);
+            SelectedTriangleDrawArray.push_back(object3d.vertices[SelectedTriangle.y()]);
+            SelectedTriangleDrawArray.push_back(object3d.vertices[SelectedTriangle.x()]);
+            SelectedTriangleDrawArray.push_back(object3d.vertices[SelectedTriangle.x()]);
+            SelectedTriangleDrawArray.push_back(object3d.vertices[SelectedTriangle.z()]);
 
             InitializeBuffer(program2, SelectedTriangleDrawArray.data(), SelectedTriangleDrawArray.size() * sizeof(QVector3D),"vertex", GL_FLOAT, 0, 3);
             InitializeBuffer(program2, new QVector4D(1.0f, 0.0f, 0.0f, 1.0f), sizeof(QVector4D), "color", GL_FLOAT, 0, 4);
@@ -658,7 +639,7 @@ void _gl_widget::CreateBuffers()
     VAO->bind();
 
     InitializeBuffer(program, object3d.VerticesDrawArrays.data(), object3d.VerticesDrawArrays.size() * sizeof(QVector3D),"vertex", GL_FLOAT, 0, 3);
-    InitializeBuffer(program, object3d.Colors.data(), object3d.Colors.size() * sizeof(QVector4D), "color", GL_FLOAT, 0, 4);
+    InitializeBuffer(program, object3d.colors.data(), object3d.colors.size() * sizeof(QVector4D), "color", GL_FLOAT, 0, 4);
     InitializeBuffer(program, object3d.Index.data(), object3d.Index.size() * sizeof(QVector3D), "indexes", GL_FLOAT, 0, 3);
     InitializeBuffer(program, object3d.VerticesNormals.data(), object3d.VerticesNormals.size() * sizeof(QVector4D), "normals", GL_FLOAT, 0, 4);
 
@@ -691,8 +672,8 @@ void _gl_widget::CreateBuffers()
     VAO3->create();
     VAO3->bind();
 
-    InitializeBuffer(program2, Axis.Vertices.data(), Axis.Vertices.size() * sizeof(QVector3D),"vertex", GL_FLOAT, 0, 3);
-    InitializeBuffer(program2, Axis.Colors.data(), Axis.Colors.size() * sizeof(QVector4D), "color", GL_FLOAT, 0, 4);
+    InitializeBuffer(program2, Axis.vertices.data(), Axis.vertices.size() * sizeof(QVector3D),"vertex", GL_FLOAT, 0, 3);
+    InitializeBuffer(program2, Axis.colors.data(), Axis.colors.size() * sizeof(QVector4D), "color", GL_FLOAT, 0, 4);
 
     VAO3->release();
     program2->release();

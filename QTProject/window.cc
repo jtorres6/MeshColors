@@ -251,7 +251,7 @@ void _window::SaveImage()
     QVector<QVector4D> Colors;
     int counter = 0;
 
-    for(int j = 0; j < GL_widget->GetObject3D()->Vertices.size()-1; j++)
+    for(int j = 0; j < GL_widget->GetObject3D()->vertices.size()-1; j++)
     {
         Colors.push_back(GL_widget->GetMeshColorsArray()[j]);
         counter++;
@@ -308,7 +308,7 @@ void _window::LoadMeshColorsFile()
 
     int counter = 0;
 
-    for(int i = 0; i < GL_widget->GetObject3D()->Vertices.size() - 1; i++)
+    for(int i = 0; i < GL_widget->GetObject3D()->vertices.size() - 1; i++)
     {
         Colors.push_back(array[i]);
         counter++;

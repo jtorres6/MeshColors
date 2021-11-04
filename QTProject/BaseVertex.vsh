@@ -1,4 +1,4 @@
-#version 420
+#version 430
 
 layout (location = 0) uniform mat4 matrix;
 layout (location = 1) in vec3 vertex;

@@ -31,8 +31,8 @@
 class _basic_object3D
 {
   public:
-  QVector<QVector3D> Vertices;
-  QVector<QVector4D> Colors;
+  QVector<QVector3D> vertices;
+  QVector<QVector4D> colors;
 };
 
 #endif

@@ -26,6 +26,7 @@
 #include <QOpenGLFunctions>
 #include <QOpenGLExtraFunctions>
 #include <QOpenGLTexture>
+#include <movableobject.h>
 
 
 namespace _gl_widget_ne {
@@ -115,20 +116,19 @@ private:
 
     QOpenGLShaderProgram* program;
     QOpenGLShaderProgram* program2;
-    QOpenGLVertexArrayObject *VAO, *VAO2, *VAO3, *VAO4;
+
+    QOpenGLVertexArrayObject *VAO;
+    QOpenGLVertexArrayObject *VAO2;
+    QOpenGLVertexArrayObject *VAO3;
+    QOpenGLVertexArrayObject *VAO4;
+    QOpenGLVertexArrayObject *VAO5;
+
     GLuint FBO;
     GLuint Color_texture;
     GLuint Depth_texture;
 
-    QMatrix4x4 Projection;
-    QMatrix4x4 Rotation_x;
-    QMatrix4x4 Rotation_y;
-    QMatrix4x4 Translation;
-
-    QMatrix4x4 Projection_light;
-    QMatrix4x4 Rotation_x_light;
-    QMatrix4x4 Rotation_y_light;
-    QMatrix4x4 Translation_light;
+    MovableObject camera;
+    MovableObject light;
 
     _axis Axis;
     _object3D object3d;
@@ -141,9 +141,9 @@ private:
     float Observer_pos_y = 0;
     float Observer_distance = 1;
 
-    float Light_angle_x = 0;
-    float Light_angle_y = 0;
-    float Light_distance = 1;
+    float lightAngleX = 0;
+    float lightAngleY = 0;
+    float lightDistance = 1;
 
     bool TriangleSelectionMode = false;
     bool ColorLerpEnabled = false;
@@ -167,7 +167,7 @@ private:
 
     QColor CurrentPaintingColor = QColor(1.0f, 0.0f, 0.0f, 1.0f);
 
-    QVector4D LightPosition = QVector4D(0.0f, 0.0f, 0.0f, 0.0f);
+    QVector4D lightPosition = QVector4D(0.0f, 0.0f, 0.0f, 0.0f);
 };
 
 #endif

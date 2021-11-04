@@ -2,6 +2,7 @@ HEADERS += \
   colors.h \
   basic_object3d.h \
   debugtools.h \
+  movableobject.h \
   object3d.h \
   axis.h \
   glwidget.h \
@@ -11,6 +12,7 @@ HEADERS += \
 SOURCES += \
   basic_object3d.cc \
   debugtools.cpp \
+  movableobject.cpp \
   object3d.cc \
   axis.cc \
   main.cc \
