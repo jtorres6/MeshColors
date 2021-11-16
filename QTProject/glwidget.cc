@@ -420,7 +420,7 @@ void _gl_widget::pick(int Selection_position_x, int Selection_position_y)
 
             const float DistanceToCenter = qFabs(0.5f - i/(PencilSize*PencilSize));
 
-            if(pickedID != -1 && pickedID < object3d.points.size())
+             if(pickedID != -1 && pickedID < object3d.points.size())
             {
                 if(!SelectedIDs.contains(pickedID))
                 {
@@ -429,11 +429,11 @@ void _gl_widget::pick(int Selection_position_x, int Selection_position_y)
 
                     if(!Indexes.contains(pickedID))
                     {
-                        DebugTools::DrawDebugString(Window, "#\n|\n|\nSelected index --> " + QString::number(pickedID) + " (" + QString::number(data[i][0]) + ", " +
-                                QString::number(data[i][1])+ ", " +
-                                 QString::number(data[i][2]) + ")"+ "\n Pos: " + QString::number(Selection_position_x) + " " + QString::number(Selection_position_y),
-                                         Selection_position_x-(PencilSize), Window->height() -  Selection_position_y-(PencilSize), 500, 100,
-                                         "QLabel { color : red; }", 0.1f);
+                        //DebugTools::DrawDebugString(Window, "#\n|\n|\nSelected index --> " + QString::number(pickedID) + " (" + QString::number(data[i][0]) + ", " +
+                        //        QString::number(data[i][1])+ ", " +
+                        //         QString::number(data[i][2]) + ")"+ "\n Pos: " + QString::number(Selection_position_x) + " " + QString::number(Selection_position_y),
+                        //                 Selection_position_x-(PencilSize), Window->height() -  Selection_position_y-(PencilSize), 500, 100,
+                        //                 "QLabel { color : red; }", 0.1f);
                         Indexes.append(i);
                     }
                 }
@@ -605,6 +605,11 @@ void _gl_widget::EnableTriangleSelectionMode()
 void _gl_widget::UpdatePencilSize(const int InValue)
 {
     PencilSize = InValue;
+}
+
+void _gl_widget::UpdatePencilTransparency(const int InValue)
+{
+    PencilTransparency = float(InValue)/100.0f;
 }
 
 void _gl_widget::ToggleLighting()

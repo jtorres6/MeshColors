@@ -81,6 +81,13 @@ _window::_window()
     Vertical_options->addWidget(Label3);
     Vertical_options->addWidget(PencilSize_widget);
 
+    QLabel *Label4 = new QLabel("Pencil transparency");
+    QSlider* PencilTransparency_widget = new QSlider(Qt::Horizontal);
+    PencilTransparency_widget->setMinimum(0);
+    PencilTransparency_widget->setMaximum(100);
+    Vertical_options->addWidget(Label4);
+    Vertical_options->addWidget(PencilTransparency_widget);
+
     Options_widget->setLayout(Vertical_options);
 
     QTabWidget *Tab_widget = new QTabWidget;
@@ -101,6 +108,7 @@ _window::_window()
     connect(Lighting_button, SIGNAL(pressed()), GL_widget, SLOT(ToggleLighting()));
     connect(Lerp_button, SIGNAL(pressed()), GL_widget, SLOT(ToggleColorInterpolation()));
     connect(PencilSize_widget, SIGNAL(valueChanged(int)), GL_widget, SLOT(UpdatePencilSize(int)));
+    connect(PencilTransparency_widget, SIGNAL(valueChanged(int)), GL_widget, SLOT(UpdatePencilTransparency(int)));
 
     QHBoxLayout *Horizontal_frame = new QHBoxLayout();
     Horizontal_frame->setContentsMargins(1,1,1,1);

@@ -118,7 +118,7 @@ void _object3D::UpdateMeshColorsArray(const QVector<QVector4D>& InSamples)
     QMap<QPair<int,int>, int> EdgeIndexMap;
     face_data TriangleData;
 
-    int index = vertices.size() - 1;
+    int index = vertices.size();
 
     for(size_t i = 0; i < Triangles.size(); i++)
     {
@@ -131,7 +131,7 @@ void _object3D::UpdateMeshColorsArray(const QVector<QVector4D>& InSamples)
             R = ssbo->Resolution[i];
         }
 
-        index += ((R - 1) * (R - 2))/2;
+        index += (R - 1) * (R - 2);
 
         QPair<int, int> Edges[3];
         Edges[0] = qMakePair(Triangles[i].z(),Triangles[i].y());
@@ -171,8 +171,8 @@ void _object3D::UpdateMeshColorsArray(const QVector<QVector4D>& InSamples)
         ssbo->Colors[i][Res]                 = InSamples[int(Triangles[i].y())];
         ssbo->Colors[i][0]                   = InSamples[int(Triangles[i].z())];
 
-        int faceIndexOffset = 0;
         int edgeIndexOffset = 0;
+        int faceIndexOffset = 0;
 
         const int ColorsPerEdge = ((Resolutions[i] - 1) * (Resolutions[i] - 2))/2 - 1;
 
@@ -182,13 +182,13 @@ void _object3D::UpdateMeshColorsArray(const QVector<QVector4D>& InSamples)
             ssbo->Colors[i][0 * (Res+1) + a]       = InSamples[int(TriangleData.EdgeInfo[0].first + (TriangleData.EdgeInfo[0].second ? ColorsPerEdge - edgeIndexOffset : edgeIndexOffset))];
             ssbo->Colors[i][a * (Res+1) + (Res-a)] = InSamples[int(TriangleData.EdgeInfo[1].first + (TriangleData.EdgeInfo[1].second ? ColorsPerEdge - edgeIndexOffset : edgeIndexOffset))];
             ssbo->Colors[i][a * (Res+1) + 0]       = InSamples[int(TriangleData.EdgeInfo[2].first + (!TriangleData.EdgeInfo[2].second ? ColorsPerEdge - edgeIndexOffset : edgeIndexOffset))];
-
             edgeIndexOffset++;
+        }
 
-            for(int j = 1; j < Res; j++)
-            {
-                if(!(a + j == Res))
-                {
+        // 0 < a < R, 0 < j < R, a + j != R
+        for(int a = 1; a < Res; a++) {
+            for(int j = 1; j < Res; j++) {
+                if(!(a + j == Res)) {
                     ssbo->Colors[i][a * (Res + 1) + j] = InSamples[int(TriangleData.FaceIndex + faceIndexOffset)];
                     faceIndexOffset++;
                 }

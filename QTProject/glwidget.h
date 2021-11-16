@@ -90,6 +90,7 @@ public slots:
     void DecreaseResolution();
     void EnableTriangleSelectionMode();
     void UpdatePencilSize(const int InValue);
+    void UpdatePencilTransparency(const int InValue);
     void ToggleLighting();
     void ToggleColorInterpolation();
 
@@ -158,6 +159,7 @@ private:
     QVector<QVector3D> SelectedTriangleDrawArray;
 
     int PencilSize = 1;
+    float PencilTransparency = 0;
 
     QVector3D points[1024];
     QOpenGLTexture *text;
