@@ -425,7 +425,7 @@ void _gl_widget::pick(int Selection_position_x, int Selection_position_y)
                 if(!SelectedIDs.contains(pickedID))
                 {
                     SelectedIDs.insert(pickedID, DistanceToCenter);
-                    object3d.points[pickedID] = DistanceToCenter * object3d.points[pickedID] + (1.0f - DistanceToCenter) * QVector4D(CurrentPaintingColor.red()/255.0f, CurrentPaintingColor.green()/255.0f, CurrentPaintingColor.blue()/255.0f, CurrentPaintingColor.alpha()/255.0f);
+                    object3d.points[pickedID] =  (1.0f- PencilTransparency) * object3d.points[pickedID] +  PencilTransparency * QVector4D(CurrentPaintingColor.red()/255.0f, CurrentPaintingColor.green()/255.0f, CurrentPaintingColor.blue()/255.0f, CurrentPaintingColor.alpha()/255.0f);
 
                     if(!Indexes.contains(pickedID))
                     {
