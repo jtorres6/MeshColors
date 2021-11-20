@@ -205,62 +205,41 @@ void _gl_widget::draw_objects()
 
     int matrixLocation = program->uniformLocation("matrix");
 
-    if(!TriangleSelectionMode)
-    {
-        program->bind();
+    program->bind();
 
-        program->setUniformValue(matrixLocation, camera.getProjectedTransform());
+    program->setUniformValue(matrixLocation, camera.getProjectedTransform());
 
-        // Draw 3D model
-        VAO->bind();
+    // Draw 3D model
+    VAO->bind();
 
-        program->setUniformValue("BaseRendering", false);
-        glLineWidth(2.0f);
+    program->setUniformValue("BaseRendering", false);
+    glLineWidth(2.0f);
 
-        program->setUniformValue("LightPos", light.getLocation());
+    program->setUniformValue("LightPos", light.getLocation());
 
-        program->setUniformValue("ColorLerpEnabled", !DrawingSamplesID && ColorLerpEnabled);
-        program->setUniformValue("LightingEnabled", !DrawingSamplesID && LightingEnabled);
+    program->setUniformValue("ColorLerpEnabled", !DrawingSamplesID && ColorLerpEnabled);
+    program->setUniformValue("LightingEnabled", !DrawingSamplesID && LightingEnabled);
 
-        context->extraFunctions()->glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, ssbo);
-        context->functions()->glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
-        glDrawArrays(GL_TRIANGLES, 0, object3d.VerticesDrawArrays.size());
-        context->functions()->glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0); // unbind
+    context->extraFunctions()->glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, ssbo);
+    context->functions()->glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
+    glDrawArrays(GL_TRIANGLES, 0, object3d.VerticesDrawArrays.size());
+    context->functions()->glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0); // unbind
 
-        VAO->release();
-        program->release();
+    VAO->release();
+    program->release();
 
-        program2->bind();
-        VAO4->bind();
+    program2->bind();
+    VAO4->bind();
 
-        matrixLocation = program2->uniformLocation("matrix");
-        program2->setUniformValue(matrixLocation, camera.getProjectedTransform());
-        program2->setUniformValue("LineColor", QVector4D(0.0f, 0.3f, 0.8f, 1.0f));
-        program2->setUniformValue("LineMode", true);
+    matrixLocation = program2->uniformLocation("matrix");
+    program2->setUniformValue(matrixLocation, camera.getProjectedTransform());
+    program2->setUniformValue("LineColor", QVector4D(0.0f, 0.3f, 0.8f, 1.0f));
+    program2->setUniformValue("LineMode", true);
 
-        glDrawArrays(GL_LINES,0, object3d.VerticesDrawArrays.size());
+    glDrawArrays(GL_LINES,0, object3d.VerticesDrawArrays.size());
 
-        VAO4->release();
-        program2->release();
-    }
-    else
-    {
-        program2->bind();
-        VAO2->bind();
-
-        int matrixLocation = program2->uniformLocation("matrix");
-        program2->setUniformValue(matrixLocation, camera.getProjectedTransform());
-
-        program->setUniformValue("ColorLerpEnabled", false);
-        program->setUniformValue("LightingEnabled", false);
-        program2->setUniformValue("LineColor", QVector4D(0.0f, 0.3f, 0.8f, 1.0f));
-        program2->setUniformValue("LineMode", false);
-
-        glDrawArrays(GL_TRIANGLES,0, object3d.VerticesDrawArrays.size());
-
-        VAO2->release();
-        program2->release();
-    }
+    VAO4->release();
+    program2->release();
 
     program2->bind();
 
@@ -304,7 +283,35 @@ void _gl_widget::DrawTrianglesSelectionMode()
 
     program2->bind();
     VAO2->bind();
-    draw_objects();
+
+    int matrixLocation = program2->uniformLocation("matrix");
+    program2->setUniformValue(matrixLocation, camera.getProjectedTransform());
+
+    program->setUniformValue("ColorLerpEnabled", false);
+    program->setUniformValue("LightingEnabled", false);
+    program2->setUniformValue("LineColor", QVector4D(0.0f, 0.3f, 0.8f, 1.0f));
+    program2->setUniformValue("LineMode", false);
+
+    glDrawArrays(GL_TRIANGLES,0, object3d.VerticesDrawArrays.size());
+
+    VAO2->release();
+    program2->release();
+
+    program2->bind();
+
+    // Draw axis
+    VAO3->bind();
+    glLineWidth(1.0f);
+
+    matrixLocation = program2->uniformLocation("matrix");
+    program2->setUniformValue(matrixLocation, camera.getProjectedTransform());
+    program2->setUniformValue("LineColor", QVector4D(0.0f, 0.7f, 1.0f, 1.0f));
+    program2->setUniformValue("LineMode", false);
+
+    glDrawArrays(GL_LINES, 0, Axis.vertices.size());
+
+    VAO3->release();
+    program2->release();
 }
 
 
@@ -580,6 +587,7 @@ void _gl_widget::IncrementResolution()
     {
         object3d.Resolutions[SelectedTriangleID] *= 2;
         object3d.UpdateResolutionsArray(object3d.Resolutions);
+        object3d.UpdateMeshColorsArray(object3d.points);
         UpdateSSBO(ssbo, sizeof(*object3d.ssbo), object3d.ssbo);
         update();
     }
@@ -591,6 +599,7 @@ void _gl_widget::DecreaseResolution()
     {
         object3d.Resolutions[SelectedTriangleID] /= 2;
         object3d.UpdateResolutionsArray(object3d.Resolutions);
+        object3d.UpdateMeshColorsArray(object3d.points);
         UpdateSSBO(ssbo, sizeof(*object3d.ssbo), object3d.ssbo);
         update();
     }
