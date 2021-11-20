@@ -213,7 +213,7 @@ void _gl_widget::draw_objects()
     VAO->bind();
 
     program->setUniformValue("BaseRendering", false);
-    glLineWidth(2.0f);
+    glLineWidth(1.5f);
 
     program->setUniformValue("LightPos", light.getLocation());
 
@@ -228,21 +228,23 @@ void _gl_widget::draw_objects()
     VAO->release();
     program->release();
 
+    if(wireframeMode) {
+        program2->bind();
+        VAO4->bind();
+
+        matrixLocation = program2->uniformLocation("matrix");
+        program2->setUniformValue(matrixLocation, camera.getProjectedTransform());
+        program2->setUniformValue("LineColor", QVector4D(0.0f, 0.3f, 0.8f, 0.5f));
+        program2->setUniformValue("LineMode", true);
+
+        glDrawArrays(GL_LINES,0, object3d.TrianglesDrawArrays.size());
+
+        VAO4->release();
+        program2->release();
+
+    }
+
     program2->bind();
-    VAO4->bind();
-
-    matrixLocation = program2->uniformLocation("matrix");
-    program2->setUniformValue(matrixLocation, camera.getProjectedTransform());
-    program2->setUniformValue("LineColor", QVector4D(0.0f, 0.3f, 0.8f, 1.0f));
-    program2->setUniformValue("LineMode", true);
-
-    glDrawArrays(GL_LINES,0, object3d.VerticesDrawArrays.size());
-
-    VAO4->release();
-    program2->release();
-
-    program2->bind();
-
     // Draw axis
     VAO3->bind();
     glLineWidth(1.0f);
@@ -633,6 +635,12 @@ void _gl_widget::ToggleColorInterpolation()
     update();
 }
 
+void _gl_widget::ToggleWireframeMode()
+{
+    wireframeMode = !wireframeMode;
+    update();
+}
+
 void _gl_widget::LoadProgram()
 {
     context = new QOpenGLContext(this);
@@ -696,7 +704,7 @@ void _gl_widget::CreateBuffers()
     VAO4->create();
     VAO4->bind();
 
-    InitializeBuffer(program2, object3d.VerticesDrawArrays.data(), object3d.VerticesDrawArrays.size() * sizeof(QVector3D),"vertex", GL_FLOAT, 0, 3);
+    InitializeBuffer(program2, object3d.TrianglesDrawArrays.data(), object3d.TrianglesDrawArrays.size() * sizeof(QVector3D),"vertex", GL_FLOAT, 0, 3);
     InitializeBuffer(program2, object3d.TriangleSelectionColors.data(), object3d.TriangleSelectionColors.size() * sizeof(QVector4D), "color", GL_FLOAT, 0, 4);
 
     VAO4->release();

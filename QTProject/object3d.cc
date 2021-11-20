@@ -81,6 +81,13 @@ _object3D::_object3D(const char *Filename)
         VerticesDrawArrays[i*3+1] = vertices[Triangles[i].y()];
         VerticesDrawArrays[i*3+2] = vertices[Triangles[i].x()];
 
+        TrianglesDrawArrays.push_back(vertices[Triangles[i].z()]);
+        TrianglesDrawArrays.push_back(vertices[Triangles[i].y()]);
+        TrianglesDrawArrays.push_back(vertices[Triangles[i].y()]);
+        TrianglesDrawArrays.push_back(vertices[Triangles[i].x()]);
+        TrianglesDrawArrays.push_back(vertices[Triangles[i].x()]);
+        TrianglesDrawArrays.push_back(vertices[Triangles[i].z()]);
+
         // Convert "i", the integer mesh ID, into an RGB color
         int r = (i & 0x000000FF) >>  0;
         int g = (i & 0x0000FF00) >>  8;

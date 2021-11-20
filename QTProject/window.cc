@@ -18,6 +18,7 @@
 #include <QSpinBox>
 #include <QGLFormat>
 #include <QSlider>
+#include <QCheckBox>
 #include <debugtools.h>
 
 #include "window.h"
@@ -55,13 +56,13 @@ _window::_window()
     Color_selection->setPalette(Pal);
     connect(Color_selection, SIGNAL(pressed()), this, SLOT(OpenColorDialog()));
 
-    QPushButton *Lighting_button = new QPushButton("Toggle lighting");
-    QPushButton *Lerp_button = new QPushButton("Toggle color inerpolation");
+    QCheckBox *Lighting_button = new QCheckBox("Lighting");
+    QCheckBox *Lerp_button = new QCheckBox("Color inerpolation");
 
     Vertical_options->addWidget(Label1);
     Vertical_options->addWidget(Color_selection);
-    Vertical_options->addWidget(Lighting_button);
-    Vertical_options->addWidget(Lerp_button);
+    //Vertical_options->addWidget(Lighting_button);
+    //Vertical_options->addWidget(Lerp_button);
     Vertical_options->addStretch();
 
     QLabel *Label2 = new QLabel("Face resolution");
@@ -97,18 +98,29 @@ _window::_window()
     QFrame *Framed_widget= new QFrame(Central_widget);
     Framed_widget->setSizePolicy(Q);
     Framed_widget->setFrameStyle(QFrame::Panel);
-    Framed_widget->setLineWidth(3);
+    Framed_widget->setLineWidth(1);
+
+    QVBoxLayout *Gl_widget_layout = new QVBoxLayout;
+    QCheckBox *wireframeEnabledWidget = new QCheckBox("Wireframe", this);
 
     GL_widget = new _gl_widget(this);
     GL_widget->setSizePolicy(Q);
+    GL_widget->setLayout(Gl_widget_layout);
+
+    Gl_widget_layout->addStretch();
+    Gl_widget_layout->addWidget(wireframeEnabledWidget);
+    Gl_widget_layout->addWidget(wireframeEnabledWidget);
+    Gl_widget_layout->addWidget(Lighting_button);
+    Gl_widget_layout->addWidget(Lerp_button);
 
     connect(FaceSelection_button, SIGNAL(pressed()), GL_widget, SLOT(EnableTriangleSelectionMode()));
     connect(Increment_button, SIGNAL(pressed()), GL_widget, SLOT(IncrementResolution()));
     connect(Decrease_button, SIGNAL(pressed()), GL_widget, SLOT(DecreaseResolution()));
-    connect(Lighting_button, SIGNAL(pressed()), GL_widget, SLOT(ToggleLighting()));
-    connect(Lerp_button, SIGNAL(pressed()), GL_widget, SLOT(ToggleColorInterpolation()));
+    connect(Lighting_button, SIGNAL(stateChanged(int)), GL_widget, SLOT(ToggleLighting()));
+    connect(Lerp_button, SIGNAL(stateChanged(int)), GL_widget, SLOT(ToggleColorInterpolation()));
     connect(PencilSize_widget, SIGNAL(valueChanged(int)), GL_widget, SLOT(UpdatePencilSize(int)));
     connect(PencilTransparency_widget, SIGNAL(valueChanged(int)), GL_widget, SLOT(UpdatePencilTransparency(int)));
+    connect(wireframeEnabledWidget, SIGNAL(stateChanged(int)), GL_widget, SLOT(ToggleWireframeMode()));
 
     QHBoxLayout *Horizontal_frame = new QHBoxLayout();
     Horizontal_frame->setContentsMargins(1,1,1,1);

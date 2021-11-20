@@ -93,6 +93,7 @@ public slots:
     void UpdatePencilTransparency(const int InValue);
     void ToggleLighting();
     void ToggleColorInterpolation();
+    void ToggleWireframeMode();
 
 protected:
     void resizeGL(int Width1, int Height1) Q_DECL_OVERRIDE;
@@ -100,7 +101,6 @@ protected:
     void initializeGL() Q_DECL_OVERRIDE;
     void keyPressEvent(QKeyEvent *Keyevent) Q_DECL_OVERRIDE;
     void keyReleaseEvent(QKeyEvent *Keyevent) Q_DECL_OVERRIDE;
-
 
     QOpenGLBuffer* GenerateBuffer(const void *data, int count);
 
@@ -148,8 +148,8 @@ private:
 
     bool TriangleSelectionMode = false;
     bool ColorLerpEnabled = false;
-
-    bool LightingEnabled = true;
+    bool wireframeMode = false;
+    bool LightingEnabled = false;
     bool DrawingSamplesID = false;
 
     bool ControlPressed = false;

@@ -59,6 +59,7 @@ class _object3D:public _basic_object3D
     QVector<QVector3D> Index;
     QVector<QVector4D> TriangleSelectionColors;
     QVector<QVector4D> VerticesNormals;
+    QVector<QVector3D> TrianglesDrawArrays;
 
     QVector<int> Resolutions;
 
