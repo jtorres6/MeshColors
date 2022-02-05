@@ -177,9 +177,7 @@ void _object3D::UpdateMeshColorsArray(const QVector<QVector4D>& InSamples)
 
         int Res = ssbo->Resolution[i];
 
-        const int NumElementsInRow = ++Res;
-
-        ssbo->Colors[i][Res * NumElementsInRow] = InSamples[int(Triangles[i].x())];
+        ssbo->Colors[i][Res * (Res + 1) + 0] = InSamples[int(Triangles[i].x())];
         ssbo->Colors[i][Res]                 = InSamples[int(Triangles[i].y())];
         ssbo->Colors[i][0]                   = InSamples[int(Triangles[i].z())];
 
@@ -187,14 +185,12 @@ void _object3D::UpdateMeshColorsArray(const QVector<QVector4D>& InSamples)
 
         const int ColorsPerEdge = ((Resolutions[i] - 1) * (Resolutions[i] - 2))/2 - 1;
 
-
         // Cij => C0k, Ck0, Ck(R-k) => 0 < k < R
-
         for(int a = 1; a < Res; a++)
         {
-            ssbo->Colors[i][a]                              = InSamples[int(TriangleData.EdgeInfo[0].first + (TriangleData.EdgeInfo[0].second ? ColorsPerEdge - edgeIndexOffset : edgeIndexOffset))];
-            ssbo->Colors[i][a * NumElementsInRow + (Res-a)] = InSamples[int(TriangleData.EdgeInfo[1].first + (TriangleData.EdgeInfo[1].second ? ColorsPerEdge - edgeIndexOffset : edgeIndexOffset))];
-            ssbo->Colors[i][a * NumElementsInRow]           = InSamples[int(TriangleData.EdgeInfo[2].first + (!TriangleData.EdgeInfo[2].second ? ColorsPerEdge - edgeIndexOffset : edgeIndexOffset))];
+            ssbo->Colors[i][a]       = InSamples[int(TriangleData.EdgeInfo[0].first + (TriangleData.EdgeInfo[0].second ? ColorsPerEdge - edgeIndexOffset : edgeIndexOffset))];
+            ssbo->Colors[i][a * (Res+1) + (Res-a)] = InSamples[int(TriangleData.EdgeInfo[1].first + (TriangleData.EdgeInfo[1].second ? ColorsPerEdge - edgeIndexOffset : edgeIndexOffset))];
+            ssbo->Colors[i][a * (Res+1)]       = InSamples[int(TriangleData.EdgeInfo[2].first + (!TriangleData.EdgeInfo[2].second ? ColorsPerEdge - edgeIndexOffset : edgeIndexOffset))];
             edgeIndexOffset++;
         }
 
@@ -203,7 +199,7 @@ void _object3D::UpdateMeshColorsArray(const QVector<QVector4D>& InSamples)
         for(int a = 1; a < Res; a++) {
             for(int j = 1; j < Res; j++) {
                 if(a + j != Res) {
-                    ssbo->Colors[i][a * NumElementsInRow + j] = InSamples[int(TriangleData.FaceIndex + faceIndexOffset)];
+                    ssbo->Colors[i][a * (Res + 1) + j] = InSamples[int(TriangleData.FaceIndex + faceIndexOffset)];
                     faceIndexOffset++;
                 }
             }
