@@ -20,6 +20,7 @@
 #include <QSlider>
 #include <QCheckBox>
 #include <debugtools.h>
+#include <QRadioButton>
 
 #include "window.h"
 #include "glwidget.h"
@@ -103,15 +104,20 @@ _window::_window()
     QVBoxLayout *Gl_widget_layout = new QVBoxLayout;
     QCheckBox *wireframeEnabledWidget = new QCheckBox("Wireframe", this);
 
+    QRadioButton *enableSelectionMode = new QRadioButton("Selection mode", this);
+    QRadioButton *enablePaintingMode = new QRadioButton("Painting mode", this);
+
     GL_widget = new _gl_widget(this);
     GL_widget->setSizePolicy(Q);
     GL_widget->setLayout(Gl_widget_layout);
 
     Gl_widget_layout->addStretch();
     Gl_widget_layout->addWidget(wireframeEnabledWidget);
-    Gl_widget_layout->addWidget(wireframeEnabledWidget);
     Gl_widget_layout->addWidget(Lighting_button);
     Gl_widget_layout->addWidget(Lerp_button);
+    Gl_widget_layout->addStretch();
+    Gl_widget_layout->addWidget(enablePaintingMode);
+    Gl_widget_layout->addWidget(enableSelectionMode);
 
     connect(FaceSelection_button, SIGNAL(pressed()), GL_widget, SLOT(EnableTriangleSelectionMode()));
     connect(Increment_button, SIGNAL(pressed()), GL_widget, SLOT(IncrementResolution()));
@@ -121,6 +127,7 @@ _window::_window()
     connect(PencilSize_widget, SIGNAL(valueChanged(int)), GL_widget, SLOT(UpdatePencilSize(int)));
     connect(PencilTransparency_widget, SIGNAL(valueChanged(int)), GL_widget, SLOT(UpdatePencilTransparency(int)));
     connect(wireframeEnabledWidget, SIGNAL(stateChanged(int)), GL_widget, SLOT(ToggleWireframeMode()));
+    connect(enableSelectionMode, SIGNAL(toggled(bool)), GL_widget, SLOT(EnableTriangleSelectionMode()));
 
     QHBoxLayout *Horizontal_frame = new QHBoxLayout();
     Horizontal_frame->setContentsMargins(1,1,1,1);
@@ -144,21 +151,21 @@ _window::_window()
     connect(Exit, SIGNAL(triggered()), this, SLOT(close()));
 
     // actions for file menu
-    QAction *FileOpen = new QAction(tr("&Open file..."), this);
+    QAction *FileOpen = new QAction(tr("&Load PLY model"), this);
     FileOpen->setShortcut(tr("Ctrl+E"));
     connect(FileOpen, SIGNAL(triggered()), this, SLOT(OpenFileDialog()));
 
     // actions for file menu
     QAction *SaveTexture = new QAction(tr("&Save texture"), this);
     SaveTexture->setShortcut(tr("Ctrl+S"));
-    connect(SaveTexture, SIGNAL(triggered()), this, SLOT(close()));
+    connect(SaveTexture, SIGNAL(triggered()), this, SLOT(SaveImage()));
 
     QAction *SaveTextureAs = new QAction(tr("&Save texture as..."), this);
     SaveTextureAs->setShortcut(tr("Ctrl+Shift+S"));
-    connect(SaveTextureAs, SIGNAL(triggered()), this, SLOT(SaveImage()));
+    connect(SaveTextureAs, SIGNAL(triggered()), this, SLOT(SaveImageAs()));
 
     // actions for file menu
-    QAction *LoadTexture = new QAction(tr("Load image"), this);
+    QAction *LoadTexture = new QAction(tr("Load texture"), this);
     connect(LoadTexture, SIGNAL(triggered()), this, SLOT(LoadMeshColorsFile()));
 
     // menus
@@ -232,9 +239,8 @@ void _window::resizeEvent(QResizeEvent *event)
 
 void _window::OpenFileDialog()
 {
-    // Posible fix: https://blogs.kde.org/2009/03/26/how-crash-almost-every-qtkde-application-and-how-fix-it-0
     QString fileName = QFileDialog::getOpenFileName(this,
-        tr("3D object location"), "",
+        tr("3D object location"), "./Models/",
         tr("PLY objects (*.ply);;All Files (*)"), 0, QFileDialog::DontUseNativeDialog);
 
     QDir dir(QDir::currentPath());
@@ -247,9 +253,60 @@ void _window::OpenFileDialog()
 
 void _window::SaveImage()
 {
-    QString fileName = QFileDialog::getSaveFileName(this,
-        tr("Mesh Colors file location"), "",
-        tr("Mesh colors map (*.mcm);;All Files (*)"), 0, QFileDialog::DontUseNativeDialog);
+    if(!SaveFileName.isEmpty())
+    {
+        QFile file(SaveFileName);
+        if (!file.open(QIODevice::WriteOnly))
+        {
+            QMessageBox::information(this, tr("Unable to open file"),
+                file.errorString());
+            return;
+        }
+
+        QDataStream out(&file);
+        out.setVersion(QDataStream::Qt_5_15);
+
+        const int nFaces = GL_widget->GetObject3D()->Triangles.size();
+
+        QVector<int> Res;
+        QVector<QVector4D> Colors;
+        int counter = 0;
+
+        for(int j = 0; j < GL_widget->GetObject3D()->vertices.size()-1; j++)
+        {
+            Colors.push_back(GL_widget->GetMeshColorsArray()[j]);
+            counter++;
+        }
+
+        for(int i = 0; i < nFaces; i++)
+        {
+            Res.push_back(GL_widget->GetResolutionsArray()[i]);
+
+            int nColors = 3 * (GL_widget->GetResolutionsArray()[i] - 1) +
+                    ((GL_widget->GetResolutionsArray()[i] - 1) * (GL_widget->GetResolutionsArray()[i] - 2)) / 2;
+
+            for(int j = 0; j < nColors; j++)
+            {
+                Colors.push_back(GL_widget->GetMeshColorsArray()[counter+j]);
+            }
+
+            counter += 2000;
+        }
+
+        out << Res;
+        out << Colors;
+    }
+    else
+    {
+        SaveImageAs();
+    }
+}
+
+void _window::SaveImageAs()
+{
+    QString fileName = QFileDialog::getOpenFileName(this,
+        tr("Chose mesh color texture file"), "",
+        tr("Mesh colors map (*.mcm);All Files (*)"), 0, QFileDialog::DontUseNativeDialog);
 
     if (fileName.isEmpty())
         return;
@@ -261,6 +318,8 @@ void _window::SaveImage()
             file.errorString());
         return;
     }
+
+    SaveFileName = fileName;
 
     QDataStream out(&file);
     out.setVersion(QDataStream::Qt_5_15);
@@ -298,10 +357,9 @@ void _window::SaveImage()
 
 void _window::LoadMeshColorsFile()
 {
-    // Posible fix: https://blogs.kde.org/2009/03/26/how-crash-almost-every-qtkde-application-and-how-fix-it-0
     QString fileName = QFileDialog::getOpenFileName(this,
-        tr("Mesh Colors file location"), "",
-        tr("Mesh colors map (*.mcm);;All Files (*)"), 0, QFileDialog::DontUseNativeDialog);
+        tr("Chose mesh color texture file"), "",
+        tr("Mesh colors map (*.mcm);All Files (*)"), 0, QFileDialog::DontUseNativeDialog);
 
     if (fileName.isEmpty())
         return;

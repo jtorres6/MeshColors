@@ -109,6 +109,10 @@ void _gl_widget::keyPressEvent(QKeyEvent *Keyevent)
       ControlPressed = true;
       break;
 
+  case Qt::Key_Shift:
+      ShiftPressed = true;
+      break;
+
   case Qt::Key_F:
       Observer_pos_x = 0.0f;
       Observer_pos_y = 0.0f;
@@ -585,7 +589,7 @@ void _gl_widget::SetCurrentPaintingColor(const QColor &InNewColor)
 
 void _gl_widget::IncrementResolution()
 {
-    if(SelectedTriangleID >= 0 && SelectedTriangleID < object3d.Resolutions.size() && object3d.Resolutions[SelectedTriangleID] < 64)
+    if(SelectedTriangleID >= 0 && SelectedTriangleID < object3d.Resolutions.size() && object3d.Resolutions[SelectedTriangleID] < 32)
     {
         object3d.Resolutions[SelectedTriangleID] *= 2;
         object3d.UpdateResolutionsArray(object3d.Resolutions);
@@ -610,6 +614,12 @@ void _gl_widget::DecreaseResolution()
 void _gl_widget::EnableTriangleSelectionMode()
 {
     TriangleSelectionMode = !TriangleSelectionMode;
+    update();
+}
+
+void _gl_widget::SetTriangleSelectionMode(bool active)
+{
+    TriangleSelectionMode = active;
     update();
 }
 

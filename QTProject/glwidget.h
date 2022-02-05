@@ -89,6 +89,8 @@ public slots:
     void IncrementResolution();
     void DecreaseResolution();
     void EnableTriangleSelectionMode();
+    void SetTriangleSelectionMode(bool active);
+
     void UpdatePencilSize(const int InValue);
     void UpdatePencilTransparency(const int InValue);
     void ToggleLighting();
@@ -153,6 +155,7 @@ private:
     bool DrawingSamplesID = false;
 
     bool ControlPressed = false;
+    bool ShiftPressed = false;
 
     int SelectedTriangleID = -1;
     QVector3D SelectedTriangle;

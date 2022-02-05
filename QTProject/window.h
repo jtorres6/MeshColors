@@ -39,6 +39,7 @@ public slots:
     void OpenFileDialog();
     void OpenColorDialog();
     void SaveImage();
+    void SaveImageAs();
     void LoadMeshColorsFile();
 
 private:
@@ -51,6 +52,7 @@ private:
 
   QPair<int, int> PreviousPosition;
   QPushButton *Color_selection;
+  QString SaveFileName;
 
   bool MousePressed = false;
 };

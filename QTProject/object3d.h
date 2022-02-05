@@ -20,7 +20,7 @@
  *****************************************************************************/
 
 const int MAX_TRIANGLES = 9000;
-const int MAX_SAMPLES = 562;
+const int MAX_SAMPLES = 2150;
 
 typedef struct ssbo_data
 {

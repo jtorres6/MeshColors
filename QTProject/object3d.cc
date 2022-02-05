@@ -75,7 +75,7 @@ _object3D::_object3D(const char *Filename)
 
     for (int i= 0; i < Triangles.length(); i++)
     {
-        Resolutions.push_back(4);
+        Resolutions.push_back(8);
 
         VerticesDrawArrays[i*3]   = vertices[Triangles[i].z()];
         VerticesDrawArrays[i*3+1] = vertices[Triangles[i].y()];
@@ -122,18 +122,21 @@ int _object3D::SsboSize()
 
 void _object3D::UpdateMeshColorsArray(const QVector<QVector4D>& InSamples)
 {
+    if(ssbo == nullptr)
+        return;
+
     QMap<QPair<int,int>, int> EdgeIndexMap;
     face_data TriangleData;
 
     int index = vertices.size();
 
-    for(size_t i = 0; i < Triangles.size(); i++)
+    for(int i = 0; i < Triangles.size(); i++)
     {
         // Colors per face:
         int faceindex = index;
         int R = 4;
 
-        if(ssbo != nullptr && ssbo->Resolution[i] <= 64)
+        if(ssbo->Resolution[i] <= 64)
         {
             R = ssbo->Resolution[i];
         }
@@ -149,7 +152,7 @@ void _object3D::UpdateMeshColorsArray(const QVector<QVector4D>& InSamples)
         {
             int edgeindex = index;
 
-            QPair<int, int> invertedPair = qMakePair(Edges[i].second, Edges[i].first);
+            const QPair<int, int> invertedPair = qMakePair(Edges[i].second, Edges[i].first);
 
             const bool IsInverted = EdgeIndexMap.contains(invertedPair);
 
@@ -174,29 +177,33 @@ void _object3D::UpdateMeshColorsArray(const QVector<QVector4D>& InSamples)
 
         int Res = ssbo->Resolution[i];
 
-        ssbo->Colors[i][Res * (Res + 1) + 0] = InSamples[int(Triangles[i].x())];
+        const int NumElementsInRow = ++Res;
+
+        ssbo->Colors[i][Res * NumElementsInRow] = InSamples[int(Triangles[i].x())];
         ssbo->Colors[i][Res]                 = InSamples[int(Triangles[i].y())];
         ssbo->Colors[i][0]                   = InSamples[int(Triangles[i].z())];
 
         int edgeIndexOffset = 0;
-        int faceIndexOffset = 0;
 
         const int ColorsPerEdge = ((Resolutions[i] - 1) * (Resolutions[i] - 2))/2 - 1;
 
+
         // Cij => C0k, Ck0, Ck(R-k) => 0 < k < R
+
         for(int a = 1; a < Res; a++)
         {
-            ssbo->Colors[i][0 * (Res+1) + a]       = InSamples[int(TriangleData.EdgeInfo[0].first + (TriangleData.EdgeInfo[0].second ? ColorsPerEdge - edgeIndexOffset : edgeIndexOffset))];
-            ssbo->Colors[i][a * (Res+1) + (Res-a)] = InSamples[int(TriangleData.EdgeInfo[1].first + (TriangleData.EdgeInfo[1].second ? ColorsPerEdge - edgeIndexOffset : edgeIndexOffset))];
-            ssbo->Colors[i][a * (Res+1) + 0]       = InSamples[int(TriangleData.EdgeInfo[2].first + (!TriangleData.EdgeInfo[2].second ? ColorsPerEdge - edgeIndexOffset : edgeIndexOffset))];
+            ssbo->Colors[i][a]                              = InSamples[int(TriangleData.EdgeInfo[0].first + (TriangleData.EdgeInfo[0].second ? ColorsPerEdge - edgeIndexOffset : edgeIndexOffset))];
+            ssbo->Colors[i][a * NumElementsInRow + (Res-a)] = InSamples[int(TriangleData.EdgeInfo[1].first + (TriangleData.EdgeInfo[1].second ? ColorsPerEdge - edgeIndexOffset : edgeIndexOffset))];
+            ssbo->Colors[i][a * NumElementsInRow]           = InSamples[int(TriangleData.EdgeInfo[2].first + (!TriangleData.EdgeInfo[2].second ? ColorsPerEdge - edgeIndexOffset : edgeIndexOffset))];
             edgeIndexOffset++;
         }
 
+        int faceIndexOffset = 0;
         // 0 < a < R, 0 < j < R, a + j != R
         for(int a = 1; a < Res; a++) {
             for(int j = 1; j < Res; j++) {
-                if(!(a + j == Res)) {
-                    ssbo->Colors[i][a * (Res + 1) + j] = InSamples[int(TriangleData.FaceIndex + faceIndexOffset)];
+                if(a + j != Res) {
+                    ssbo->Colors[i][a * NumElementsInRow + j] = InSamples[int(TriangleData.FaceIndex + faceIndexOffset)];
                     faceIndexOffset++;
                 }
             }
