@@ -66,36 +66,36 @@ public:
     void draw_axis();
     void draw_objects();
 
-    void pick(int Selection_position_x, int Selection_position_y);
-    void MouseMove(const int InPosX, const int InPosY);
-    void DrawTrianglesSelectionMode();
+    void pick(const int Selection_position_x, const int Selection_position_y);
+    void mouseMove(const int InPosX, const int InPosY);
+    void drawTrianglesSelectionMode();
 
-    void MoveCameraRightLeft(QPair<qint32, qint32> InUnits);
-    void AddCameraZoom(const float InValue);
+    void moveCameraRightLeft(QPair<qint32, qint32> InUnits);
+    void addCameraZoom(const float InValue);
 
-    void SetObjectPath(const char* InNewPath);
-    void SetMeshColorsArray(QVector<QVector4D> InColors);
-    void SetResolutionsArray(QVector<int> InRes);
+    void setObjectPath(const char* InNewPath);
+    void setMeshColorsArray(QVector<QVector4D> InColors);
+    void setResolutionsArray(QVector<int> InRes);
 
-    const QVector<QVector4D>& GetMeshColorsArray() const;
-    const QVector<int>& GetResolutionsArray() const;
-    const _object3D *GetObject3D() const;
+    const QVector<QVector4D>& getMeshColorsArray() const;
+    const QVector<int>& getResolutionsArray() const;
+    const _object3D *getObject3D() const;
 
-    void SetCurrentPaintingColor(const QColor& InNewColor);
+    void setCurrentPaintingColor(const QColor& InNewColor);
 
-    void InitializeBuffer(QOpenGLShaderProgram* InShader, void* InData, const int InSize, const char* InName, const GLenum InType, const int InOffset, const int InStride);
+    void initializeBuffer(QOpenGLShaderProgram* InShader, void* InData, const int InSize, const char* InName, const GLenum InType, const int InOffset, const int InStride);
 
 public slots:
-    void IncrementResolution();
-    void DecreaseResolution();
-    void EnableTriangleSelectionMode();
-    void SetTriangleSelectionMode(bool active);
+    void incrementResolution();
+    void decreaseResolution();
+    void enableTriangleSelectionMode();
+    void setTriangleSelectionMode(bool active);
 
-    void UpdatePencilSize(const int InValue);
-    void UpdatePencilTransparency(const int InValue);
-    void ToggleLighting();
-    void ToggleColorInterpolation();
-    void ToggleWireframeMode();
+    void updatePencilSize(const int InValue);
+    void updatePencilTransparency(const int InValue);
+    void toggleLighting();
+    void toggleColorInterpolation();
+    void toggleWireframeMode();
 
 protected:
     void resizeGL(int Width1, int Height1) Q_DECL_OVERRIDE;
@@ -104,13 +104,13 @@ protected:
     void keyPressEvent(QKeyEvent *Keyevent) Q_DECL_OVERRIDE;
     void keyReleaseEvent(QKeyEvent *Keyevent) Q_DECL_OVERRIDE;
 
-    QOpenGLBuffer* GenerateBuffer(const void *data, int count);
+    QOpenGLBuffer* generateBuffer(const void *data, int count);
 
-    void UpdateSSBO(GLuint InSsbo, GLsizei InSize, void* InData);
+    void updateSSBO(GLuint InSsbo, GLsizei InSize, void* InData);
 
-    void LoadProgram();
-    void CreateBuffers();
-    void LogGlInfo();
+    void loadProgram();
+    void createBuffers();
+    void logGlInfo();
 
 public:
     _window *Window;

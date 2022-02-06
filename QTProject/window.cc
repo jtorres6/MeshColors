@@ -119,15 +119,15 @@ _window::_window()
     Gl_widget_layout->addWidget(enablePaintingMode);
     Gl_widget_layout->addWidget(enableSelectionMode);
 
-    connect(FaceSelection_button, SIGNAL(pressed()), GL_widget, SLOT(EnableTriangleSelectionMode()));
-    connect(Increment_button, SIGNAL(pressed()), GL_widget, SLOT(IncrementResolution()));
-    connect(Decrease_button, SIGNAL(pressed()), GL_widget, SLOT(DecreaseResolution()));
-    connect(Lighting_button, SIGNAL(stateChanged(int)), GL_widget, SLOT(ToggleLighting()));
-    connect(Lerp_button, SIGNAL(stateChanged(int)), GL_widget, SLOT(ToggleColorInterpolation()));
-    connect(PencilSize_widget, SIGNAL(valueChanged(int)), GL_widget, SLOT(UpdatePencilSize(int)));
-    connect(PencilTransparency_widget, SIGNAL(valueChanged(int)), GL_widget, SLOT(UpdatePencilTransparency(int)));
-    connect(wireframeEnabledWidget, SIGNAL(stateChanged(int)), GL_widget, SLOT(ToggleWireframeMode()));
-    connect(enableSelectionMode, SIGNAL(toggled(bool)), GL_widget, SLOT(EnableTriangleSelectionMode()));
+    connect(FaceSelection_button, SIGNAL(pressed()), GL_widget, SLOT(enableTriangleSelectionMode()));
+    connect(Increment_button, SIGNAL(pressed()), GL_widget, SLOT(incrementResolution()));
+    connect(Decrease_button, SIGNAL(pressed()), GL_widget, SLOT(decreaseResolution()));
+    connect(Lighting_button, SIGNAL(stateChanged(int)), GL_widget, SLOT(toggleLighting()));
+    connect(Lerp_button, SIGNAL(stateChanged(int)), GL_widget, SLOT(toggleColorInterpolation()));
+    connect(PencilSize_widget, SIGNAL(valueChanged(int)), GL_widget, SLOT(updatePencilSize(int)));
+    connect(PencilTransparency_widget, SIGNAL(valueChanged(int)), GL_widget, SLOT(updatePencilTransparency(int)));
+    connect(wireframeEnabledWidget, SIGNAL(stateChanged(int)), GL_widget, SLOT(toggleWireframeMode()));
+    connect(enableSelectionMode, SIGNAL(toggled(bool)), GL_widget, SLOT(enableTriangleSelectionMode()));
 
     QHBoxLayout *Horizontal_frame = new QHBoxLayout();
     Horizontal_frame->setContentsMargins(1,1,1,1);
@@ -201,7 +201,7 @@ void _window::mouseMoveEvent(QMouseEvent *e)
     {
         if(MousePressed)
         {
-            GL_widget->MoveCameraRightLeft(QPair<qint32, qint32>(e->pos().x() - PreviousPosition.first, e->pos().y() - PreviousPosition.second));
+            GL_widget->moveCameraRightLeft(QPair<qint32, qint32>(e->pos().x() - PreviousPosition.first, e->pos().y() - PreviousPosition.second));
         }
         else
         {
@@ -225,7 +225,7 @@ void _window::wheelEvent(QWheelEvent *event)
 {
     if(event != nullptr)
     {
-        GL_widget->AddCameraZoom(event->angleDelta().y());
+        GL_widget->addCameraZoom(event->angleDelta().y());
     }
 }
 
@@ -248,7 +248,7 @@ void _window::OpenFileDialog()
     std::string FileNameStd = dir.relativeFilePath(fileName).toStdString();
 
     const char *fileNameChar = FileNameStd.c_str();
-    GL_widget->SetObjectPath(fileNameChar);
+    GL_widget->setObjectPath(fileNameChar);
 }
 
 void _window::SaveImage()
@@ -266,28 +266,28 @@ void _window::SaveImage()
         QDataStream out(&file);
         out.setVersion(QDataStream::Qt_5_15);
 
-        const int nFaces = GL_widget->GetObject3D()->Triangles.size();
+        const int nFaces = GL_widget->getObject3D()->Triangles.size();
 
         QVector<int> Res;
         QVector<QVector4D> Colors;
         int counter = 0;
 
-        for(int j = 0; j < GL_widget->GetObject3D()->vertices.size()-1; j++)
+        for(int j = 0; j < GL_widget->getObject3D()->vertices.size()-1; j++)
         {
-            Colors.push_back(GL_widget->GetMeshColorsArray()[j]);
+            Colors.push_back(GL_widget->getMeshColorsArray()[j]);
             counter++;
         }
 
         for(int i = 0; i < nFaces; i++)
         {
-            Res.push_back(GL_widget->GetResolutionsArray()[i]);
+            Res.push_back(GL_widget->getResolutionsArray()[i]);
 
-            int nColors = 3 * (GL_widget->GetResolutionsArray()[i] - 1) +
-                    ((GL_widget->GetResolutionsArray()[i] - 1) * (GL_widget->GetResolutionsArray()[i] - 2)) / 2;
+            int nColors = 3 * (GL_widget->getResolutionsArray()[i] - 1) +
+                    ((GL_widget->getResolutionsArray()[i] - 1) * (GL_widget->getResolutionsArray()[i] - 2)) / 2;
 
             for(int j = 0; j < nColors; j++)
             {
-                Colors.push_back(GL_widget->GetMeshColorsArray()[counter+j]);
+                Colors.push_back(GL_widget->getMeshColorsArray()[counter+j]);
             }
 
             counter += 2000;
@@ -324,28 +324,28 @@ void _window::SaveImageAs()
     QDataStream out(&file);
     out.setVersion(QDataStream::Qt_5_15);
 
-    const int nFaces = GL_widget->GetObject3D()->Triangles.size();
+    const int nFaces = GL_widget->getObject3D()->Triangles.size();
 
     QVector<int> Res;
     QVector<QVector4D> Colors;
     int counter = 0;
 
-    for(int j = 0; j < GL_widget->GetObject3D()->vertices.size()-1; j++)
+    for(int j = 0; j < GL_widget->getObject3D()->vertices.size()-1; j++)
     {
-        Colors.push_back(GL_widget->GetMeshColorsArray()[j]);
+        Colors.push_back(GL_widget->getMeshColorsArray()[j]);
         counter++;
     }
 
     for(int i = 0; i < nFaces; i++)
     {
-        Res.push_back(GL_widget->GetResolutionsArray()[i]);
+        Res.push_back(GL_widget->getResolutionsArray()[i]);
 
-        int nColors = 3 * (GL_widget->GetResolutionsArray()[i] - 1) +
-                ((GL_widget->GetResolutionsArray()[i] - 1) * (GL_widget->GetResolutionsArray()[i] - 2)) / 2;
+        int nColors = 3 * (GL_widget->getResolutionsArray()[i] - 1) +
+                ((GL_widget->getResolutionsArray()[i] - 1) * (GL_widget->getResolutionsArray()[i] - 2)) / 2;
 
         for(int j = 0; j < nColors; j++)
         {
-            Colors.push_back(GL_widget->GetMeshColorsArray()[counter+j]);
+            Colors.push_back(GL_widget->getMeshColorsArray()[counter+j]);
         }
 
         counter += 2000;
@@ -382,11 +382,11 @@ void _window::LoadMeshColorsFile()
 
     QVector<int> Res;
     QVector<QVector4D> Colors;
-    const int nFaces = GL_widget->GetObject3D()->Triangles.size();
+    const int nFaces = GL_widget->getObject3D()->Triangles.size();
 
     int counter = 0;
 
-    for(int i = 0; i < GL_widget->GetObject3D()->vertices.size() - 1; i++)
+    for(int i = 0; i < GL_widget->getObject3D()->vertices.size() - 1; i++)
     {
         Colors.push_back(array[i]);
         counter++;
@@ -410,19 +410,19 @@ void _window::LoadMeshColorsFile()
         }
     }
 
-    GL_widget->SetResolutionsArray(resolutions);
-    GL_widget->SetMeshColorsArray(Colors);
+    GL_widget->setResolutionsArray(resolutions);
+    GL_widget->setMeshColorsArray(Colors);
 }
 
 void _window::OpenColorDialog()
 {
-     QColor NewColor = QColorDialog::getColor(Qt::yellow, this );
+     const QColor newColor = QColorDialog::getColor(Qt::yellow, this );
 
-     if(NewColor.isValid())
+     if(newColor.isValid())
      {
-         GL_widget->SetCurrentPaintingColor(NewColor);
+         GL_widget->setCurrentPaintingColor(newColor);
 
-         QString qss = QString("background-color: %1").arg(NewColor.name());
-         Color_selection->setStyleSheet(qss);
+         QString styleString = QString("background-color: %1").arg(newColor.name());
+         Color_selection->setStyleSheet(styleString);
      }
 }
