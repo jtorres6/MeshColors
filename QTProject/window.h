@@ -43,7 +43,7 @@ public slots:
     void LoadMeshColorsFile();
 
 private:
-  _gl_widget *GL_widget;
+  _gl_widget *m_glWidget;
   void mouseMoveEvent(QMouseEvent *e);
   void mousePressEvent(QMouseEvent *e);
   void mouseReleaseEvent(QMouseEvent *event);

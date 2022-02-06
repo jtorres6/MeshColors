@@ -750,7 +750,3 @@ void _gl_widget::initializeBuffer(QOpenGLShaderProgram* InShader, void* InData, 
     InShader->setAttributeBuffer(InName, InType, InOffset, InStride);
     buffer->release();
 }
-
-void _gl_widget::mouseMove(const int InPosX, const int InPosY)
-{
-}
