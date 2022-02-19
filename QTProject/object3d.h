@@ -20,12 +20,12 @@
  *****************************************************************************/
 
 const int MAX_TRIANGLES = 9000;
-const int MAX_SAMPLES = 2150;
+const int MAX_SAMPLES = 32;
 
 typedef struct ssbo_data
 {
     int Resolution[MAX_TRIANGLES];
-    QVector4D Colors[MAX_TRIANGLES][MAX_SAMPLES];
+    QVector4D Colors[MAX_TRIANGLES][MAX_SAMPLES][MAX_SAMPLES];
 }ssbo_type;
 
 typedef struct meshColorsFace
@@ -80,15 +80,25 @@ typedef struct meshColorsFace
                         }
                     }
 
-                    for (int i = samples.size(); i <= newResolution; ++i) {
+                    for (int i = 0; i <= newResolution; ++i) {
 
-                        QVector<int> indexVector;
-                        for (int j = 0; j <= newResolution; j++){
-                            indexVector.push_back(faceIndex);
-                            ++faceIndex;
+                        if( i > Resolution)
+                        {
+                            QVector<int> indexVector;
+                            for (int j = 0; j <= newResolution; j++){
+                                indexVector.push_back(faceIndex);
+                                ++faceIndex;
+                            }
+
+                            samples.push_back(indexVector);
                         }
-
-                        samples.push_back(indexVector);
+                        else
+                        {
+                            for (int j = 0; j <= newResolution; j++){
+                                samples[i].push_back(faceIndex);
+                                ++faceIndex;
+                            }
+                        }
                     }
 
                     for (int i = 0; i < samples.size(); ++i) {
@@ -133,7 +143,7 @@ typedef struct meshColorsFace
 
                             QVector<int> row;
 
-                            for (int j = 0; j <= i; j++){
+                            for (int j = 0; j < samples[i].size(); j++){
                                 if (j%2 == 0.0f) {
                                     row.push_back(samples[i][j]);
                                 }
@@ -160,37 +170,37 @@ typedef struct meshColorsFace
                 index += Resolution-1;
 
                 samples[Resolution][Resolution] = int(Vertex.x());
-                InSamples[Vertex.x()] = QVector4D(float(Resolution)/float(Resolution), float(Resolution)/float(Resolution), 0.0f, 1.0f);
+                //InSamples[Vertex.x()] = QVector4D(float(Resolution)/float(Resolution), float(Resolution)/float(Resolution), 0.0f, 1.0f);
 
                 samples[Resolution][0]          = int(Vertex.y());
-                InSamples[Vertex.y()] = QVector4D(float(Resolution)/float(Resolution), 0, 0.0f, 1.0f);
+                //InSamples[Vertex.y()] = QVector4D(float(Resolution)/float(Resolution), 0, 0.0f, 1.0f);
 
                 samples[0][0]                   = int(Vertex.z());
-                InSamples[Vertex.z()] = QVector4D(0, 0, 0.0f, 1.0f);
+                //InSamples[Vertex.z()] = QVector4D(0, 0, 0.0f, 1.0f);
 
                 int edgeIndexOffset = 0;
 
                 // Cij => C0k, Ck0, Ck(R-k) => 0 < k < R
-                for(int a = 1; a < Resolution; a++)
+                for(int a = 0; a <= Resolution; a++)
                 {
                     samples[a][0]          = Edges[0] + edgeIndexOffset;
-                    InSamples[Edges[0] + edgeIndexOffset] = QVector4D(float(a)/float(Resolution), 0.0f, 0.0f, 1.0f);
+                    //InSamples[Edges[0] + edgeIndexOffset] = QVector4D(float(a)/float(Resolution), 0.0f, 0.0f, 1.0f);
 
                     samples[Resolution][a] = Edges[1] + edgeIndexOffset;
-                    InSamples[Edges[1] + edgeIndexOffset] = QVector4D(float(Resolution)/float(Resolution), float(a)/Resolution, 0.0f, 1.0f);
+                    //InSamples[Edges[1] + edgeIndexOffset] = QVector4D(float(Resolution)/float(Resolution), float(a)/Resolution, 0.0f, 1.0f);
 
                     samples[a][a]          = Edges[2] + edgeIndexOffset;
-                    InSamples[Edges[2] + edgeIndexOffset] = QVector4D(float(a)/float(Resolution), float(a)/float(Resolution), 0.0f, 1.0f);
+                    //InSamples[Edges[2] + edgeIndexOffset] = QVector4D(float(a)/float(Resolution), float(a)/float(Resolution), 0.0f, 1.0f);
 
                     edgeIndexOffset++;
                 }
 
                 int faceIndexOffset = 0;
                 // 0 < a < R, 0 < j < R, a + j != R
-                for(int a = 1; a < Resolution; a++) {
-                    for(int j = 1; j < samples[a].size(); j++) {
+                for(int a = 0; a <= Resolution; a++) {
+                    for(int j = 0; j < samples[a].size(); j++) {
                         samples[a][j]   = index + faceIndexOffset;
-                        InSamples[index + faceIndexOffset] = QVector4D(float(a)/float(Resolution), float(j)/float(Resolution), 0.0f, 1.0f);
+                        //InSamples[index + faceIndexOffset] = QVector4D(float(a)/float(Resolution), float(j)/float(Resolution), 0.0f, 1.0f);
                         faceIndexOffset++;
                     }
                 }
@@ -204,7 +214,7 @@ typedef struct meshColorsFace
         for (int i = 0; i < samples.size(); ++i) {
 
             QString row =  "| ";
-            for (int j = 0; j <= i; j++){
+            for (int j = 0; j < samples[i].size(); j++){
                 row += QString::number(i) + ", " + QString::number(j) + " | ";
             }
 
