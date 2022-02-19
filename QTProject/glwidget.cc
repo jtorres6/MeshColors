@@ -441,11 +441,11 @@ void _gl_widget::pick(const int Selection_position_x, const int Selection_positi
 
                     if(!Indexes.contains(pickedID))
                     {
-                        //DebugTools::DrawDebugString(Window, "#\n|\n|\nSelected index --> " + QString::number(pickedID) + " (" + QString::number(data[i][0]) + ", " +
-                        //        QString::number(data[i][1])+ ", " +
-                        //         QString::number(data[i][2]) + ")"+ "\n Pos: " + QString::number(Selection_position_x) + " " + QString::number(Selection_position_y),
-                        //                 Selection_position_x-(PencilSize), Window->height() -  Selection_position_y-(PencilSize), 500, 100,
-                        //                 "QLabel { color : red; }", 0.1f);
+                        DebugTools::DrawDebugString(Window, "#\n|\n|\nSelected index --> " + QString::number(pickedID) + " (" + QString::number(data[i][0]) + ", " +
+                                QString::number(data[i][1])+ ", " +
+                                 QString::number(data[i][2]) + ")"+ "\n Pos: " + QString::number(Selection_position_x) + " " + QString::number(Selection_position_y),
+                                         Selection_position_x-(PencilSize), Window->height() -  Selection_position_y-(PencilSize), 500, 100,
+                                         "QLabel { color : red; }", 0.1f);
                         Indexes.append(i);
                     }
                 }
@@ -545,6 +545,7 @@ void _gl_widget::updateSSBO(GLuint InSsbo, GLsizei InSize, void* InData)
 void _gl_widget::setObjectPath(const char* InNewPath)
 {
     ModelFilePath = InNewPath;
+
     initializeGL();
 }
 
