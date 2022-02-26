@@ -13,7 +13,6 @@
 #ifdef PLATFORM_WINDOWS
 #include "windows.h"
 #endif
-#include <GL/gl.h>
 #include <QOpenGLWidget>
 #include <QKeyEvent>
 #include <iostream>
@@ -160,8 +159,8 @@ private:
     QVector3D SelectedTriangle;
     QVector<QVector3D> SelectedTriangleDrawArray;
 
-    int PencilSize = 1;
-    float PencilTransparency = 0;
+    int PencilSize = 10;
+    float PencilTransparency = 0.5f;
 
     QVector3D points[1024];
     QOpenGLTexture *text;

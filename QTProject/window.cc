@@ -79,6 +79,7 @@ _window::_window()
     QLabel *Label3 = new QLabel("Pencil size");
     QSlider* PencilSize_widget = new QSlider(Qt::Horizontal);
     PencilSize_widget->setMinimum(1);
+    PencilSize_widget->setSliderPosition(10);
     PencilSize_widget->setMaximum(32);
     Vertical_options->addWidget(Label3);
     Vertical_options->addWidget(PencilSize_widget);
@@ -86,6 +87,7 @@ _window::_window()
     QLabel *Label4 = new QLabel("Pencil transparency");
     QSlider* PencilTransparency_widget = new QSlider(Qt::Horizontal);
     PencilTransparency_widget->setMinimum(0);
+    PencilTransparency_widget->setSliderPosition(50);
     PencilTransparency_widget->setMaximum(100);
     Vertical_options->addWidget(Label4);
     Vertical_options->addWidget(PencilTransparency_widget);
@@ -264,7 +266,7 @@ void _window::SaveImage()
         }
 
         QDataStream out(&file);
-        out.setVersion(QDataStream::Qt_5_15);
+        out.setVersion(QDataStream::Qt_5_10);
 
         const int nFaces = m_glWidget->getObject3D()->Triangles.size();
 
@@ -322,7 +324,7 @@ void _window::SaveImageAs()
     SaveFileName = fileName;
 
     QDataStream out(&file);
-    out.setVersion(QDataStream::Qt_5_15);
+    out.setVersion(QDataStream::Qt_5_10);
 
     const int nFaces = m_glWidget->getObject3D()->Triangles.size();
 
@@ -373,7 +375,7 @@ void _window::LoadMeshColorsFile()
     }
 
     QDataStream in(&file);
-    in.setVersion(QDataStream::Qt_5_15);
+    in.setVersion(QDataStream::Qt_5_10);
     QVector<int> resolutions;
     QVector<QVector4D> array;
 
