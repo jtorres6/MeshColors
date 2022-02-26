@@ -10,6 +10,13 @@ struct FDebugLabel
     float SpawnTime;
     float Duration;
 
+    FDebugLabel()
+        : Label(nullptr)
+        , SpawnTime(0.0f)
+        , Duration(0.0f)
+    {
+    }
+
     FDebugLabel(QLabel* InLabel, float InSpawnTime, float InDuration)
         : Label(InLabel)
         , SpawnTime(InSpawnTime)
