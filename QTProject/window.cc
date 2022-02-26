@@ -183,12 +183,15 @@ _window::_window()
 
 void _window::mousePressEvent(QMouseEvent *e)
 {
-    if (e != nullptr) {
+    if (e != nullptr && m_glWidget != nullptr && m_glWidget->underMouse()) {
+        const float x = e->pos().x();
+        const float y = height() - e->pos().y();
+
         if (e->buttons() & Qt::LeftButton) {
-            m_glWidget->pick(e->pos().x(), height() - e->pos().y());
+            m_glWidget->pick(x, y);
         }
         else if (e->buttons() & Qt::MiddleButton) {
-            m_glWidget->selectTriangle(e->pos().x(), height() - e->pos().y());
+            m_glWidget->selectTriangle(x, y);
         }
     }
 }
