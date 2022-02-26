@@ -19,7 +19,6 @@
 #include <QGLFormat>
 #include <QSlider>
 #include <QCheckBox>
-#include <debugtools.h>
 #include <QRadioButton>
 
 #include "window.h"
@@ -62,8 +61,13 @@ _window::_window()
 
     Vertical_options->addWidget(Label1);
     Vertical_options->addWidget(Color_selection);
-    //Vertical_options->addWidget(Lighting_button);
-    //Vertical_options->addWidget(Lerp_button);
+    Vertical_options->addStretch();
+
+    QCheckBox *wireframeEnabledWidget = new QCheckBox("Wireframe", this);
+
+    Vertical_options->addWidget(wireframeEnabledWidget);
+    Vertical_options->addWidget(Lighting_button);
+    Vertical_options->addWidget(Lerp_button);
     Vertical_options->addStretch();
 
     QLabel *Label2 = new QLabel("Face resolution");
@@ -100,24 +104,8 @@ _window::_window()
     Framed_widget->setSizePolicy(Q);
     Framed_widget->setFrameStyle(QFrame::Panel);
     Framed_widget->setLineWidth(1);
-
-    QVBoxLayout *m_glWidget_layout = new QVBoxLayout;
-    QCheckBox *wireframeEnabledWidget = new QCheckBox("Wireframe", this);
-
-    QRadioButton *enableSelectionMode = new QRadioButton("Selection mode", this);
-    QRadioButton *enablePaintingMode = new QRadioButton("Painting mode", this);
-
     m_glWidget = new _gl_widget(this);
     m_glWidget->setSizePolicy(Q);
-    m_glWidget->setLayout(m_glWidget_layout);
-
-    m_glWidget_layout->addStretch();
-    m_glWidget_layout->addWidget(wireframeEnabledWidget);
-    m_glWidget_layout->addWidget(Lighting_button);
-    m_glWidget_layout->addWidget(Lerp_button);
-    m_glWidget_layout->addStretch();
-    m_glWidget_layout->addWidget(enablePaintingMode);
-    m_glWidget_layout->addWidget(enableSelectionMode);
 
     connect(Increment_button, SIGNAL(pressed()), m_glWidget, SLOT(incrementResolution()));
     connect(Decrease_button, SIGNAL(pressed()), m_glWidget, SLOT(decreaseResolution()));
@@ -126,7 +114,6 @@ _window::_window()
     connect(PencilSize_widget, SIGNAL(valueChanged(int)), m_glWidget, SLOT(updatePencilSize(int)));
     connect(PencilTransparency_widget, SIGNAL(valueChanged(int)), m_glWidget, SLOT(updatePencilTransparency(int)));
     connect(wireframeEnabledWidget, SIGNAL(stateChanged(int)), m_glWidget, SLOT(toggleWireframeMode()));
-    connect(enableSelectionMode, SIGNAL(toggled(bool)), m_glWidget, SLOT(enableTriangleSelectionMode()));
 
     QHBoxLayout *Horizontal_frame = new QHBoxLayout();
     Horizontal_frame->setContentsMargins(1,1,1,1);
