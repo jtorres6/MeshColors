@@ -7,6 +7,7 @@
  */
 
 #include "glwidget.h"
+#include "file_ply_stl.h"
 #include "window.h"
 #include <QByteArray>
 #include <QColor>
@@ -362,7 +363,14 @@ void _gl_widget::initializeGL()
     makeCurrent();
     Axis = _axis(1500.0f);
 
-    object3d = _object3D(ModelFilePath);
+    QVector<QVector3D> triangles;
+    QVector<QVector3D> vertices;
+    if(!ModelFilePath.empty())
+    {
+        readPlyFile(ModelFilePath, vertices, triangles);
+    }
+    object3d = _object3D(vertices, triangles);
+
     SelectedTriangleDrawArray.clear();
     TriangleSelectionMode = false;
 
@@ -383,6 +391,28 @@ void _gl_widget::initializeGL()
     lightAngleY=0;
     lightDistance=DEFAULT_DISTANCE;
 }
+
+bool _gl_widget::readPlyFile(const string &filename, QVector<QVector3D>& outVertices, QVector<QVector3D>& outTriangles)
+ {
+     _file_ply ply;
+     if(ply.open(filename) == 0) return false;
+
+     vector<float> Coordinates;
+     vector<unsigned int> Positions;
+     ply.read(Coordinates, Positions);
+
+     for(size_t i = 0; i <= Coordinates.size()-3; i+=3)
+     {
+         outVertices.push_back(QVector3D(Coordinates[i],Coordinates[i+1],Coordinates[i+2]));
+     }
+
+     for(size_t i = 0; i <= Positions.size()-3; i+=3)
+     {
+         outTriangles.push_back(QVector3D(Positions[i],Positions[i+1],Positions[i+2]));
+     }
+
+     return true;
+ }
 
 
 void _gl_widget::pick(const int Selection_position_x, const int Selection_position_y)

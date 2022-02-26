@@ -110,6 +110,8 @@ protected:
     void createBuffers();
     void logGlInfo();
 
+    bool readPlyFile(const string &filename, QVector<QVector3D>& outVertices, QVector<QVector3D>&  outTriangles);
+
 public:
     _window *Window;
 
@@ -134,7 +136,7 @@ private:
     _axis Axis;
     _object3D object3d;
 
-    const char* ModelFilePath = "";
+    string ModelFilePath;
 
     float Observer_angle_x = 0;
     float Observer_angle_y = 0;
