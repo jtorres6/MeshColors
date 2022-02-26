@@ -59,24 +59,10 @@ _window::_window()
     QCheckBox *Lighting_button = new QCheckBox("Lighting");
     QCheckBox *Lerp_button = new QCheckBox("Color inerpolation");
 
+    Options_widget->setLayout(Vertical_options);
+
     Vertical_options->addWidget(Label1);
     Vertical_options->addWidget(Color_selection);
-    Vertical_options->addStretch();
-
-    QCheckBox *wireframeEnabledWidget = new QCheckBox("Wireframe", this);
-
-    Vertical_options->addWidget(wireframeEnabledWidget);
-    Vertical_options->addWidget(Lighting_button);
-    Vertical_options->addWidget(Lerp_button);
-    Vertical_options->addStretch();
-
-    QLabel *Label2 = new QLabel("Face resolution");
-    QPushButton *Increment_button = new QPushButton("+");
-    QPushButton *Decrease_button = new QPushButton("-");
-    Vertical_options->addWidget(Label2);
-    Vertical_options->addWidget(Increment_button);
-    Vertical_options->addWidget(Decrease_button);
-    Vertical_options->addStretch();
 
     QLabel *Label3 = new QLabel("Pencil size");
     QSlider* PencilSize_widget = new QSlider(Qt::Horizontal);
@@ -94,7 +80,20 @@ _window::_window()
     Vertical_options->addWidget(Label4);
     Vertical_options->addWidget(PencilTransparency_widget);
 
-    Options_widget->setLayout(Vertical_options);
+    QCheckBox *wireframeEnabledWidget = new QCheckBox("Wireframe", this);
+
+    Vertical_options->addWidget(wireframeEnabledWidget);
+    Vertical_options->addWidget(Lighting_button);
+    Vertical_options->addWidget(Lerp_button);
+    Vertical_options->addStretch();
+
+    QLabel *Label2 = new QLabel("Face resolution");
+    QPushButton *Increment_button = new QPushButton("+");
+    QPushButton *Decrease_button = new QPushButton("-");
+    Vertical_options->addWidget(Label2);
+    Vertical_options->addWidget(Increment_button);
+    Vertical_options->addWidget(Decrease_button);
+    Vertical_options->addStretch();
 
     QTabWidget *Tab_widget = new QTabWidget;
     Tab_widget->setMaximumWidth(300);
