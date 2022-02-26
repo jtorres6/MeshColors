@@ -66,6 +66,7 @@ public:
     void draw_objects();
 
     void pick(const int Selection_position_x, const int Selection_position_y);
+    void selectTriangle(const int Selection_position_x, const int Selection_position_y);
     void drawTrianglesSelectionMode();
 
     void moveCameraRightLeft(QPair<qint32, qint32> InUnits);

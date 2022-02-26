@@ -552,6 +552,77 @@ void _gl_widget::pick(const int Selection_position_x, const int Selection_positi
     program->release();
 }
 
+void _gl_widget::selectTriangle(const int Selection_position_x, const int Selection_position_y)
+{
+    if(program == nullptr)
+        return;
+
+    program->bind();
+    program->setUniformValue("ColorLerpEnabled", false);
+    program->setUniformValue("LightingEnabled", false);
+    program->release();
+
+    makeCurrent();
+    clear_window();
+
+    //paintGL();
+    drawTrianglesSelectionMode();
+
+    // get the pixel
+    int Color;
+    glReadBuffer(GL_FRONT);
+    glPixelStorei(GL_PACK_ALIGNMENT, 1);
+    glReadPixels(Selection_position_x, Selection_position_y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, &Color);
+    uint R = ((Color & 0x000000FF));
+    uint G = ((Color & 0x0000FF00) >> 8);
+    uint B = ((Color & 0x00FF0000) >> 16);
+
+    int pickedID =
+       R +
+       G * 256 +
+       B * 256 * 256;
+
+    if(pickedID >= 0 && SelectedTriangleID < object3d.Resolutions.size())
+    {
+        DebugTools::DrawDebugString(Window, "#\n|\n|\n Previous --> " +   QString::number(SelectedTriangleID) + "\n Selected index --> " + QString::number(pickedID) + " = " + QString::number(R) + " + " +
+                QString::number(G)+ " * 256 + " +
+                 QString::number(B) + " * 256 * 256"+ "\n Pos: " + QString::number(Selection_position_x) + " " + QString::number(Selection_position_y),
+                         Selection_position_x, Window->height() - Selection_position_y, 500, 100,
+                         "QLabel { color : red; }", 0.1f);
+
+        SelectedTriangleID = pickedID;
+        SelectedTriangle = object3d.Triangles[SelectedTriangleID];
+
+        VAO5 = new QOpenGLVertexArrayObject();
+        VAO5->create();
+        VAO5->bind();
+
+        SelectedTriangleDrawArray.clear();
+
+        SelectedTriangleDrawArray.push_back(object3d.vertices[SelectedTriangle.z()]);
+        SelectedTriangleDrawArray.push_back(object3d.vertices[SelectedTriangle.y()]);
+        SelectedTriangleDrawArray.push_back(object3d.vertices[SelectedTriangle.y()]);
+        SelectedTriangleDrawArray.push_back(object3d.vertices[SelectedTriangle.x()]);
+        SelectedTriangleDrawArray.push_back(object3d.vertices[SelectedTriangle.x()]);
+        SelectedTriangleDrawArray.push_back(object3d.vertices[SelectedTriangle.z()]);
+
+        initializeBuffer(program2, SelectedTriangleDrawArray.data(), SelectedTriangleDrawArray.size() * sizeof(QVector3D),"vertex", GL_FLOAT, 0, 3);
+        initializeBuffer(program2, new QVector4D(1.0f, 0.0f, 0.0f, 1.0f), sizeof(QVector4D), "color", GL_FLOAT, 0, 4);
+
+        VAO5->release();
+    }
+
+    TriangleSelectionMode = false;
+
+    program->bind();
+    program->setUniformValue("ColorLerpEnabled", ColorLerpEnabled);
+    program->setUniformValue("LightingEnabled", true);
+    program->release();
+
+    update();
+    paintGL();
+}
+
 QOpenGLBuffer* _gl_widget::generateBuffer(const void *InData, int InCount)
 {
     QOpenGLBuffer* Buffer = new QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
