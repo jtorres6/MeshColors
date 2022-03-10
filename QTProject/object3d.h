@@ -52,7 +52,7 @@ typedef struct meshColorsFace
         for (int i = 0; i < samples.size(); ++i) {
 
             QString row =  "| ";
-            for (int j = 0; j <samples[i].size(); j++){
+            for (int j = 0; j < samples[i].size(); j++){
                 row += QString::number(i) + ", " + QString::number(j) + " | ";
             }
 
@@ -75,7 +75,7 @@ typedef struct meshColorsFace
 
                     for (int i = 0; i < samples.size(); ++i) {
                         for (int j = 0; j < samples[i].size(); j++){
-                            coreSamples.push_back({i, j});
+                            coreSamples.push_back({i * step, j * step});
                             coreSampleIndex.push_back(samples[i][j]);
                         }
                     }
@@ -94,48 +94,16 @@ typedef struct meshColorsFace
                         }
                         else
                         {
-                            for (int j = 0; j <= newResolution; j++){
+                            for (int j = Resolution + 1; j <= newResolution; j++){
                                 samples[i].push_back(faceIndex);
                                 ++faceIndex;
                             }
                         }
                     }
 
-                    for (int i = 0; i < samples.size(); ++i) {
-                        for (int j = 0; j < samples[i].size(); j++){
 
-                            QVector4D newColor = QVector4D(0.0f, 0.0f, 0.0f, 0.0f);
-                            int numColorReferences = 0;
-                            float distance = MAX_FLOAT_VALUE;
-
-                            for(QPair<int, int> sample : coreSamples) {
-                                if(std::abs(i - sample.first * step) + std::abs(j - sample.second * step) <= distance) {
-                                    newColor = InSamples[oldSamples[sample.first][sample.second]];
-                                    distance = std::abs(i - sample.first * step) + std::abs(j - sample.second * step);
-
-                                    ++numColorReferences;
-                                }
-
-                                if(std::abs(i - sample.first * step) == 0 && std::abs(j - sample.second * step) == 0)
-                                {
-                                    numColorReferences = 0;
-                                    //InSamples[samples[i][j]] = QVector4D(1.0f, 0.0f, 0.0f, 1.0f);
-                                    break;
-                                }
-                            }
-
-                            if(numColorReferences > 0) {
-                                //InSamples[samples[i][j]] = QVector4D(1.0f, 0.0f, 0.0f, 1.0f);
-                            }
-                            else
-                            {
-                                //InSamples[samples[i][j]] = QVector4D(0.0f, 1.0f, 0.0f, 1.0f);
-                            }
-                        }
-                    }
                 }
                 else if (step < 1) {
-                    QVector<QPair<int, int>> coreSamples;
                     QVector<QVector<int>> newSamples;
 
                     for (int i = 0; i < samples.size(); ++i) {
@@ -146,6 +114,8 @@ typedef struct meshColorsFace
                             for (int j = 0; j < samples[i].size(); j++){
                                 if (j%2 == 0.0f) {
                                     row.push_back(samples[i][j]);
+                                    coreSamples.push_back({i * step, j * step});
+                                    coreSampleIndex.push_back(samples[i][j]);
                                 }
                             }
 
@@ -169,14 +139,14 @@ typedef struct meshColorsFace
                 Edges.push_back(index);
                 index += Resolution-1;
 
-                samples[Resolution][Resolution] = int(Vertex.x());
-                //InSamples[Vertex.x()] = QVector4D(float(Resolution)/float(Resolution), float(Resolution)/float(Resolution), 0.0f, 1.0f);
-
-                samples[Resolution][0]          = int(Vertex.y());
-                //InSamples[Vertex.y()] = QVector4D(float(Resolution)/float(Resolution), 0, 0.0f, 1.0f);
-
-                samples[0][0]                   = int(Vertex.z());
-                //InSamples[Vertex.z()] = QVector4D(0, 0, 0.0f, 1.0f);
+                //samples[0][0]          = 0;
+                //InSamples[samples[0][0]] = QVector4D(1.0f, 0.0f, 1.0f, 1.0f);
+                //
+                //samples[0][Resolution]          = 1;
+                //InSamples[samples[0][Resolution]] = QVector4D(1.0f, 0.0f, 1.0f, 1.0f);
+                //
+                //samples[Resolution][Resolution] = 2;
+                //InSamples[samples[Resolution][Resolution]] = QVector4D(1.0f, 0.0f, 0.0f, 1.0f);
 
                 int edgeIndexOffset = 0;
 
@@ -184,43 +154,93 @@ typedef struct meshColorsFace
                 for(int a = 0; a <= Resolution; a++)
                 {
                     samples[a][0]          = Edges[0] + edgeIndexOffset;
-                    //InSamples[Edges[0] + edgeIndexOffset] = QVector4D(float(a)/float(Resolution), 0.0f, 0.0f, 1.0f);
-
                     samples[Resolution][a] = Edges[1] + edgeIndexOffset;
-                    //InSamples[Edges[1] + edgeIndexOffset] = QVector4D(float(Resolution)/float(Resolution), float(a)/Resolution, 0.0f, 1.0f);
-
                     samples[a][a]          = Edges[2] + edgeIndexOffset;
-                    //InSamples[Edges[2] + edgeIndexOffset] = QVector4D(float(a)/float(Resolution), float(a)/float(Resolution), 0.0f, 1.0f);
 
                     edgeIndexOffset++;
                 }
 
                 int faceIndexOffset = 0;
                 // 0 < a < R, 0 < j < R, a + j != R
-                for(int a = 0; a <= Resolution; a++) {
+                for(int a = 0; a < samples.size(); a++) {
                     for(int j = 0; j < samples[a].size(); j++) {
                         samples[a][j]   = index + faceIndexOffset;
-                        //InSamples[index + faceIndexOffset] = QVector4D(float(a)/float(Resolution), float(j)/float(Resolution), 0.0f, 1.0f);
                         faceIndexOffset++;
                     }
                 }
 
                 for(int i = 0; i < coreSamples.size(); ++i) {
-                    //samples[coreSamples[i].first* step][coreSamples[i].second * step] = coreSampleIndex[i];
+                    samples[coreSamples[i].first][coreSamples[i].second] = coreSampleIndex[i];
                 }
-        }
 
-        qDebug() << "\n\n" << Resolution << "\n";
-        for (int i = 0; i < samples.size(); ++i) {
+                for(int a = 0; a < samples.size(); a++) {
+                    for(int j = 0; j < samples[a].size(); j++) {
+                        if (!coreSamples.contains({a, j}))
+                        {
+                            QVector4D newColor = QVector4D(0.0f, 0.0f, 0.0f, 1.0f);
 
-            QString row =  "| ";
-            for (int j = 0; j < samples[i].size(); j++){
-                row += QString::number(i) + ", " + QString::number(j) + " | ";
+                            int colorCount = 0;
+
+                            if (a%2 != 0)
+                            {
+                                if (a-1 >= 0) {
+                                    newColor += InSamples[samples[a-1][j]];
+                                    ++colorCount;
+                                }
+
+                                if (a+1 <= samples.size()) {
+                                    newColor += InSamples[samples[a+1][j]];
+                                    ++colorCount;
+                                }
+                            }
+
+                            if (j%2 != 0)
+                            {
+                                if (j-1 >= 0) {
+                                    newColor += InSamples[samples[a][j-1]];
+                                    ++colorCount;
+                                }
+
+                                if (j+1 <= samples.size()) {
+                                    newColor += InSamples[samples[a][j+1]];
+                                    ++colorCount;
+                                }
+                            }
+
+                            InSamples[samples[a][j]] = newColor/colorCount;
+                        }
+                    }
+                }
             }
 
-            qDebug()<< row << "\n";
+            qDebug() << "\n\n" << "OJO" << Resolution << "\n";
+            for (int i = 0; i < samples.size(); ++i) {
+
+                QString row =  "| ";
+
+                for (int j = 0; j < samples[i].size(); j++){
+                    bool core = false;
+                    for(int a = 0; a < coreSamples.size(); ++a) {
+                        if(i == coreSamples[a].first && j == coreSamples[a].second)
+                        {
+                            //InSamples[samples[coreSamples[i].first][coreSamples[i].second]] = QVector4D(1.0f, 0.0f, 0.0f, 1.0f);
+                            core = true;
+                            break;
+                        }
+                    }
+
+                    if (core) {
+                        row += "((" + QString::number(i) + ", " + QString::number(j) + ")) | ";
+                    }
+                    else {
+                        row += "  " + QString::number(i) + ", " + QString::number(j) + "   | ";
+                    }
+
+                }
+
+                qDebug()<< row << "\n";
+            }
         }
-    }
     }
 } meshColorsFace;
 
