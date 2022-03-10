@@ -13,7 +13,6 @@
 #ifdef PLATFORM_WINDOWS
 #include "windows.h"
 #endif
-#include <GL/gl.h>
 #include <QOpenGLWidget>
 #include <QKeyEvent>
 #include <iostream>
@@ -67,6 +66,7 @@ public:
     void draw_objects();
 
     void pick(const int Selection_position_x, const int Selection_position_y);
+    void selectTriangle(const int Selection_position_x, const int Selection_position_y);
     void drawTrianglesSelectionMode();
 
     void moveCameraRightLeft(QPair<qint32, qint32> InUnits);
@@ -111,6 +111,8 @@ protected:
     void createBuffers();
     void logGlInfo();
 
+    bool readPlyFile(const string &filename, QVector<QVector3D>& outVertices, QVector<QVector3D>&  outTriangles);
+
 public:
     _window *Window;
 
@@ -135,7 +137,7 @@ private:
     _axis Axis;
     _object3D object3d;
 
-    const char* ModelFilePath = "";
+    string ModelFilePath;
 
     float Observer_angle_x = 0;
     float Observer_angle_y = 0;
@@ -160,8 +162,8 @@ private:
     QVector3D SelectedTriangle;
     QVector<QVector3D> SelectedTriangleDrawArray;
 
-    int PencilSize = 1;
-    float PencilTransparency = 0;
+    int PencilSize = 10;
+    float PencilTransparency = 0.5f;
 
     QVector3D points[1024];
     QOpenGLTexture *text;

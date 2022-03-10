@@ -8,46 +8,20 @@
 
 
 #include "object3d.h"
-#include "file_ply_stl.h"
+#include <QDebug>
 #include <map>
 #include <QDebug>
 
 using namespace _colors_ne;
 
-void _object3D::ReadPlyFile(const char *Filename)
-{
-    _file_ply ply;
-    if(ply.open(Filename) == 0) return;
-
-    vector<float> Coordinates;
-    vector<unsigned int> Positions;
-    ply.read(Coordinates, Positions);
-
-    for(size_t i = 0; i <= Coordinates.size()-3; i+=3)
-    {
-        vertices.push_back(QVector3D(Coordinates[i],Coordinates[i+1],Coordinates[i+2]));
-    }
-
-    for(size_t i = 0; i <= Positions.size()-3; i+=3)
-    {
-        Triangles.push_back(QVector3D(Positions[i],Positions[i+1],Positions[i+2]));
-    }
-}
-
-float RandomFloat(const float a, const float b) {
-    const float random = ((float) rand()) / (float) RAND_MAX;
-    const float diff = b - a;
-    const float r = random * diff;
-    return a + r;
-}
-
 _object3D::_object3D()
 {
 }
 
-_object3D::_object3D(const char *Filename)
+_object3D::_object3D(QVector<QVector3D>& InVertices, QVector<QVector3D>& InTriangles)
 {
-    ReadPlyFile(Filename);
+    Triangles = InTriangles;
+    vertices = InVertices;
 
     ssbo = (ssbo_data*)malloc(sizeof(ssbo_data));
 

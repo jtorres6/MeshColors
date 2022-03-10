@@ -283,7 +283,7 @@ class _object3D:public _basic_object3D
     QVector<int> Resolutions;
 
     _object3D();
-    _object3D(const char *Filename);
+    _object3D(QVector<QVector3D>& InVertices, QVector<QVector3D>& InTriangles);
 
     void ReadPlyFile(const char *Filename);
 

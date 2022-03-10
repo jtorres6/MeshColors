@@ -14,7 +14,6 @@
 #ifdef PLATFORM_WINDOWS
 #include "windows.h"
 #endif
-#include <GL/gl.h>
 #include "colors.h"
 #include "vertex.h"
 #include <QOpenGLShaderProgram>
