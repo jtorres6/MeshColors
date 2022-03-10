@@ -19,7 +19,6 @@
 #include <QGLFormat>
 #include <QSlider>
 #include <QCheckBox>
-#include <debugtools.h>
 #include <QRadioButton>
 
 #include "window.h"
@@ -60,25 +59,15 @@ _window::_window()
     QCheckBox *Lighting_button = new QCheckBox("Lighting");
     QCheckBox *Lerp_button = new QCheckBox("Color inerpolation");
 
+    Options_widget->setLayout(Vertical_options);
+
     Vertical_options->addWidget(Label1);
     Vertical_options->addWidget(Color_selection);
-    //Vertical_options->addWidget(Lighting_button);
-    //Vertical_options->addWidget(Lerp_button);
-    Vertical_options->addStretch();
-
-    QLabel *Label2 = new QLabel("Face resolution");
-    QPushButton *FaceSelection_button = new QPushButton("Enable face selection");
-    QPushButton *Increment_button = new QPushButton("+");
-    QPushButton *Decrease_button = new QPushButton("-");
-    Vertical_options->addWidget(Label2);
-    Vertical_options->addWidget(FaceSelection_button);
-    Vertical_options->addWidget(Increment_button);
-    Vertical_options->addWidget(Decrease_button);
-    Vertical_options->addStretch();
 
     QLabel *Label3 = new QLabel("Pencil size");
     QSlider* PencilSize_widget = new QSlider(Qt::Horizontal);
     PencilSize_widget->setMinimum(1);
+    PencilSize_widget->setSliderPosition(10);
     PencilSize_widget->setMaximum(32);
     Vertical_options->addWidget(Label3);
     Vertical_options->addWidget(PencilSize_widget);
@@ -86,11 +75,25 @@ _window::_window()
     QLabel *Label4 = new QLabel("Pencil transparency");
     QSlider* PencilTransparency_widget = new QSlider(Qt::Horizontal);
     PencilTransparency_widget->setMinimum(0);
+    PencilTransparency_widget->setSliderPosition(50);
     PencilTransparency_widget->setMaximum(100);
     Vertical_options->addWidget(Label4);
     Vertical_options->addWidget(PencilTransparency_widget);
 
-    Options_widget->setLayout(Vertical_options);
+    QCheckBox *wireframeEnabledWidget = new QCheckBox("Wireframe", this);
+
+    Vertical_options->addWidget(wireframeEnabledWidget);
+    Vertical_options->addWidget(Lighting_button);
+    Vertical_options->addWidget(Lerp_button);
+    Vertical_options->addStretch();
+
+    QLabel *Label2 = new QLabel("Face resolution");
+    QPushButton *Increment_button = new QPushButton("+");
+    QPushButton *Decrease_button = new QPushButton("-");
+    Vertical_options->addWidget(Label2);
+    Vertical_options->addWidget(Increment_button);
+    Vertical_options->addWidget(Decrease_button);
+    Vertical_options->addStretch();
 
     QTabWidget *Tab_widget = new QTabWidget;
     Tab_widget->setMaximumWidth(300);
@@ -100,26 +103,9 @@ _window::_window()
     Framed_widget->setSizePolicy(Q);
     Framed_widget->setFrameStyle(QFrame::Panel);
     Framed_widget->setLineWidth(1);
-
-    QVBoxLayout *m_glWidget_layout = new QVBoxLayout;
-    QCheckBox *wireframeEnabledWidget = new QCheckBox("Wireframe", this);
-
-    QRadioButton *enableSelectionMode = new QRadioButton("Selection mode", this);
-    QRadioButton *enablePaintingMode = new QRadioButton("Painting mode", this);
-
     m_glWidget = new _gl_widget(this);
     m_glWidget->setSizePolicy(Q);
-    m_glWidget->setLayout(m_glWidget_layout);
 
-    m_glWidget_layout->addStretch();
-    m_glWidget_layout->addWidget(wireframeEnabledWidget);
-    m_glWidget_layout->addWidget(Lighting_button);
-    m_glWidget_layout->addWidget(Lerp_button);
-    m_glWidget_layout->addStretch();
-    m_glWidget_layout->addWidget(enablePaintingMode);
-    m_glWidget_layout->addWidget(enableSelectionMode);
-
-    connect(FaceSelection_button, SIGNAL(pressed()), m_glWidget, SLOT(enableTriangleSelectionMode()));
     connect(Increment_button, SIGNAL(pressed()), m_glWidget, SLOT(incrementResolution()));
     connect(Decrease_button, SIGNAL(pressed()), m_glWidget, SLOT(decreaseResolution()));
     connect(Lighting_button, SIGNAL(stateChanged(int)), m_glWidget, SLOT(toggleLighting()));
@@ -127,7 +113,6 @@ _window::_window()
     connect(PencilSize_widget, SIGNAL(valueChanged(int)), m_glWidget, SLOT(updatePencilSize(int)));
     connect(PencilTransparency_widget, SIGNAL(valueChanged(int)), m_glWidget, SLOT(updatePencilTransparency(int)));
     connect(wireframeEnabledWidget, SIGNAL(stateChanged(int)), m_glWidget, SLOT(toggleWireframeMode()));
-    connect(enableSelectionMode, SIGNAL(toggled(bool)), m_glWidget, SLOT(enableTriangleSelectionMode()));
 
     QHBoxLayout *Horizontal_frame = new QHBoxLayout();
     Horizontal_frame->setContentsMargins(1,1,1,1);
@@ -184,9 +169,16 @@ _window::_window()
 
 void _window::mousePressEvent(QMouseEvent *e)
 {
-    if(e->buttons() & Qt::LeftButton)
-    {
-        m_glWidget->pick(e->pos().x(), height() - e->pos().y());
+    if (e != nullptr && m_glWidget != nullptr && m_glWidget->underMouse()) {
+        const float x = e->pos().x();
+        const float y = height() - e->pos().y();
+
+        if (e->buttons() & Qt::LeftButton) {
+            m_glWidget->pick(x, y);
+        }
+        else if (e->buttons() & Qt::MiddleButton) {
+            m_glWidget->selectTriangle(x, y);
+        }
     }
 }
 
@@ -264,7 +256,7 @@ void _window::SaveImage()
         }
 
         QDataStream out(&file);
-        out.setVersion(QDataStream::Qt_5_15);
+        out.setVersion(QDataStream::Qt_5_10);
 
         const int nFaces = m_glWidget->getObject3D()->Triangles.size();
 
@@ -322,7 +314,7 @@ void _window::SaveImageAs()
     SaveFileName = fileName;
 
     QDataStream out(&file);
-    out.setVersion(QDataStream::Qt_5_15);
+    out.setVersion(QDataStream::Qt_5_10);
 
     const int nFaces = m_glWidget->getObject3D()->Triangles.size();
 
@@ -373,7 +365,7 @@ void _window::LoadMeshColorsFile()
     }
 
     QDataStream in(&file);
-    in.setVersion(QDataStream::Qt_5_15);
+    in.setVersion(QDataStream::Qt_5_10);
     QVector<int> resolutions;
     QVector<QVector4D> array;
 
