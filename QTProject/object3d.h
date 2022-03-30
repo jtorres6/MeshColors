@@ -119,7 +119,7 @@ typedef struct meshColorsFace
                 ////////////////////////////////////////////////////////////////////////////
 
                 Resolution = newResolution;
-                int index = (baseIndex * MAX_SAMPLES * MAX_SAMPLES)/2 + (Resolution - 1) * (Resolution - 2);
+                int index = (baseIndex * 32 * 32)/2 + (Resolution - 1) * (Resolution - 2);
 
                 QVector<int> Edges;
                 Edges.push_back(index);

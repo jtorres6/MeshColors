@@ -464,6 +464,7 @@ void _gl_widget::pick(const int Selection_position_x, const int Selection_positi
 
                     if (!Indexes.contains(pickedID)) {
                         Indexes.append(i);
+                        qDebug() << pickedID;
                     }
                 }
                 else if (SelectedIDs.find(pickedID).value() > DistanceToCenter) {
@@ -665,7 +666,7 @@ void _gl_widget::incrementResolution()
 
 void _gl_widget::decreaseResolution()
 {
-    if(SelectedTriangleID >= 0 && SelectedTriangleID < object3d.Resolutions.size() && SelectedTriangleID >= 0 && object3d.Resolutions[SelectedTriangleID] >= 2)
+    if(SelectedTriangleID >= 0 && SelectedTriangleID < object3d.Resolutions.size() && SelectedTriangleID >= 0 && object3d.Resolutions[SelectedTriangleID] > 1)
     {
         object3d.Resolutions[SelectedTriangleID] /= 2;
         object3d.UpdateResolutionsArray(object3d.Resolutions);
