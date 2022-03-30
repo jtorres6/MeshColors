@@ -83,7 +83,7 @@ void _gl_widget::keyPressEvent(QKeyEvent *Keyevent)
 
   case Qt::Key_Plus:
 
-      if(SelectedTriangleID >= 0 && object3d.Resolutions[SelectedTriangleID] < 32)
+      if(SelectedTriangleID >= 0 && object3d.Resolutions[SelectedTriangleID] < MAX_SAMPLES)
       {
           object3d.Resolutions[SelectedTriangleID] *= 2;
           object3d.UpdateResolutionsArray(object3d.Resolutions);
@@ -653,7 +653,7 @@ void _gl_widget::setCurrentPaintingColor(const QColor &InNewColor)
 
 void _gl_widget::incrementResolution()
 {
-    if(SelectedTriangleID >= 0 && SelectedTriangleID < object3d.Resolutions.size() && object3d.Resolutions[SelectedTriangleID] < 32)
+    if(SelectedTriangleID >= 0 && SelectedTriangleID < object3d.Resolutions.size() && object3d.Resolutions[SelectedTriangleID] < MAX_SAMPLES)
     {
         object3d.Resolutions[SelectedTriangleID] *= 2;
         object3d.UpdateResolutionsArray(object3d.Resolutions);

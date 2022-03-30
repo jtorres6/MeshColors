@@ -20,7 +20,7 @@
  *****************************************************************************/
 
 const int MAX_TRIANGLES = 9000;
-const int MAX_SAMPLES = 32;
+const int MAX_SAMPLES = 16;
 
 typedef struct ssbo_data
 {
@@ -28,7 +28,7 @@ typedef struct ssbo_data
     QVector4D Colors[MAX_TRIANGLES][MAX_SAMPLES][MAX_SAMPLES];
 }ssbo_type;
 
-static int index = 0;
+static int vertexIndex = 0;
 typedef struct meshColorsFace
 {
     int Resolution;
@@ -42,8 +42,8 @@ typedef struct meshColorsFace
             QVector<int> indexVector;
 
             for (int j = 0; j <= Resolution; ++j){
-                indexVector.push_back(index);
-                ++index;
+                indexVector.push_back(vertexIndex);
+                ++vertexIndex;
             }
 
             samples.push_back(indexVector);
@@ -119,7 +119,7 @@ typedef struct meshColorsFace
                 ////////////////////////////////////////////////////////////////////////////
 
                 Resolution = newResolution;
-                int index = (baseIndex * 32 * 32)/2 + (Resolution - 1) * (Resolution - 2);
+                int index = (baseIndex * MAX_SAMPLES * MAX_SAMPLES)/2 + (Resolution - 1) * (Resolution - 2);
 
                 QVector<int> Edges;
                 Edges.push_back(index);

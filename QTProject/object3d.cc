@@ -116,7 +116,7 @@ void _object3D::UpdateMeshColorsArray(QVector<QVector4D>& InSamples)
         // Colors per face:
         int R = 4;
 
-        if(ssbo->Resolution[i] <= 32)
+        if(ssbo->Resolution[i] <= MAX_SAMPLES)
         {
             R = ssbo->Resolution[i];
 
