@@ -83,7 +83,7 @@ void _gl_widget::keyPressEvent(QKeyEvent *Keyevent)
 
   case Qt::Key_Plus:
 
-      if(SelectedTriangleID >= 0 && object3d.Resolutions[SelectedTriangleID] < 64)
+      if(SelectedTriangleID >= 0 && object3d.Resolutions[SelectedTriangleID] < 32)
       {
           object3d.Resolutions[SelectedTriangleID] *= 2;
           object3d.UpdateResolutionsArray(object3d.Resolutions);

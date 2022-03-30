@@ -28,6 +28,7 @@ typedef struct ssbo_data
     QVector4D Colors[MAX_TRIANGLES][MAX_SAMPLES][MAX_SAMPLES];
 }ssbo_type;
 
+static int index = 0;
 typedef struct meshColorsFace
 {
     int Resolution;
@@ -40,29 +41,18 @@ typedef struct meshColorsFace
 
             QVector<int> indexVector;
 
-            for (int j = 0; j <= Resolution; j++){
-                indexVector.push_back(i);
+            for (int j = 0; j <= Resolution; ++j){
+                indexVector.push_back(index);
+                ++index;
             }
 
             samples.push_back(indexVector);
-        }
-
-
-        qDebug() << Resolution;
-        for (int i = 0; i < samples.size(); ++i) {
-
-            QString row =  "| ";
-            for (int j = 0; j < samples[i].size(); j++){
-                row += QString::number(i) + ", " + QString::number(j) + " | ";
-            }
-
-            qDebug()<< row;
         }
     }
 
     void UpdateResolution(int newResolution, QVector<QVector4D>& InSamples, const QVector3D& Vertex, const int baseIndex)
     {
-        static int faceIndex;
+        int faceIndex = baseIndex;
         if(newResolution != Resolution && Resolution != 0 && newResolution != 0)
         {
             const float step = float(newResolution)/float(Resolution);
@@ -82,7 +72,7 @@ typedef struct meshColorsFace
 
                     for (int i = 0; i <= newResolution; ++i) {
 
-                        if( i > Resolution)
+                        if(i > Resolution)
                         {
                             QVector<int> indexVector;
                             for (int j = 0; j <= newResolution; j++){
@@ -129,7 +119,7 @@ typedef struct meshColorsFace
                 ////////////////////////////////////////////////////////////////////////////
 
                 Resolution = newResolution;
-                int index = baseIndex + (Resolution - 1) * (Resolution - 2);
+                int index = (baseIndex * 32 * 32)/2 + (Resolution - 1) * (Resolution - 2);
 
                 QVector<int> Edges;
                 Edges.push_back(index);
@@ -213,7 +203,6 @@ typedef struct meshColorsFace
                 }
             }
 
-            qDebug() << "\n\n" << "OJO" << Resolution << "\n";
             for (int i = 0; i < samples.size(); ++i) {
 
                 QString row =  "| ";
@@ -228,17 +217,7 @@ typedef struct meshColorsFace
                             break;
                         }
                     }
-
-                    if (core) {
-                        row += "((" + QString::number(i) + ", " + QString::number(j) + ")) | ";
-                    }
-                    else {
-                        row += "  " + QString::number(i) + ", " + QString::number(j) + "   | ";
-                    }
-
                 }
-
-                qDebug()<< row << "\n";
             }
         }
     }

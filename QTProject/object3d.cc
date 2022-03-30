@@ -27,7 +27,7 @@ _object3D::_object3D(QVector<QVector3D>& InVertices, QVector<QVector3D>& InTrian
 
     VerticesDrawArrays.resize(Triangles.size()*3);
 
-    for(size_t i = 0; i < MAX_TRIANGLES*MAX_SAMPLES; i++)
+    for(size_t i = 0; i < MAX_TRIANGLES*MAX_SAMPLES*MAX_SAMPLES; i++)
     {
         if(i%2 == 0)
         {
@@ -94,6 +94,13 @@ int _object3D::SsboSize()
     return sizeof(ssbo_data);
 }
 
+float RandomFloat(const float a, const float b) {
+    const float random = ((float) rand()) / (float) RAND_MAX;
+    const float diff = b - a;
+    const float r = random * diff;
+    return a + r;
+}
+
 void _object3D::UpdateMeshColorsArray(QVector<QVector4D>& InSamples)
 {
     if(ssbo == nullptr)
@@ -109,32 +116,27 @@ void _object3D::UpdateMeshColorsArray(QVector<QVector4D>& InSamples)
         // Colors per face:
         int R = 4;
 
-        if(ssbo->Resolution[i] <= 64)
+        if(ssbo->Resolution[i] <= 32)
         {
             R = ssbo->Resolution[i];
 
             if(i >= Faces.size())
             {
                 meshColorsFace m = meshColorsFace(R);
-                m.UpdateResolution(R, InSamples, Triangles[i], index);
+                m.UpdateResolution(R, InSamples, Triangles[i], i);
                 Faces.push_back(m);
             }
             else
             {
-                Faces[i].UpdateResolution(R, InSamples, Triangles[i], index);
+                Faces[i].UpdateResolution(R, InSamples, Triangles[i], i);
             }
         }
 
-        int faceIndexOffset = 0;
-        // 0 < a < R, 0 < j < R, a + j != R
         for(int a = 0; a < Faces[i].samples.size(); a++) {
             for(int j = 0; j < Faces[i].samples[a].size(); j++) {
-
                 ssbo->Colors[i][a][j] =  InSamples[Faces[i].samples[a][j]];
-                faceIndexOffset++;
             }
         }
-        qDebug() << faceIndexOffset;
     }
 }
 
