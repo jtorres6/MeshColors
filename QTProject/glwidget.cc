@@ -441,8 +441,8 @@ void _gl_widget::pick(const int Selection_position_x, const int Selection_positi
         glReadBuffer(GL_FRONT);
         glPixelStorei(GL_PACK_ALIGNMENT,1);
 
-        int PosX = Selection_position_x - 12.5 - (PencilSize*0.5f);
-        int PosY = Selection_position_y - 12.5 - (PencilSize*0.5f);
+        int PosX = Selection_position_x - 12.5f - (PencilSize*0.5f);
+        int PosY = Selection_position_y - 12.5f - (PencilSize*0.5f);
 
         glReadPixels(PosX, PosY, PencilSize, PencilSize, GL_RGBA, GL_UNSIGNED_BYTE, data);
 
@@ -460,11 +460,10 @@ void _gl_widget::pick(const int Selection_position_x, const int Selection_positi
              if (data[3] != 0 && pickedID != -1 && pickedID < object3d.points.size()) {
                 if (!SelectedIDs.contains(pickedID)) {
                     SelectedIDs.insert(pickedID, DistanceToCenter);
-                    object3d.points[pickedID] =  (1.0f- PencilTransparency) * object3d.points[pickedID] +  PencilTransparency * QVector4D(CurrentPaintingColor.red()/255.0f, CurrentPaintingColor.green()/255.0f, CurrentPaintingColor.blue()/255.0f, CurrentPaintingColor.alpha()/255.0f);
+                    object3d.points[pickedID] =  (1.0f - PencilTransparency) * object3d.points[pickedID] +  PencilTransparency * QVector4D(CurrentPaintingColor.red()/255.0f, CurrentPaintingColor.green()/255.0f, CurrentPaintingColor.blue()/255.0f, CurrentPaintingColor.alpha()/255.0f);
 
                     if (!Indexes.contains(pickedID)) {
                         Indexes.append(i);
-                        qDebug() << pickedID;
                     }
                 }
                 else if (SelectedIDs.find(pickedID).value() > DistanceToCenter) {

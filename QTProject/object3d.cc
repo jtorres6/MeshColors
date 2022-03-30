@@ -35,7 +35,7 @@ _object3D::_object3D(QVector<QVector3D>& InVertices, QVector<QVector3D>& InTrian
         }
         else
         {
-            points.push_back(QVector4D(0.4f, 0.4f, 0.4f, 1.0f));
+            points.push_back(QVector4D(0.25f, 0.25f, 0.25f, 1.0f));
         }
 
         // Convert "i", the integer mesh ID, into an RGB color
@@ -43,7 +43,6 @@ _object3D::_object3D(QVector<QVector3D>& InVertices, QVector<QVector3D>& InTrian
         int g = (i & 0x0000FF00) >>  8;
         int b = (i & 0x00FF0000) >> 16;
 
-        // TODO: This should be r/255.0f, but it only works with 254 somehow. CHECK THIS!
         selectionPoints.push_back(QVector4D(r/255.0f, g/255.0f, b/255.0f, i/float(MAX_TRIANGLES*MAX_SAMPLES)));
     }
 
