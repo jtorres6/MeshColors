@@ -3,7 +3,7 @@
 layout(std430, binding = 3) buffer MeshColorsData
 {
     int Resolution[9000];
-    vec4 Colors[9000][32][32];
+    vec4 Colors[9000][16][16];
 };
 
 uniform bool ColorLerpEnabled;
