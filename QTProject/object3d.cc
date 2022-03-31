@@ -109,8 +109,6 @@ void _object3D::UpdateMeshColorsArray(QVector<QVector4D>& InSamples)
     QMap<QPair<int,int>, int> EdgeIndexMap;
     face_data TriangleData;
 
-    int index = vertices.size();
-
     for(int i = 0; i < Triangles.size(); i++)
     {
         // Colors per face:
