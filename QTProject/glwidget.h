@@ -20,6 +20,7 @@
 #include "colors.h"
 #include "axis.h"
 #include "object3d.h"
+#include "meshcolorsobject3d.h"
 #include <QOpenGLBuffer>
 #include <QOpenGLContext>
 #include <QOpenGLFunctions>
@@ -135,7 +136,7 @@ private:
     MovableObject light;
 
     _axis Axis;
-    _object3D object3d;
+    MeshColorsObject3D object3d;
 
     string ModelFilePath;
 
@@ -165,7 +166,7 @@ private:
     int PencilSize = 10;
     float PencilTransparency = 0.5f;
 
-    QVector3D points[1024];
+    QVector3D Points[1024];
     QOpenGLTexture *text;
 
     QOpenGLContext *context;

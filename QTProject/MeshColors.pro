@@ -1,6 +1,8 @@
 HEADERS += \
   colors.h \
   basic_object3d.h \
+  meshcolorsface.h \
+  meshcolorsobject3d.h \
   movableobject.h \
   object3d.h \
   axis.h \
@@ -10,6 +12,8 @@ HEADERS += \
 
 SOURCES += \
   basic_object3d.cc \
+  meshcolorsface.cpp \
+  meshcolorsobject3d.cpp \
   movableobject.cpp \
   object3d.cc \
   axis.cc \

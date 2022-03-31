@@ -95,13 +95,13 @@ void _gl_widget::keyPressEvent(QKeyEvent *Keyevent)
       DrawingSamplesID = false;
 
       // TO-DO: This can be One method.
-      object3d.UpdateMeshColorsArray(object3d.points);
+      object3d.UpdateMeshColorsArray(object3d.Points);
       updateSSBO(ssbo, sizeof(*object3d.ssbo), object3d.ssbo);
       break;
 
   case Qt::Key_Comma:
       DrawingSamplesID = true;
-      object3d.UpdateMeshColorsArray(object3d.selectionPoints);
+      object3d.UpdateMeshColorsArray(object3d.SelectionPoints);
       updateSSBO(ssbo, sizeof(*object3d.ssbo), object3d.ssbo);
       break;
 
@@ -367,7 +367,7 @@ void _gl_widget::initializeGL()
     {
         readPlyFile(ModelFilePath, vertices, triangles);
     }
-    object3d = _object3D(vertices, triangles);
+    object3d = MeshColorsObject3D(vertices, triangles);
 
     SelectedTriangleDrawArray.clear();
     TriangleSelectionMode = false;
@@ -429,7 +429,7 @@ void _gl_widget::pick(const int Selection_position_x, const int Selection_positi
 
         makeCurrent();
 
-        object3d.UpdateMeshColorsArray(object3d.selectionPoints);
+        object3d.UpdateMeshColorsArray(object3d.SelectionPoints);
 
         updateSSBO(ssbo, sizeof(*object3d.ssbo), object3d.ssbo);
 
@@ -457,24 +457,23 @@ void _gl_widget::pick(const int Selection_position_x, const int Selection_positi
 
             const float DistanceToCenter = qFabs(0.5f - i/(PencilSize*PencilSize));
 
-             if (data[3] != 0 && pickedID != -1 && pickedID < object3d.points.size()) {
+             if (data[3] != 0 && pickedID != -1 && pickedID < object3d.Points.size()) {
                 if (!SelectedIDs.contains(pickedID)) {
                     SelectedIDs.insert(pickedID, DistanceToCenter);
-                    object3d.points[pickedID] =  (1.0f- PencilTransparency) * object3d.points[pickedID] +  PencilTransparency * QVector4D(CurrentPaintingColor.red()/255.0f, CurrentPaintingColor.green()/255.0f, CurrentPaintingColor.blue()/255.0f, CurrentPaintingColor.alpha()/255.0f);
+                    object3d.Points[pickedID] =  (1.0f- PencilTransparency) * object3d.Points[pickedID] +  PencilTransparency * QVector4D(CurrentPaintingColor.red()/255.0f, CurrentPaintingColor.green()/255.0f, CurrentPaintingColor.blue()/255.0f, CurrentPaintingColor.alpha()/255.0f);
 
                     if (!Indexes.contains(pickedID)) {
                         Indexes.append(i);
-                        qDebug() << pickedID;
                     }
                 }
                 else if (SelectedIDs.find(pickedID).value() > DistanceToCenter) {
                     SelectedIDs.find(pickedID).value() = DistanceToCenter;
-                    object3d.points[pickedID] = DistanceToCenter * object3d.points[pickedID] + (1.0f - DistanceToCenter) * QVector4D(CurrentPaintingColor.red()/255.0f, CurrentPaintingColor.green()/255.0f, CurrentPaintingColor.blue()/255.0f, CurrentPaintingColor.alpha()/255.0f);
+                    object3d.Points[pickedID] = DistanceToCenter * object3d.Points[pickedID] + (1.0f - DistanceToCenter) * QVector4D(CurrentPaintingColor.red()/255.0f, CurrentPaintingColor.green()/255.0f, CurrentPaintingColor.blue()/255.0f, CurrentPaintingColor.alpha()/255.0f);
                 }
             }
         }
 
-        object3d.UpdateMeshColorsArray(object3d.points);
+        object3d.UpdateMeshColorsArray(object3d.Points);
         updateSSBO(ssbo, sizeof(*object3d.ssbo), object3d.ssbo);
         DrawingSamplesID = false;
     }
@@ -617,7 +616,7 @@ void _gl_widget::setObjectPath(const char* InNewPath)
 
 void _gl_widget::setMeshColorsArray(QVector<QVector4D> InColors)
 {
-    object3d.points = InColors;
+    object3d.Points = InColors;
     object3d.UpdateMeshColorsArray(InColors);
     updateSSBO(ssbo, sizeof(*object3d.ssbo), object3d.ssbo);
 }
@@ -631,7 +630,7 @@ void _gl_widget::setResolutionsArray(QVector<int> InRes)
 
 const QVector<QVector4D>& _gl_widget::getMeshColorsArray() const
 {
-    return object3d.points;
+    return object3d.Points;
 }
 
 const QVector<int>& _gl_widget::getResolutionsArray() const
@@ -658,7 +657,7 @@ void _gl_widget::incrementResolution()
     {
         object3d.Resolutions[SelectedTriangleID] *= 2;
         object3d.UpdateResolutionsArray(object3d.Resolutions);
-        object3d.UpdateMeshColorsArray(object3d.points);
+        object3d.UpdateMeshColorsArray(object3d.Points);
         updateSSBO(ssbo, sizeof(*object3d.ssbo), object3d.ssbo);
         update();
     }
@@ -670,7 +669,7 @@ void _gl_widget::decreaseResolution()
     {
         object3d.Resolutions[SelectedTriangleID] /= 2;
         object3d.UpdateResolutionsArray(object3d.Resolutions);
-        object3d.UpdateMeshColorsArray(object3d.points);
+        object3d.UpdateMeshColorsArray(object3d.Points);
         updateSSBO(ssbo, sizeof(*object3d.ssbo), object3d.ssbo);
         update();
     }
