@@ -21,24 +21,22 @@
 
 const int MAX_TRIANGLES = 9000;
 
-class _object3D:public _basic_object3D
+class _object3D : public _basic_object3D
 {
-    public:
+public:
     QVector<QVector3D> Triangles;
     QVector<QVector3D> VerticesDrawArrays;
-    QVector<QVector3D> MeshColorsData;
+    QVector<QVector3D> TrianglesDrawArrays;
     QVector<QVector3D> Index;
     QVector<QVector4D> TriangleSelectionColors;
     QVector<QVector4D> VerticesNormals;
-    QVector<QVector3D> TrianglesDrawArrays;
-
-    QVector<int> Resolutions;
 
     _object3D();
     _object3D(QVector<QVector3D>& InVertices, QVector<QVector3D>& InTriangles);
 
     void ReadPlyFile(const char *Filename);
 
+private:
     QMatrix4x4 Projection;
     QMatrix4x4 Rotation_x;
     QMatrix4x4 Rotation_y;

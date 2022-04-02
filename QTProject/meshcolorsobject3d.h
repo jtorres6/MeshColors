@@ -25,6 +25,7 @@ public:
 
     ssbo_data* ssbo;
     QVector<QVector4D> Points, SelectionPoints;
+    QVector<int> Resolutions;
 
 private:
     QVector<MeshColorsFace> Faces;
@@ -34,6 +35,10 @@ private:
 
     bool TriangleSelectionMode = true;
     QVector<QVector4D> ColorArray;
+
+    void InitializeSSBO();
+    void InitializePointsArrays();
+
 };
 
 #endif // MESHCOLORSOBJECT3D_H

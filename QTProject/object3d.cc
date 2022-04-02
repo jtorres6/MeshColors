@@ -28,8 +28,6 @@ _object3D::_object3D(QVector<QVector3D>& InVertices, QVector<QVector3D>& InTrian
 
     for (int i= 0; i < Triangles.length(); i++)
     {
-        Resolutions.push_back(1);
-
         VerticesDrawArrays[i*3]   = vertices[Triangles[i].z()];
         VerticesDrawArrays[i*3+1] = vertices[Triangles[i].y()];
         VerticesDrawArrays[i*3+2] = vertices[Triangles[i].x()];

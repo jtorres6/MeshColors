@@ -9,10 +9,19 @@ class MeshColorsFace
 public:
     MeshColorsFace();
     MeshColorsFace(const int res);
-    void UpdateResolution(int newResolution, QVector<QVector4D>& InSamples, const int baseIndex);
+    MeshColorsFace(const int res, QVector<QVector4D>& colorSamples, const int baseIndex);
+    void updateResolution(int res, QVector<QVector4D>& colorSamples);
 
-    int Resolution;
+    int resolution;
     QVector<QVector<int>> samples;
+
+private:
+    void initializeSamples();
+    void increaseSamples(const int newResolution,  QVector<QPair<int, int>>& coreSamples, QVector<int>& coreSampleIndex);
+    void decreaseSamples(const int newResolution,  QVector<QPair<int, int>>& coreSamples, QVector<int>& coreSampleIndex);
+    void updateSamplesIndexes(QVector<QPair<int, int>>& coreSamples, QVector<int>& coreSampleIndex);
+
+    int faceIndex;
 };
 
 #endif // MESHCOLORSFACE_H
