@@ -4,6 +4,8 @@ TEMPLATE = app
 
 INCLUDEPATH += $$PWD/src
 
+DEFINES += PROJECT_PATH=\"\\\"$${_PRO_FILE_PWD_}/\\\"\"
+
 HEADERS += \
     $$PWD/src/colors.h \
     $$PWD/src/basic_object3d.h \
