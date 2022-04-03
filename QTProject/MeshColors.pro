@@ -1,33 +1,39 @@
+TARGET = MeshColors
+
+TEMPLATE = app
+
+INCLUDEPATH += $$PWD/src
+
 HEADERS += \
-  colors.h \
-  basic_object3d.h \
-  meshcolorsface.h \
-  meshcolorsobject3d.h \
-  movableobject.h \
-  object3d.h \
-  axis.h \
-  glwidget.h \
-  window.h \
-  file_ply_stl.ch
+    $$PWD/src/colors.h \
+    $$PWD/src/basic_object3d.h \
+    $$PWD/src/meshcolorsface.h \
+    $$PWD/src/meshcolorsobject3d.h \
+    $$PWD/src/movableobject.h \
+    $$PWD/src/object3d.h \
+    $$PWD/src/axis.h \
+    $$PWD/src/glwidget.h \
+    $$PWD/src/window.h \
+    $$PWD/src/file_ply_stl.ch
 
 SOURCES += \
-  basic_object3d.cc \
-  meshcolorsface.cpp \
-  meshcolorsobject3d.cpp \
-  movableobject.cpp \
-  object3d.cc \
-  axis.cc \
-  main.cc \
-  glwidget.cc \
-  window.cc \
-  file_ply_stl.cc
+    $$PWD/src/basic_object3d.cc \
+    $$PWD/src/meshcolorsface.cpp \
+    $$PWD/src/meshcolorsobject3d.cpp \
+    $$PWD/src/movableobject.cpp \
+    $$PWD/src/object3d.cc \
+    $$PWD/src/axis.cc \
+    $$PWD/src/main.cc \
+    $$PWD/src/glwidget.cc \
+    $$PWD/src/window.cc \
+    $$PWD/src/file_ply_stl.cc
 
 DISTFILES += \
-  MeshColorsFragment.fsh \
-  MeshColorsVertex.vsh \
-  MeshColorsGeometry.gsh \
-  BaseFragment.fsh \
-  BaseVertex.vsh
+    $$PWD/src/shaders/MeshColorsFragment.fsh \
+    $$PWD/src/shaders/MeshColorsVertex.vsh \
+    $$PWD/src/shaders/MeshColorsGeometry.gsh \
+    $$PWD/src/shaders/BaseFragment.fsh \
+    $$PWD/src/shaders/BaseVertex.vsh
 
 win32 {
     DEFINES += PLATFORM_WINDOWS=1

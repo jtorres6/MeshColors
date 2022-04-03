@@ -1,7 +1,7 @@
 #ifndef MESHCOLORSOBJECT3D_H
 #define MESHCOLORSOBJECT3D_H
 
-#include <object3d.h>
+#include <src/object3d.h>
 #include "meshcolorsface.h"
 
 const int MAX_SAMPLES = 16;

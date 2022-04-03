@@ -47,7 +47,7 @@ void MeshColorsObject3D::UpdateMeshColorsArray(QVector<QVector4D>& InSamples)
 
             for(int a = 0; a < Faces[i].samples.size(); a++) {
                 for(int j = 0; j < Faces[i].samples[a].size(); j++) {
-                    ssbo->Colors[i][a][j] =  InSamples[Faces[i].samples[a][j]];
+                    ssbo->Colors[i][a][j] = InSamples[Faces[i].samples[a][j]];
                 }
             }
         }

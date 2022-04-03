@@ -665,7 +665,7 @@ void _gl_widget::incrementResolution()
 
 void _gl_widget::decreaseResolution()
 {
-    if(SelectedTriangleID >= 0 && SelectedTriangleID < object3d.Resolutions.size() && SelectedTriangleID >= 0 && object3d.Resolutions[SelectedTriangleID] > 1)
+    if(SelectedTriangleID >= 0 && SelectedTriangleID < object3d.Resolutions.size() && SelectedTriangleID >= 0 && object3d.Resolutions[SelectedTriangleID] >= 2)
     {
         object3d.Resolutions[SelectedTriangleID] /= 2;
         object3d.UpdateResolutionsArray(object3d.Resolutions);
@@ -720,9 +720,11 @@ void _gl_widget::loadProgram()
     context = new QOpenGLContext(this);
     program = new QOpenGLShaderProgram(context);
 
-    program->addCacheableShaderFromSourceFile(QOpenGLShader::Vertex,   "../QTProject/MeshColorsVertex.vsh");
-    program->addCacheableShaderFromSourceFile(QOpenGLShader::Geometry, "../QTProject/MeshColorsGeometry.gsh");
-    program->addCacheableShaderFromSourceFile(QOpenGLShader::Fragment, "../QTProject/MeshColorsFragment.fsh");
+    const QString& path = QDir::currentPath() + "/src/shaders/";
+
+    program->addCacheableShaderFromSourceFile(QOpenGLShader::Vertex,   path + "MeshColorsVertex.vsh");
+    program->addCacheableShaderFromSourceFile(QOpenGLShader::Geometry, path + "MeshColorsGeometry.gsh");
+    program->addCacheableShaderFromSourceFile(QOpenGLShader::Fragment, path + "MeshColorsFragment.fsh");
     program->link();
 }
 
@@ -750,8 +752,10 @@ void _gl_widget::createBuffers()
 
     program2 = new QOpenGLShaderProgram(context);
 
-    program2->addCacheableShaderFromSourceFile(QOpenGLShader::Vertex,   "../QTProject/BaseVertex.vsh");
-    program2->addCacheableShaderFromSourceFile(QOpenGLShader::Fragment, "../QTProject/BaseFragment.fsh");
+    const QString& path = QDir::currentPath() + "/src/shaders/";
+
+    program2->addCacheableShaderFromSourceFile(QOpenGLShader::Vertex,   path + "BaseVertex.vsh");
+    program2->addCacheableShaderFromSourceFile(QOpenGLShader::Fragment, path + "BaseFragment.fsh");
     program2->link();
     program2->bind();
 
