@@ -232,7 +232,7 @@ void _window::resizeEvent(QResizeEvent *event)
 void _window::OpenFileDialog()
 {
     QString fileName = QFileDialog::getOpenFileName(this,
-        tr("3D object location"), "./Models/",
+        tr("3D object location"), QString(PROJECT_PATH) + "/models/",
         tr("PLY objects (*.ply);;All Files (*)"), 0, QFileDialog::DontUseNativeDialog);
 
     QDir dir(QDir::currentPath());
