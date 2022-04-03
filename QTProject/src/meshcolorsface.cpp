@@ -28,62 +28,12 @@ void MeshColorsFace::updateResolution(const int newResolution, QVector<QVector4D
 {
     if(newResolution != resolution && resolution != 0 && newResolution != 0)
     {
-        QVector<QPair<int, int>> coreSamples;
-        QVector<int> coreSampleIndex;
-
         if(newResolution != resolution) {
             if (newResolution > resolution) {
-                increaseSamples(newResolution, coreSamples, coreSampleIndex);
+                increaseSamples(newResolution, colorSamples);
             }
             else {
-                decreaseSamples(newResolution, coreSamples, coreSampleIndex);
-            }
-
-            ////////////////////////////////////////////////////////////////////////////
-
-            resolution = newResolution;
-
-            updateSamplesIndexes(coreSamples, coreSampleIndex);
-
-            for(int a = 0; a < samples.size(); a++) {
-                for(int j = 0; j < samples[a].size(); j++) {
-                    if (!coreSamples.contains({a, j}))
-                    {
-                        QVector4D newColor = QVector4D(0.0f, 0.0f, 0.0f, 1.0f);
-
-                        int colorCount = 0;
-
-                        if (a%2 != 0)
-                        {
-                            if (a-1 >= 0) {
-                                newColor += colorSamples[samples[a-1][j]];
-                                ++colorCount;
-                            }
-
-                            if (a+1 < samples.size()) {
-                                newColor += colorSamples[samples[a+1][j]];
-                                ++colorCount;
-                            }
-                        }
-
-                        if (j%2 != 0)
-                        {
-                            if (j-1 >= 0) {
-                                newColor += colorSamples[samples[a][j-1]];
-                                ++colorCount;
-                            }
-
-                            if (j+1 < samples[a].size()) {
-                                newColor += colorSamples[samples[a][j+1]];
-                                ++colorCount;
-                            }
-                        }
-
-                        if(colorCount > 0) {
-                            colorSamples[samples[a][j]] = newColor/colorCount;
-                        }
-                    }
-                }
+                decreaseSamples(newResolution, colorSamples);
             }
         }
     }
@@ -103,8 +53,11 @@ void MeshColorsFace::initializeSamples()
     }
 }
 
-void MeshColorsFace::increaseSamples(const int newResolution,  QVector<QPair<int, int>>& coreSamples, QVector<int>& coreSampleIndex)
+void MeshColorsFace::increaseSamples(const int newResolution, QVector<QVector4D>& colorSamples)
 {
+    QVector<QPair<int, int>> coreSamples;
+    QVector<int> coreSampleIndex;
+
     QVector<QVector<int>> oldSamples = samples;
     const int step = newResolution/resolution;
 
@@ -136,10 +89,57 @@ void MeshColorsFace::increaseSamples(const int newResolution,  QVector<QPair<int
             }
         }
     }
+    resolution = newResolution;
+
+    updateSamplesIndexes(coreSamples, coreSampleIndex);
+
+    for(int a = 0; a < samples.size(); a++) {
+        for(int j = 0; j < samples[a].size(); j++) {
+            if (!coreSamples.contains({a, j}))
+            {
+                QVector4D newColor = QVector4D(0.0f, 0.0f, 0.0f, 1.0f);
+
+                int colorCount = 0;
+
+                if (a%2 != 0)
+                {
+                    if (a-1 >= 0) {
+                        newColor += colorSamples[samples[a-1][j]];
+                        ++colorCount;
+                    }
+
+                    if (a+1 < samples.size()) {
+                        newColor += colorSamples[samples[a+1][j]];
+                        ++colorCount;
+                    }
+                }
+
+                if (j%2 != 0)
+                {
+                    if (j-1 >= 0) {
+                        newColor += colorSamples[samples[a][j-1]];
+                        ++colorCount;
+                    }
+
+                    if (j+1 < samples[a].size()) {
+                        newColor += colorSamples[samples[a][j+1]];
+                        ++colorCount;
+                    }
+                }
+
+                if(colorCount > 0) {
+                    colorSamples[samples[a][j]] = newColor/colorCount;
+                }
+            }
+        }
+    }
 }
 
-void MeshColorsFace::decreaseSamples(const int newResolution, QVector<QPair<int, int>>& coreSamples, QVector<int>& coreSampleIndex)
+void MeshColorsFace::decreaseSamples(const int newResolution, QVector<QVector4D>& colorSamples)
 {
+    QVector<QPair<int, int>> coreSamples;
+    QVector<int> coreSampleIndex;
+
     QVector<QVector<int>> newSamples;
     const float step = float(newResolution)/float(resolution);
 
@@ -153,6 +153,25 @@ void MeshColorsFace::decreaseSamples(const int newResolution, QVector<QPair<int,
                     row.push_back(samples[i][j]);
                     coreSamples.push_back({int(i * step), int(j * step)});
                     coreSampleIndex.push_back(samples[i][j]);
+
+                    QVector4D newColor = QVector4D(0.0f, 0.0f, 0.0f, 1.0f);
+
+                    int count = 0;
+
+                    for(int k = -1; k <= 1; ++k){
+                        for(int a = -1; a <= 1; ++a){
+                            if(i+k < samples.size() && i+k >= 0){
+                                if (j+a < samples[i].size() && j+a >= 0){
+
+                                    newColor += colorSamples[samples[i+k][a+j]];
+                                    ++count;
+                                }
+                            }
+                        }
+                    }
+                    if(count > 0) {
+                        colorSamples[samples[i][j]] = newColor/count;
+                    }
                 }
             }
 
@@ -161,6 +180,10 @@ void MeshColorsFace::decreaseSamples(const int newResolution, QVector<QPair<int,
     }
 
     samples = newSamples;
+
+    resolution = newResolution;
+
+    updateSamplesIndexes(coreSamples, coreSampleIndex);
 }
 
 void MeshColorsFace::updateSamplesIndexes(QVector<QPair<int, int>>& coreSamples, QVector<int>& coreSampleIndex)

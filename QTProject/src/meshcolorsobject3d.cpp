@@ -14,7 +14,7 @@ MeshColorsObject3D::MeshColorsObject3D(QVector<QVector3D>& InVertices, QVector<Q
 
     for(int i = 0; i < Triangles.size(); i++)
     {
-        Resolutions.push_back(1);
+        Resolutions.push_back(2);
     }
 
     UpdateResolutionsArray(Resolutions);

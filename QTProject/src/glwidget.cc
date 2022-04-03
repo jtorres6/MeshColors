@@ -665,7 +665,7 @@ void _gl_widget::incrementResolution()
 
 void _gl_widget::decreaseResolution()
 {
-    if(SelectedTriangleID >= 0 && SelectedTriangleID < object3d.Resolutions.size() && SelectedTriangleID >= 0 && object3d.Resolutions[SelectedTriangleID] >= 2)
+    if(SelectedTriangleID >= 0 && SelectedTriangleID < object3d.Resolutions.size() && SelectedTriangleID >= 0 && object3d.Resolutions[SelectedTriangleID] > 2)
     {
         object3d.Resolutions[SelectedTriangleID] /= 2;
         object3d.UpdateResolutionsArray(object3d.Resolutions);
