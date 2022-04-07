@@ -39,9 +39,6 @@ namespace _gl_widget_ne {
   const float BACK_PLANE_PERSPECTIVE=1000;
   const float DEFAULT_DISTANCE=2;
   const float ANGLE_STEP=0.5f;
-
-  typedef enum {MODE_DRAW_POINT,MODE_DRAW_LINE,MODE_DRAW_FILL,MODE_DRAW_CHESS} _mode_draw;
-  typedef enum {OBJECT_TETRAHEDRON,OBJECT_CUBE,OBJECT_MESHCOLORS} _object;
 }
 
 class _window;
@@ -63,7 +60,10 @@ public:
     void change_projection();
     void change_observer();
 
-    void draw_axis();
+    void drawObject3D();
+    void drawAxis();
+    void drawSelectedTriangle();
+    void drawObjectWireframe();
     void draw_objects();
 
     void pick(const int Selection_position_x, const int Selection_position_y);

@@ -1,11 +1,3 @@
- /*! \file
- * Copyright Domingo Martín Perandres
- * email: dmartin@ugr.es
- * web: http://calipso.ugr.es/dmartin
- * 2003-2019
- * GPL 3
- */
-
 #include "glwidget.h"
 #include "file_ply_stl.h"
 #include "window.h"
@@ -15,16 +7,7 @@
 #include <QColorDialog>
 #include <QtMath>
 
-using namespace std;
 using namespace _gl_widget_ne;
-using namespace _colors_ne;
-
-
-/*****************************************************************************//**
- *
- *
- *
- *****************************************************************************/
 
 _gl_widget::_gl_widget(_window *Window1):Window(Window1)
 {
@@ -33,14 +16,6 @@ _gl_widget::_gl_widget(_window *Window1):Window(Window1)
   camera = MovableObject();
   light = MovableObject();
 }
-
-
-/*****************************************************************************//**
- * Evento tecla pulsada
- *
- *
- *
- *****************************************************************************/
 
 void _gl_widget::keyReleaseEvent(QKeyEvent *Keyevent)
 {
@@ -125,7 +100,6 @@ void _gl_widget::keyPressEvent(QKeyEvent *Keyevent)
   update();
 }
 
-
 void _gl_widget::moveCameraRightLeft(QPair<qint32, qint32> InUnits)
 {
     if(ControlPressed)
@@ -147,26 +121,10 @@ void _gl_widget::addCameraZoom(const float InValue)
     update();
 }
 
-/*****************************************************************************//**
- * Limpiar ventana
- *
- *
- *
- *****************************************************************************/
-
 void _gl_widget::clear_window()
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 }
-
-
-
-/*****************************************************************************//**
- * Funcion para definir la transformación de proyeccion
- *
- *
- *
- *****************************************************************************/
 
 void _gl_widget::change_projection()
 {
@@ -179,13 +137,6 @@ void _gl_widget::change_projection()
     camera.rotate(Observer_angle_y, 0, 1, 0);
 }
 
-/*****************************************************************************//**
- * Funcion para definir la transformación de vista (posicionar la camara)
- *
- *
- *
- *****************************************************************************/
-
 void _gl_widget::change_observer()
 {
     light.reset();
@@ -194,91 +145,105 @@ void _gl_widget::change_observer()
     light.rotate(lightAngleY, 0, 1, 0);
 }
 
-
-/*****************************************************************************//**
- * Funcion que dibuja los objetos
- *
- *
- *
- *****************************************************************************/
-
-void _gl_widget::draw_objects()
+void _gl_widget::drawObject3D()
 {
-    //glEnable(GL_CULL_FACE);
-    //glCullFace(GL_FRONT);
+    if (program != nullptr && VAO != nullptr) {
+        program->bind();
+        VAO->bind();
 
-    int matrixLocation = program->uniformLocation("matrix");
+        const int matrixLocation = program->uniformLocation("matrix");
 
-    program->bind();
+        program->setUniformValue(matrixLocation, camera.getProjectedTransform());
+        program->setUniformValue("BaseRendering", false);
+        program->setUniformValue("LightPos", light.getLocation());
+        program->setUniformValue("ColorLerpEnabled", !DrawingSamplesID && ColorLerpEnabled);
+        program->setUniformValue("LightingEnabled", !DrawingSamplesID && LightingEnabled);
 
-    program->setUniformValue(matrixLocation, camera.getProjectedTransform());
+        glLineWidth(1.5f);
 
-    // Draw 3D model
-    VAO->bind();
+        context->extraFunctions()->glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, ssbo);
+        context->functions()->glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
+        glDrawArrays(GL_TRIANGLES, 0, object3d.VerticesDrawArrays.size());
+        context->functions()->glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0); // unbind
 
-    program->setUniformValue("BaseRendering", false);
-    glLineWidth(1.5f);
+        VAO->release();
+        program->release();
+    }
+}
 
-    program->setUniformValue("LightPos", light.getLocation());
+void _gl_widget::drawAxis()
+{
+    if(program2 != nullptr && VAO3 != nullptr) {
+        program2->bind();
+        VAO3->bind();
 
-    program->setUniformValue("ColorLerpEnabled", !DrawingSamplesID && ColorLerpEnabled);
-    program->setUniformValue("LightingEnabled", !DrawingSamplesID && LightingEnabled);
+        glLineWidth(1.0f);
 
-    context->extraFunctions()->glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, ssbo);
-    context->functions()->glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
-    glDrawArrays(GL_TRIANGLES, 0, object3d.VerticesDrawArrays.size());
-    context->functions()->glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0); // unbind
+        const int matrixLocation = program2->uniformLocation("matrix");
+        program2->setUniformValue(matrixLocation, camera.getProjectedTransform());
+        program2->setUniformValue("LineColor", QVector4D(0.0f, 0.7f, 1.0f, 1.0f));
+        program2->setUniformValue("LineMode", false);
 
-    VAO->release();
-    program->release();
+        glDrawArrays(GL_LINES, 0, Axis.vertices.size());
 
-    if(wireframeMode) {
+        VAO3->release();
+        program2->release();
+    }
+}
+
+void _gl_widget::drawSelectedTriangle()
+{
+    if(program2 != nullptr && VAO5 != nullptr) {
+        program2->bind();
+        VAO5->bind();
+
+        const int matrixLocation = program2->uniformLocation("matrix");
+        program2->setUniformValue(matrixLocation, camera.getProjectedTransform());
+        program2->setUniformValue("LineColor", QVector4D(0.6f, 0.0f, 0.2f, 1.0f));
+        program2->setUniformValue("LineMode", true);
+
+        glLineWidth(1.5f);
+
+        glDrawArrays(GL_LINES, 0, SelectedTriangleDrawArray.size());
+
+        VAO5->release();
+        program2->release();
+    }
+}
+
+void _gl_widget::drawObjectWireframe()
+{
+    if (program2 != nullptr && VAO4 != nullptr) {
         program2->bind();
         VAO4->bind();
 
-        matrixLocation = program2->uniformLocation("matrix");
+        const int matrixLocation = program2->uniformLocation("matrix");
         program2->setUniformValue(matrixLocation, camera.getProjectedTransform());
-        program2->setUniformValue("LineColor", QVector4D(0.0f, 0.3f, 0.8f, 0.5f));
+        program2->setUniformValue("LineColor", QVector4D(0.0f, 0.15f, 0.4f, 0.5f));
         program2->setUniformValue("LineMode", true);
+
+        glLineWidth(0.5f);
 
         glDrawArrays(GL_LINES,0, object3d.TrianglesDrawArrays.size());
 
         VAO4->release();
         program2->release();
+    }
+}
 
+void _gl_widget::draw_objects()
+{
+    drawAxis();
+
+    drawObject3D();
+
+    if(SelectedTriangleDrawArray.size() > 0) {
+        drawSelectedTriangle();
     }
 
-    program2->bind();
-    // Draw axis
-    VAO3->bind();
-    glLineWidth(1.0f);
-
-    matrixLocation = program2->uniformLocation("matrix");
-    program2->setUniformValue(matrixLocation, camera.getProjectedTransform());
-    program2->setUniformValue("LineColor", QVector4D(0.0f, 0.7f, 1.0f, 1.0f));
-    program2->setUniformValue("LineMode", false);
-
-    glDrawArrays(GL_LINES, 0, Axis.vertices.size());
-
-    VAO3->release();
-
-    if(VAO5 != nullptr && SelectedTriangleDrawArray.size() > 0)
-    {
-        // Draw axis
-        VAO5->bind();
-        glLineWidth(7.5f);
-
-        matrixLocation = program2->uniformLocation("matrix");
-        program2->setUniformValue(matrixLocation, camera.getProjectedTransform());
-        program2->setUniformValue("LineColor", QVector4D(1.0f, 0.0f, 0.0f, 1.0f));
-        program2->setUniformValue("LineMode", true);
-
-        glDrawArrays(GL_LINES, 0, SelectedTriangleDrawArray.size());
-
-        VAO5->release();
+    if(wireframeMode) {
+        drawObjectWireframe();
     }
-
-    program2->release();
 }
 
 void _gl_widget::drawTrianglesSelectionMode()
@@ -319,14 +284,6 @@ void _gl_widget::drawTrianglesSelectionMode()
     program2->release();
 }
 
-
-/*****************************************************************************//**
- * Evento de dibujado
- *
- *
- *
- *****************************************************************************/
-
 void _gl_widget::paintGL()
 {
   clear_window();
@@ -335,26 +292,10 @@ void _gl_widget::paintGL()
   draw_objects();
 }
 
-
-/*****************************************************************************//**
- * Evento de cambio de tamaño de la ventana
- *
- *
- *
- *****************************************************************************/
-
 void _gl_widget::resizeGL(int Width1, int Height1)
 {
   glViewport(0,0,Width1,Height1);
 }
-
-
-/*****************************************************************************//**
- * Inicialización de OpenGL
- *
- *
- *
- *****************************************************************************/
 
 void _gl_widget::initializeGL()
 {
