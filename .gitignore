@@ -37,3 +37,4 @@ debug/
 *.Debug
 *.Release
 *.stash
+*.user
