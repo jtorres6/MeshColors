@@ -12,7 +12,7 @@ MeshColorsObject3D::MeshColorsObject3D(QVector<QVector3D>& InVertices, QVector<Q
     InitializeSSBO();
     InitializePointsArrays();
 
-    for(int i = 0; i < Triangles.size(); i++)
+    for(int i = 0; i < triangles.size(); i++)
     {
         Resolutions.push_back(2);
     }
@@ -28,9 +28,8 @@ int MeshColorsObject3D::GetSsboSize() const
 
 void MeshColorsObject3D::UpdateMeshColorsArray(QVector<QVector4D>& InSamples)
 {
-    if(ssbo != nullptr){
-        for(int i = 0; i < Triangles.size(); i++)
-        {
+    if(ssbo != nullptr) {
+        for(int i = 0; i < triangles.size(); i++) {
             const int R = ssbo->Resolution[i];
 
             if(R <= MAX_SAMPLES)
@@ -56,10 +55,8 @@ void MeshColorsObject3D::UpdateMeshColorsArray(QVector<QVector4D>& InSamples)
 
 void MeshColorsObject3D::UpdateResolutionsArray(const QVector<int>& InNewResolutions)
 {
-    if(ssbo != nullptr)
-    {
-        for(int i = 0; i < Triangles.size(); i++)
-        {
+    if(ssbo != nullptr) {
+        for(int i = 0; i < triangles.size(); i++) {
             if(i >= InNewResolutions.size()) return;
 
             ssbo->Resolution[i] = InNewResolutions[i];
@@ -75,14 +72,11 @@ void MeshColorsObject3D::InitializeSSBO()
 void MeshColorsObject3D::InitializePointsArrays()
 {
     const size_t SamplesArraySize = MAX_TRIANGLES * 32 * 32;
-    for(size_t i = 0; i < SamplesArraySize; i++)
-    {
-        if(i%2 == 0)
-        {
+    for(size_t i = 0; i < SamplesArraySize; i++) {
+        if(i%2 == 0) {
             Points.push_back(QVector4D(0.2f, 0.2f, 0.2f, 1.0f));
         }
-        else
-        {
+        else {
             Points.push_back(QVector4D(0.4f, 0.4f, 0.4f, 1.0f));
         }
 

@@ -58,7 +58,6 @@ void MeshColorsFace::increaseSamples(const int newResolution, QVector<QVector4D>
     QVector<QPair<int, int>> coreSamples;
     QVector<int> coreSampleIndex;
 
-    QVector<QVector<int>> oldSamples = samples;
     const int step = newResolution/resolution;
 
     for (int i = 0; i < samples.size(); ++i) {
@@ -89,6 +88,7 @@ void MeshColorsFace::increaseSamples(const int newResolution, QVector<QVector4D>
             }
         }
     }
+
     resolution = newResolution;
 
     updateSamplesIndexes(coreSamples, coreSampleIndex);

@@ -24,9 +24,9 @@ const int MAX_TRIANGLES = 9000;
 class _object3D : public _basic_object3D
 {
 public:
-    QVector<QVector3D> Triangles;
-    QVector<QVector3D> VerticesDrawArrays;
-    QVector<QVector3D> TrianglesDrawArrays;
+    QVector<QVector3D> triangles;
+    QVector<QVector3D> verticesDrawArrays;
+    QVector<QVector3D> trianglesDrawArrays;
     QVector<QVector3D> Index;
     QVector<QVector4D> TriangleSelectionColors;
     QVector<QVector4D> VerticesNormals;

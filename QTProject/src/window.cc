@@ -258,7 +258,7 @@ void _window::SaveImage()
         QDataStream out(&file);
         out.setVersion(QDataStream::Qt_5_10);
 
-        const int nFaces = m_glWidget->getObject3D()->Triangles.size();
+        const int nFaces = m_glWidget->getObject3D()->triangles.size();
 
         QVector<int> Res;
         QVector<QVector4D> Colors;
@@ -316,7 +316,7 @@ void _window::SaveImageAs()
     QDataStream out(&file);
     out.setVersion(QDataStream::Qt_5_10);
 
-    const int nFaces = m_glWidget->getObject3D()->Triangles.size();
+    const int nFaces = m_glWidget->getObject3D()->triangles.size();
 
     QVector<int> Res;
     QVector<QVector4D> Colors;
@@ -372,9 +372,8 @@ void _window::LoadMeshColorsFile()
     in >> resolutions;
     in >> array;
 
-    QVector<int> Res;
     QVector<QVector4D> Colors;
-    const int nFaces = m_glWidget->getObject3D()->Triangles.size();
+    const int nFaces = m_glWidget->getObject3D()->triangles.size();
 
     int counter = 0;
 
