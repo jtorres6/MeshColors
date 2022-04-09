@@ -184,24 +184,26 @@ void _window::mousePressEvent(QMouseEvent *e)
 
 void _window::mouseMoveEvent(QMouseEvent *e)
 {
-    if(e->buttons() & Qt::LeftButton)
-    {
-        m_glWidget->pick(e->pos().x(), height() - e->pos().y());
-    }
-
-    if(e->buttons() & Qt::RightButton)
-    {
-        if(MousePressed)
+    if(m_glWidget != nullptr && m_glWidget->underMouse()) {
+        if(e->buttons() & Qt::LeftButton )
         {
-            m_glWidget->moveCameraRightLeft(QPair<qint32, qint32>(e->pos().x() - PreviousPosition.first, e->pos().y() - PreviousPosition.second));
-        }
-        else
-        {
-            MousePressed = true;
+            m_glWidget->pick(e->pos().x(), height() - e->pos().y());
         }
 
-        PreviousPosition.first  = e->pos().x();
-        PreviousPosition.second = e->pos().y();
+        if(e->buttons() & Qt::RightButton)
+        {
+            if(MousePressed)
+            {
+                m_glWidget->moveCameraRightLeft(QPair<qint32, qint32>(e->pos().x() - PreviousPosition.first, e->pos().y() - PreviousPosition.second));
+            }
+            else
+            {
+                MousePressed = true;
+            }
+
+            PreviousPosition.first  = e->pos().x();
+            PreviousPosition.second = e->pos().y();
+        }
     }
 }
 
