@@ -667,68 +667,77 @@ void _gl_widget::loadProgram()
 
 void _gl_widget::createBuffers()
 {
-    program->bind();
+    if(context != nullptr) {
+        if(program == nullptr) {
+            program = new QOpenGLShaderProgram(context);
+        }
 
-    VAO = new QOpenGLVertexArrayObject();
-    if (VAO->create()) {
-        VAO->bind();
+        program->bind();
 
-        initializeBuffer(program, object3d.verticesDrawArrays.data(), object3d.verticesDrawArrays.size() * sizeof(QVector3D),"vertex", GL_FLOAT, 0, 3);
-        initializeBuffer(program, object3d.colors.data(), object3d.colors.size() * sizeof(QVector4D), "color", GL_FLOAT, 0, 4);
-        initializeBuffer(program, object3d.Index.data(), object3d.Index.size() * sizeof(QVector3D), "indexes", GL_FLOAT, 0, 3);
-        initializeBuffer(program, object3d.VerticesNormals.data(), object3d.VerticesNormals.size() * sizeof(QVector4D), "normals", GL_FLOAT, 0, 4);
+        VAO = new QOpenGLVertexArrayObject();
+        if (VAO->create()) {
+            VAO->bind();
 
-        program->setUniformValue("ColorLerpEnabled", ColorLerpEnabled);
+            initializeBuffer(program, object3d.verticesDrawArrays.data(), object3d.verticesDrawArrays.size() * sizeof(QVector3D),"vertex", GL_FLOAT, 0, 3);
+            initializeBuffer(program, object3d.colors.data(), object3d.colors.size() * sizeof(QVector4D), "color", GL_FLOAT, 0, 4);
+            initializeBuffer(program, object3d.Index.data(), object3d.Index.size() * sizeof(QVector3D), "indexes", GL_FLOAT, 0, 3);
+            initializeBuffer(program, object3d.VerticesNormals.data(), object3d.VerticesNormals.size() * sizeof(QVector4D), "normals", GL_FLOAT, 0, 4);
 
-        context->functions()->glGenBuffers(1, &ssbo);
+            program->setUniformValue("ColorLerpEnabled", ColorLerpEnabled);
 
-        updateSSBO(ssbo, sizeof(*object3d.ssbo), object3d.ssbo);
+            context->functions()->glGenBuffers(1, &ssbo);
 
-        VAO->release();
+            updateSSBO(ssbo, sizeof(*object3d.ssbo), object3d.ssbo);
+
+            VAO->release();
+        }
+
+        program->release();
+
+        if(program2 == nullptr) {
+            program2 = new QOpenGLShaderProgram(context);
+        }
+
+        const QString& path = QString(PROJECT_PATH) + "/src/shaders/";
+
+        program2->addCacheableShaderFromSourceFile(QOpenGLShader::Vertex,   path + "BaseVertex.vsh");
+        program2->addCacheableShaderFromSourceFile(QOpenGLShader::Fragment, path + "BaseFragment.fsh");
+        program2->link();
+        program2->bind();
+
+        VAO2 = new QOpenGLVertexArrayObject();
+        if (VAO2->create()) {
+            VAO2->bind();
+
+            initializeBuffer(program2, object3d.verticesDrawArrays.data(), object3d.verticesDrawArrays.size() * sizeof(QVector3D),"vertex", GL_FLOAT, 0, 3);
+            initializeBuffer(program2, object3d.TriangleSelectionColors.data(), object3d.TriangleSelectionColors.size() * sizeof(QVector4D), "color", GL_FLOAT, 0, 4);
+
+            VAO2->release();
+        }
+
+        VAO3 = new QOpenGLVertexArrayObject();
+        if (VAO3->create()) {
+            VAO3->bind();
+
+            initializeBuffer(program2, Axis.vertices.data(), Axis.vertices.size() * sizeof(QVector3D),"vertex", GL_FLOAT, 0, 3);
+            initializeBuffer(program2, Axis.colors.data(), Axis.colors.size() * sizeof(QVector4D), "color", GL_FLOAT, 0, 4);
+
+            VAO3->release();
+        }
+
+        VAO4 = new QOpenGLVertexArrayObject();
+        if (VAO4->create()) {
+            VAO4->bind();
+
+            initializeBuffer(program2, object3d.trianglesDrawArrays.data(), object3d.trianglesDrawArrays.size() * sizeof(QVector3D),"vertex", GL_FLOAT, 0, 3);
+            initializeBuffer(program2, object3d.TriangleSelectionColors.data(), object3d.TriangleSelectionColors.size() * sizeof(QVector4D), "color", GL_FLOAT, 0, 4);
+
+            VAO4->release();
+        }
+
+        program2->release();
+
     }
-
-    program->release();
-
-    program2 = new QOpenGLShaderProgram(context);
-
-    const QString& path = QString(PROJECT_PATH) + "/src/shaders/";
-
-    program2->addCacheableShaderFromSourceFile(QOpenGLShader::Vertex,   path + "BaseVertex.vsh");
-    program2->addCacheableShaderFromSourceFile(QOpenGLShader::Fragment, path + "BaseFragment.fsh");
-    program2->link();
-    program2->bind();
-
-    VAO2 = new QOpenGLVertexArrayObject();
-    if (VAO2->create()) {
-        VAO2->bind();
-
-        initializeBuffer(program2, object3d.verticesDrawArrays.data(), object3d.verticesDrawArrays.size() * sizeof(QVector3D),"vertex", GL_FLOAT, 0, 3);
-        initializeBuffer(program2, object3d.TriangleSelectionColors.data(), object3d.TriangleSelectionColors.size() * sizeof(QVector4D), "color", GL_FLOAT, 0, 4);
-
-        VAO2->release();
-    }
-
-    VAO3 = new QOpenGLVertexArrayObject();
-    if (VAO3->create()) {
-        VAO3->bind();
-
-        initializeBuffer(program2, Axis.vertices.data(), Axis.vertices.size() * sizeof(QVector3D),"vertex", GL_FLOAT, 0, 3);
-        initializeBuffer(program2, Axis.colors.data(), Axis.colors.size() * sizeof(QVector4D), "color", GL_FLOAT, 0, 4);
-
-        VAO3->release();
-    }
-
-    VAO4 = new QOpenGLVertexArrayObject();
-    if (VAO4->create()) {
-        VAO4->bind();
-
-        initializeBuffer(program2, object3d.trianglesDrawArrays.data(), object3d.trianglesDrawArrays.size() * sizeof(QVector3D),"vertex", GL_FLOAT, 0, 3);
-        initializeBuffer(program2, object3d.TriangleSelectionColors.data(), object3d.TriangleSelectionColors.size() * sizeof(QVector4D), "color", GL_FLOAT, 0, 4);
-
-        VAO4->release();
-    }
-
-    program2->release();
 }
 
 void _gl_widget::logGlInfo()
