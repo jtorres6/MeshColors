@@ -113,7 +113,7 @@ void _gl_widget::moveCameraRightLeft(QPair<qint32, qint32> InUnits)
 
 void _gl_widget::addCameraZoom(const float InValue)
 {
-    Observer_distance += (0.005f*(Observer_distance/20.0f))*InValue;
+    Observer_distance += (0.005f * (Observer_distance/20.0f)) * InValue;
     update();
 }
 
@@ -229,7 +229,10 @@ void _gl_widget::drawObjectWireframe()
 
 void _gl_widget::draw_objects()
 {
-    drawAxis();
+    if(!DrawingSamplesID)
+    {
+        drawAxis();
+    }
 
     drawObject3D();
 
@@ -374,30 +377,29 @@ void _gl_widget::pick(const int Selection_position_x, const int Selection_positi
         paintGL();
 
         // get the pixel
-        unsigned char data[PencilSize*PencilSize][4];
+        unsigned char data[PencilSize * PencilSize][4];
         glReadBuffer(GL_FRONT);
         glPixelStorei(GL_PACK_ALIGNMENT,1);
 
-        int PosX = Selection_position_x - 12.5 - (PencilSize*0.5f);
-        int PosY = Selection_position_y - 12.5 - (PencilSize*0.5f);
+        int PosX = Selection_position_x - 12.5f - (PencilSize * 0.5f);
+        int PosY = Selection_position_y - 12.5f - (PencilSize * 0.5f);
 
         glReadPixels(PosX, PosY, PencilSize, PencilSize, GL_RGBA, GL_UNSIGNED_BYTE, data);
 
         QMap<int, float> SelectedIDs;
 
         // Convert the color back to an integer ID
-        for(int i = 0; i < PencilSize*PencilSize; i++) {
+        for(int i = 0; i < PencilSize * PencilSize; i++) {
             const int pickedID =
-                data[i][0] +
-                data[i][1] * 256 +
-                data[i][2] * 256 * 256;
+            data[i][0] +
+            data[i][1] * 256 +
+            data[i][2] * 256 * 256;
 
-            const float DistanceToCenter = qFabs(0.5f - i/(PencilSize*PencilSize));
-
-             if (data[3] != 0 && pickedID != -1 && pickedID < object3d.Points.size()) {
+            const float DistanceToCenter = qFabs(0.5f - i/(PencilSize * PencilSize));
+            if (data[i][3] == 255 && pickedID != -1 && pickedID < object3d.Points.size()) {
                 if (!SelectedIDs.contains(pickedID)) {
                     SelectedIDs.insert(pickedID, DistanceToCenter);
-                    object3d.Points[pickedID] =  (1.0f- PencilTransparency) * object3d.Points[pickedID] +  PencilTransparency * QVector4D(CurrentPaintingColor.red()/255.0f, CurrentPaintingColor.green()/255.0f, CurrentPaintingColor.blue()/255.0f, CurrentPaintingColor.alpha()/255.0f);
+                    object3d.Points[pickedID] =  (1.0f - PencilTransparency) * object3d.Points[pickedID] + PencilTransparency * QVector4D(CurrentPaintingColor.red()/255.0f, CurrentPaintingColor.green()/255.0f, CurrentPaintingColor.blue()/255.0f, CurrentPaintingColor.alpha()/255.0f);
 
                     if (!Indexes.contains(pickedID)) {
                         Indexes.append(i);

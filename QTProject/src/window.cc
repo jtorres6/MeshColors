@@ -40,7 +40,7 @@ _window::_window()
     QPalette Pal(palette());
     Pal.setColor(QPalette::Background, Qt::black);
 
-    QWidget *Options_widget = new QWidget;
+    Options_widget = new QWidget;
     QVBoxLayout *Vertical_options = new QVBoxLayout;
     QLabel *Label1 = new QLabel("Select color");
     Color_selection = new QPushButton("");
@@ -185,19 +185,15 @@ void _window::mousePressEvent(QMouseEvent *e)
 void _window::mouseMoveEvent(QMouseEvent *e)
 {
     if(m_glWidget != nullptr && m_glWidget->underMouse()) {
-        if(e->buttons() & Qt::LeftButton )
-        {
+        if(e->buttons() & Qt::LeftButton ) {
             m_glWidget->pick(e->pos().x(), height() - e->pos().y());
         }
 
-        if(e->buttons() & Qt::RightButton)
-        {
-            if(MousePressed)
-            {
+        if(e->buttons() & Qt::RightButton) {
+            if(MousePressed) {
                 m_glWidget->moveCameraRightLeft(QPair<qint32, qint32>(e->pos().x() - PreviousPosition.first, e->pos().y() - PreviousPosition.second));
             }
-            else
-            {
+            else {
                 MousePressed = true;
             }
 

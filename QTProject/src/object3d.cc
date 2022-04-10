@@ -43,7 +43,7 @@ _object3D::_object3D(QVector<QVector3D>& InVertices, QVector<QVector3D>& InTrian
         int g = (i & 0x0000FF00) >>  8;
         int b = (i & 0x00FF0000) >> 16;
 
-        QVector4D TriangleID = QVector4D(r/255.0f, g/255.0f, b/255.0f, 1.0f);
+        QVector4D TriangleID = QVector4D(r/255.0f, g/255.0f, b/255.0f, 255.0f);
         TriangleSelectionColors.push_back(TriangleID);
         TriangleSelectionColors.push_back(TriangleID);
         TriangleSelectionColors.push_back(TriangleID);
@@ -56,7 +56,7 @@ _object3D::_object3D(QVector<QVector3D>& InVertices, QVector<QVector3D>& InTrian
         const QVector3D v2 = vertices[int(triangles[i].x())] - vertices[int(triangles[i].z())];
         const QVector3D& CrossProduct = QVector3D::crossProduct(v1, v2);
 
-        QVector4D Normal = QVector4D(CrossProduct.normalized(),1.0f);
+        QVector4D Normal = QVector4D(CrossProduct.normalized(), 1.0f);
 
         VerticesNormals.push_back(Normal);
         VerticesNormals.push_back(Normal);

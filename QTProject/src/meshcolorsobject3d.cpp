@@ -85,7 +85,7 @@ void MeshColorsObject3D::InitializePointsArrays()
         const int g = (i & 0x0000FF00) >>  8;
         const int b = (i & 0x00FF0000) >> 16;
 
-        SelectionPoints.push_back(QVector4D(r/255.0f, g/255.0f, b/255.0f, i/float(SamplesArraySize)));
+        SelectionPoints.push_back(QVector4D(r/255.0f, g/255.0f, b/255.0f, 1.0f));
     }
 }
 
