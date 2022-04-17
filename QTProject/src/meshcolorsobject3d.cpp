@@ -73,12 +73,7 @@ void MeshColorsObject3D::InitializePointsArrays()
 {
     const size_t SamplesArraySize = MAX_TRIANGLES * 32 * 32;
     for(size_t i = 0; i < SamplesArraySize; i++) {
-        if(i%2 == 0) {
-            Points.push_back(QVector4D(0.2f, 0.2f, 0.2f, 1.0f));
-        }
-        else {
-            Points.push_back(QVector4D(0.4f, 0.4f, 0.4f, 1.0f));
-        }
+        Points.push_back(QVector4D(0.2f, 0.2f, 0.2f, 1.0f));
 
         // Convert "i", the integer mesh ID, into an RGB color
         const int r = (i & 0x000000FF) >>  0;
