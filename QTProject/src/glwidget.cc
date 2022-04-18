@@ -86,11 +86,7 @@ void _gl_widget::keyPressEvent(QKeyEvent *Keyevent)
       break;
 
   case Qt::Key_F:
-      Observer_pos_x = 0.0f;
-      Observer_pos_y = 0.0f;
-      Observer_angle_y = 0.0f;
-      Observer_angle_x = 0.0f;
-      Observer_distance = 10.0f;
+      centerFocus();
       break;
   }
 
@@ -551,6 +547,8 @@ void _gl_widget::setObjectPath(const char* InNewPath)
     ModelFilePath = InNewPath;
 
     initializeGL();
+
+    centerFocus();
 }
 
 void _gl_widget::setMeshColorsArray(QVector<QVector4D> InColors)
@@ -565,6 +563,15 @@ void _gl_widget::setResolutionsArray(QVector<int> InRes)
     object3d.Resolutions = InRes;
     object3d.UpdateResolutionsArray(InRes);
     updateSSBO(ssbo, sizeof(*object3d.ssbo), object3d.ssbo);
+}
+
+void _gl_widget::centerFocus()
+{
+    Observer_pos_x = 0.0f;
+    Observer_pos_y = 0.0f;
+    Observer_angle_y = 0.0f;
+    Observer_angle_x = 0.0f;
+    Observer_distance = 10.0f;
 }
 
 const QVector<QVector4D>& _gl_widget::getMeshColorsArray() const
