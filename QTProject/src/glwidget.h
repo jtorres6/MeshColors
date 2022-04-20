@@ -77,6 +77,8 @@ public:
     void setMeshColorsArray(QVector<QVector4D> InColors);
     void setResolutionsArray(QVector<int> InRes);
 
+    void centerFocus();
+
     const QVector<QVector4D>& getMeshColorsArray() const;
     const QVector<int>& getResolutionsArray() const;
     const _object3D *getObject3D() const;
