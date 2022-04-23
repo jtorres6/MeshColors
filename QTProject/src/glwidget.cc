@@ -191,7 +191,7 @@ void _gl_widget::drawSelectedTriangle()
 
         const int matrixLocation = program2->uniformLocation("matrix");
         program2->setUniformValue(matrixLocation, camera.getProjectedTransform());
-        program2->setUniformValue("LineColor", QVector4D(0.6f, 0.0f, 0.2f, 1.0f));
+        program2->setUniformValue("LineColor", QVector4D(0.8f, 0.0f, 0.2f, 0.9f));
         program2->setUniformValue("LineMode", true);
 
         glLineWidth(1.5f);
@@ -211,7 +211,7 @@ void _gl_widget::drawObjectWireframe()
 
         const int matrixLocation = program2->uniformLocation("matrix");
         program2->setUniformValue(matrixLocation, camera.getProjectedTransform());
-        program2->setUniformValue("LineColor", QVector4D(0.0f, 0.15f, 0.4f, 0.5f));
+        program2->setUniformValue("LineColor", QVector4D(0.0f, 0.25f, 1.0f, 0.9f));
         program2->setUniformValue("LineMode", true);
 
         glLineWidth(0.5f);
@@ -314,7 +314,7 @@ void _gl_widget::initializeGL()
 
     logGlInfo();
 
-    glClearColor(0.22f, 0.22f, 0.22f, 0.0f);
+    glClearColor(0.92f, 0.92f, 0.92f, 0.0f);
     glEnable(GL_DEPTH_TEST);
 
     Observer_angle_x=0;
