@@ -1,5 +1,6 @@
 #include "meshcolorsface.h"
 #include <QVector4D>
+#include <QDebug>
 
 static int vertexIndex = 0;
 
@@ -94,7 +95,7 @@ void MeshColorsFace::increaseSamples(const int newResolution, QVector<QVector4D>
     updateSamplesIndexes(coreSamples, coreSampleIndex);
 
     for(int a = 0; a < samples.size(); a++) {
-        for(int j = 0; j < samples[a].size(); j++) {
+        for(int j = 0; j < samples[a].size() - a; j++) {
             if (!coreSamples.contains({a, j}))
             {
                 QVector4D newColor = QVector4D(0.0f, 0.0f, 0.0f, 1.0f);
@@ -108,9 +109,12 @@ void MeshColorsFace::increaseSamples(const int newResolution, QVector<QVector4D>
                         ++colorCount;
                     }
 
-                    if (a+1 < samples.size()) {
-                        newColor += colorSamples[samples[a+1][j]];
-                        ++colorCount;
+                    if (a+1 < samples.size() && j < samples[a+1].size() - a+1) {
+                        if(coreSamples.contains({a+1,j}))
+                        {
+                            newColor += colorSamples[samples[a+1][j]];
+                            ++colorCount;
+                        }
                     }
                 }
 
@@ -121,14 +125,19 @@ void MeshColorsFace::increaseSamples(const int newResolution, QVector<QVector4D>
                         ++colorCount;
                     }
 
-                    if (j+1 < samples[a].size()) {
-                        newColor += colorSamples[samples[a][j+1]];
-                        ++colorCount;
+                    if (j+1 < samples[a].size() - a) {
+                        if(coreSamples.contains({a, j+1}))
+                        {
+                            newColor += colorSamples[samples[a][j+1]];
+                            ++colorCount;
+                        }
                     }
                 }
 
                 if(colorCount > 0) {
-                    colorSamples[samples[a][j]] = newColor/colorCount;
+                    newColor = newColor/colorCount;
+                    newColor[3] = 1.0f;
+                    colorSamples[samples[a][j]] = newColor;
                 }
             }
         }
@@ -154,6 +163,8 @@ void MeshColorsFace::decreaseSamples(const int newResolution, QVector<QVector4D>
                     coreSamples.push_back({int(i * step), int(j * step)});
                     coreSampleIndex.push_back(samples[i][j]);
 
+                    qDebug() << colorSamples[samples[i][j]];
+
                     QVector4D newColor = QVector4D(0.0f, 0.0f, 0.0f, 1.0f);
 
                     int count = 0;
@@ -161,8 +172,8 @@ void MeshColorsFace::decreaseSamples(const int newResolution, QVector<QVector4D>
                     for(int k = -1; k <= 1; ++k){
                         for(int a = -1; a <= 1; ++a){
                             if(i+k < samples.size() && i+k >= 0){
-                                if (j+a < samples[i].size() && j+a >= 0){
-
+                                const int size = samples[i+k].size();
+                                if (j+a < size - (i+k) && j+a >= 0){
                                     newColor += colorSamples[samples[i+k][a+j]];
                                     ++count;
                                 }

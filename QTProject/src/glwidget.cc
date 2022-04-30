@@ -395,7 +395,7 @@ void _gl_widget::pick(const int Selection_position_x, const int Selection_positi
             if (data[i][3] == 255 && pickedID != -1 && pickedID < object3d.Points.size()) {
                 if (!SelectedIDs.contains(pickedID)) {
                     SelectedIDs.insert(pickedID, DistanceToCenter);
-                    object3d.Points[pickedID] =  (1.0f - PencilTransparency) * object3d.Points[pickedID] + PencilTransparency * QVector4D(CurrentPaintingColor.red()/255.0f, CurrentPaintingColor.green()/255.0f, CurrentPaintingColor.blue()/255.0f, CurrentPaintingColor.alpha()/255.0f);
+                    object3d.Points[pickedID] =  (1.0f - PencilTransparency) * object3d.Points[pickedID] + PencilTransparency * QVector4D(CurrentPaintingColor.red()/255.0f, CurrentPaintingColor.green()/255.0f, CurrentPaintingColor.blue()/255.0f, 1.0f);
 
                     if (!Indexes.contains(pickedID)) {
                         Indexes.append(i);
@@ -403,7 +403,7 @@ void _gl_widget::pick(const int Selection_position_x, const int Selection_positi
                 }
                 else if (SelectedIDs.find(pickedID).value() > DistanceToCenter) {
                     SelectedIDs.find(pickedID).value() = DistanceToCenter;
-                    object3d.Points[pickedID] = DistanceToCenter * object3d.Points[pickedID] + (1.0f - DistanceToCenter) * QVector4D(CurrentPaintingColor.red()/255.0f, CurrentPaintingColor.green()/255.0f, CurrentPaintingColor.blue()/255.0f, CurrentPaintingColor.alpha()/255.0f);
+                    object3d.Points[pickedID] = DistanceToCenter * object3d.Points[pickedID] + (1.0f - DistanceToCenter) * QVector4D(CurrentPaintingColor.red()/255.0f, CurrentPaintingColor.green()/255.0f, CurrentPaintingColor.blue()/255.0f, 1.0f);
                 }
             }
         }
