@@ -115,7 +115,7 @@ _window::_window()
     QVBoxLayout *vlayout = new QVBoxLayout;
     helpDialog->setFixedSize(300,300);
 
-    QLabel *cameraControl = new QLabel("Camera: \n -Rotate camera: Left Mouse Button \n -Pan camera: Ctrl + Left Mouse Button \n -Zoom: Mouse wheel");
+    QLabel *cameraControl = new QLabel("Camera: \n -Rotate: Left Mouse Button \n -Move: Ctrl + Left Mouse Button \n -Zoom: Mouse wheel");
     cameraControl->setStyleSheet("color:rgb(250,250,250)");
 
     QLabel *paintControl = new QLabel("Painting and resolution: \n -Paint: Right Mouse Button \n -Select triangle: Ctrl + Right Mouse Button \n -Change face resolution: Ctrl + Mouse wheel");
