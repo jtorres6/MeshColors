@@ -202,7 +202,7 @@ void MeshColorsFace::updateSamplesIndexes(QVector<QPair<int, int>>& coreSamples,
     int faceIndexOffset = 0;
     for(int a = 0; a < samples.size(); a++) {
         for(int j = 0; j < samples[a].size(); j++) {
-            samples[a][j]   = index + faceIndexOffset;
+            samples[a][j] = index + faceIndexOffset;
             faceIndexOffset++;
         }
     }

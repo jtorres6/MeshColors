@@ -109,8 +109,18 @@ void _gl_widget::moveCameraRightLeft(QPair<qint32, qint32> InUnits)
 
 void _gl_widget::addCameraZoom(const float InValue)
 {
-    Observer_distance += (0.005f * (Observer_distance/20.0f)) * InValue;
-    update();
+    if(!ControlPressed) {
+        Observer_distance += (0.005f * (Observer_distance/20.0f)) * InValue;
+        update();
+    }
+    else {
+        if(InValue > 0.0f) {
+            incrementResolution();
+        }
+        else {
+            decreaseResolution();
+        }
+    }
 }
 
 void _gl_widget::clear_window()
@@ -353,113 +363,118 @@ void _gl_widget::pick(const int Selection_position_x, const int Selection_positi
 {
     if (program == nullptr) return;
 
-    program->bind();
-    program->setUniformValue("ColorLerpEnabled", false);
-    program->setUniformValue("LightingEnabled", false);
-    program->release();
+    if(!ControlPressed) {
+        program->bind();
+        program->setUniformValue("ColorLerpEnabled", false);
+        program->setUniformValue("LightingEnabled", false);
+        program->release();
 
-    QList<int> Indexes;
+        QList<int> Indexes;
 
-    if (!TriangleSelectionMode) {
-        DrawingSamplesID = true;
+        if (!TriangleSelectionMode) {
+            DrawingSamplesID = true;
 
-        makeCurrent();
+            makeCurrent();
 
-        object3d.UpdateMeshColorsArray(object3d.SelectionPoints);
+            object3d.UpdateMeshColorsArray(object3d.SelectionPoints);
 
-        updateSSBO(ssbo, sizeof(*object3d.ssbo), object3d.ssbo);
+            updateSSBO(ssbo, sizeof(*object3d.ssbo), object3d.ssbo);
 
-        update();
-        paintGL();
+            update();
+            paintGL();
 
-        // get the pixel
-        unsigned char data[PencilSize * PencilSize][4];
-        glReadBuffer(GL_FRONT);
-        glPixelStorei(GL_PACK_ALIGNMENT,1);
+            // get the pixel
+            unsigned char data[PencilSize * PencilSize][4];
+            glReadBuffer(GL_FRONT);
+            glPixelStorei(GL_PACK_ALIGNMENT,1);
 
-        int PosX = Selection_position_x - 12.5f - (PencilSize * 0.5f);
-        int PosY = Selection_position_y - 12.5f - (PencilSize * 0.5f);
+            int PosX = Selection_position_x - 12.5f - (PencilSize * 0.5f);
+            int PosY = Selection_position_y - 12.5f - (PencilSize * 0.5f);
 
-        glReadPixels(PosX, PosY, PencilSize, PencilSize, GL_RGBA, GL_UNSIGNED_BYTE, data);
+            glReadPixels(PosX, PosY, PencilSize, PencilSize, GL_RGBA, GL_UNSIGNED_BYTE, data);
 
-        QMap<int, float> SelectedIDs;
+            QMap<int, float> SelectedIDs;
 
-        // Convert the color back to an integer ID
-        for(int i = 0; i < PencilSize * PencilSize; i++) {
-            const int pickedID =
-            data[i][0] +
-            data[i][1] * 256 +
-            data[i][2] * 256 * 256;
+            // Convert the color back to an integer ID
+            for(int i = 0; i < PencilSize * PencilSize; i++) {
+                const int pickedID =
+                data[i][0] +
+                data[i][1] * 256 +
+                data[i][2] * 256 * 256;
 
-            const float DistanceToCenter = qFabs(0.5f - i/(PencilSize * PencilSize));
-            if (data[i][3] == 255 && pickedID != -1 && pickedID < object3d.Points.size()) {
-                if (!SelectedIDs.contains(pickedID)) {
-                    SelectedIDs.insert(pickedID, DistanceToCenter);
-                    object3d.Points[pickedID] =  (1.0f - PencilTransparency) * object3d.Points[pickedID] + PencilTransparency * QVector4D(CurrentPaintingColor.red()/255.0f, CurrentPaintingColor.green()/255.0f, CurrentPaintingColor.blue()/255.0f, 1.0f);
+                const float DistanceToCenter = qFabs(0.5f - i/(PencilSize * PencilSize));
+                if (data[i][3] == 255 && pickedID != -1 && pickedID < object3d.Points.size()) {
+                    if (!SelectedIDs.contains(pickedID)) {
+                        SelectedIDs.insert(pickedID, DistanceToCenter);
+                        object3d.Points[pickedID] =  (1.0f - PencilTransparency) * object3d.Points[pickedID] + PencilTransparency * QVector4D(CurrentPaintingColor.red()/255.0f, CurrentPaintingColor.green()/255.0f, CurrentPaintingColor.blue()/255.0f, 1.0f);
 
-                    if (!Indexes.contains(pickedID)) {
-                        Indexes.append(i);
+                        if (!Indexes.contains(pickedID)) {
+                            Indexes.append(i);
+                        }
+                    }
+                    else if (SelectedIDs.find(pickedID).value() > DistanceToCenter) {
+                        SelectedIDs.find(pickedID).value() = DistanceToCenter;
+                        object3d.Points[pickedID] = DistanceToCenter * object3d.Points[pickedID] + (1.0f - DistanceToCenter) * QVector4D(CurrentPaintingColor.red()/255.0f, CurrentPaintingColor.green()/255.0f, CurrentPaintingColor.blue()/255.0f, 1.0f);
                     }
                 }
-                else if (SelectedIDs.find(pickedID).value() > DistanceToCenter) {
-                    SelectedIDs.find(pickedID).value() = DistanceToCenter;
-                    object3d.Points[pickedID] = DistanceToCenter * object3d.Points[pickedID] + (1.0f - DistanceToCenter) * QVector4D(CurrentPaintingColor.red()/255.0f, CurrentPaintingColor.green()/255.0f, CurrentPaintingColor.blue()/255.0f, 1.0f);
-                }
             }
+
+            object3d.UpdateMeshColorsArray(object3d.Points);
+            updateSSBO(ssbo, sizeof(*object3d.ssbo), object3d.ssbo);
+            DrawingSamplesID = false;
+        }
+        else {
+            makeCurrent();
+            clear_window();
+
+            //paintGL();
+            drawTrianglesSelectionMode();
+
+            // get the pixel
+            unsigned char data[4];
+            glReadBuffer(GL_FRONT);
+            glPixelStorei(GL_PACK_ALIGNMENT, 1);
+            glReadPixels(Selection_position_x, Selection_position_y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, &data);
+
+            int pickedID =
+                data[0] +
+                data[1] * 256 +
+                data[2] * 256 * 256;
+
+            if(data[3] != 0 && pickedID >= 0 && SelectedTriangleID < object3d.Resolutions.size()) {
+                SelectedTriangleID = pickedID;
+                SelectedTriangle = object3d.triangles[SelectedTriangleID];
+
+                VAO5 = new QOpenGLVertexArrayObject();
+                VAO5->create();
+                VAO5->bind();
+
+                SelectedTriangleDrawArray.clear();
+
+                SelectedTriangleDrawArray.push_back(object3d.vertices[SelectedTriangle.z()]);
+                SelectedTriangleDrawArray.push_back(object3d.vertices[SelectedTriangle.y()]);
+                SelectedTriangleDrawArray.push_back(object3d.vertices[SelectedTriangle.y()]);
+                SelectedTriangleDrawArray.push_back(object3d.vertices[SelectedTriangle.x()]);
+                SelectedTriangleDrawArray.push_back(object3d.vertices[SelectedTriangle.x()]);
+                SelectedTriangleDrawArray.push_back(object3d.vertices[SelectedTriangle.z()]);
+
+                initializeBuffer(program2, SelectedTriangleDrawArray.data(), SelectedTriangleDrawArray.size() * sizeof(QVector3D),"vertex", GL_FLOAT, 0, 3);
+                initializeBuffer(program2, new QVector4D(1.0f, 0.0f, 0.0f, 1.0f), sizeof(QVector4D), "color", GL_FLOAT, 0, 4);
+
+                VAO5->release();
+            }
+
+            TriangleSelectionMode = false;
         }
 
-        object3d.UpdateMeshColorsArray(object3d.Points);
-        updateSSBO(ssbo, sizeof(*object3d.ssbo), object3d.ssbo);
-        DrawingSamplesID = false;
+        program->bind();
+        program->setUniformValue("ColorLerpEnabled", ColorLerpEnabled);
+        program->setUniformValue("LightingEnabled", true);
+        program->release();
     }
     else {
-        makeCurrent();
-        clear_window();
-
-        //paintGL();
-        drawTrianglesSelectionMode();
-
-        // get the pixel
-        unsigned char data[4];
-        glReadBuffer(GL_FRONT);
-        glPixelStorei(GL_PACK_ALIGNMENT, 1);
-        glReadPixels(Selection_position_x, Selection_position_y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, &data);
-
-        int pickedID =
-            data[0] +
-            data[1] * 256 +
-            data[2] * 256 * 256;
-
-        if(data[3] != 0 && pickedID >= 0 && SelectedTriangleID < object3d.Resolutions.size()) {
-            SelectedTriangleID = pickedID;
-            SelectedTriangle = object3d.triangles[SelectedTriangleID];
-
-            VAO5 = new QOpenGLVertexArrayObject();
-            VAO5->create();
-            VAO5->bind();
-
-            SelectedTriangleDrawArray.clear();
-
-            SelectedTriangleDrawArray.push_back(object3d.vertices[SelectedTriangle.z()]);
-            SelectedTriangleDrawArray.push_back(object3d.vertices[SelectedTriangle.y()]);
-            SelectedTriangleDrawArray.push_back(object3d.vertices[SelectedTriangle.y()]);
-            SelectedTriangleDrawArray.push_back(object3d.vertices[SelectedTriangle.x()]);
-            SelectedTriangleDrawArray.push_back(object3d.vertices[SelectedTriangle.x()]);
-            SelectedTriangleDrawArray.push_back(object3d.vertices[SelectedTriangle.z()]);
-
-            initializeBuffer(program2, SelectedTriangleDrawArray.data(), SelectedTriangleDrawArray.size() * sizeof(QVector3D),"vertex", GL_FLOAT, 0, 3);
-            initializeBuffer(program2, new QVector4D(1.0f, 0.0f, 0.0f, 1.0f), sizeof(QVector4D), "color", GL_FLOAT, 0, 4);
-
-            VAO5->release();
-        }
-
-        TriangleSelectionMode = false;
+        selectTriangle(Selection_position_x, Selection_position_y);
     }
-
-    program->bind();
-    program->setUniformValue("ColorLerpEnabled", ColorLerpEnabled);
-    program->setUniformValue("LightingEnabled", true);
-    program->release();
 }
 
 void _gl_widget::selectTriangle(const int Selection_position_x, const int Selection_position_y)
