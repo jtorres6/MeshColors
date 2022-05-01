@@ -45,6 +45,8 @@ public slots:
 private:
   _gl_widget *m_glWidget;
   QWidget *Options_widget;
+  QDialog *helpDialog;
+
   void mouseMoveEvent(QMouseEvent *e);
   void mousePressEvent(QMouseEvent *e);
   void mouseReleaseEvent(QMouseEvent *event);

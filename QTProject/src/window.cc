@@ -20,7 +20,8 @@
 #include <QSlider>
 #include <QCheckBox>
 #include <QRadioButton>
-
+#include <QMdiSubWindow>
+#include <QDialog>
 #include "window.h"
 #include "glwidget.h"
 
@@ -105,6 +106,35 @@ _window::_window()
     Framed_widget->setLineWidth(1);
     m_glWidget = new _gl_widget(this);
     m_glWidget->setSizePolicy(Q);
+    QHBoxLayout *Test_frame1 = new QHBoxLayout();
+    QVBoxLayout *Test_frame2 = new QVBoxLayout();
+    Test_frame2->addLayout(Test_frame1);
+
+    helpDialog = new QDialog();
+    helpDialog->setStyleSheet("border: solid 10px grey;  background-color: rgba(75, 75, 75, 175); color:rgb(75, 75, 75)");
+    QVBoxLayout *vlayout = new QVBoxLayout;
+    helpDialog->setFixedSize(300,300);
+
+    QLabel *cameraControl = new QLabel("Camera: \n -Rotate camera: Left Mouse Button \n -Pan camera: Ctrl + Left Mouse Button \n -Zoom: Mouse wheel");
+    cameraControl->setStyleSheet("color:rgb(250,250,250)");
+
+    QLabel *paintControl = new QLabel("Painting and resolution: \n -Paint: Right Mouse Button \n -Select triangle: Ctrl + Right Mouse Button \n -Change face resolution: Ctrl + Mouse wheel");
+    paintControl->setStyleSheet("color:rgb(250,250,250)");
+
+    QAbstractButton *bExit = new QPushButton("Hide");
+
+    bExit->setStyleSheet("border: solid 10px grey;  background-color: rgba(255, 255, 255, 255); color:rgb(100,100,100)");
+    vlayout->addWidget(cameraControl);
+    vlayout->addWidget(paintControl);
+    helpDialog->setLayout(vlayout);
+    helpDialog->show();
+    vlayout->addWidget(bExit);
+    helpDialog->connect(bExit,SIGNAL(clicked()),helpDialog,SLOT(close()));
+
+    Test_frame1->addWidget(helpDialog);
+    m_glWidget->setLayout(Test_frame2);
+    Test_frame1->addStretch();
+    Test_frame2->addStretch();
 
     connect(Increment_button, SIGNAL(pressed()), m_glWidget, SLOT(incrementResolution()));
     connect(Decrease_button, SIGNAL(pressed()), m_glWidget, SLOT(decreaseResolution()));
@@ -161,6 +191,13 @@ _window::_window()
     fileMenu->addAction(actionLoadTexture);
     fileMenu->addAction(actionExit);
     fileMenu->setAttribute(Qt::WA_AlwaysShowToolTips);
+
+    QAction *showControls = new QAction(tr("&Show controls"), this);
+    actionSaveTextureAs->setShortcut(tr("Ctrl+Shift+O"));
+    connect(showControls, SIGNAL(triggered()), helpDialog, SLOT(show()));
+
+    QMenu *helpMenu = menuBar()->addMenu(tr("&Help"));
+    helpMenu->addAction(showControls);
 
     setWindowTitle(tr("MeshColors"));
 
