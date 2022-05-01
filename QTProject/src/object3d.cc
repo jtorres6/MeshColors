@@ -10,7 +10,6 @@
 #include "object3d.h"
 #include <QDebug>
 #include <map>
-#include <QDebug>
 #include "meshcolorsface.h"
 
 using namespace _colors_ne;

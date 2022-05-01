@@ -11,10 +11,10 @@ using namespace _gl_widget_ne;
 
 _gl_widget::_gl_widget(_window *Window1):Window(Window1)
 {
-  setMinimumSize(300, 300);
-  setFocusPolicy(Qt::StrongFocus);
-  camera = MovableObject();
-  light = MovableObject();
+    setMinimumSize(300, 300);
+    setFocusPolicy(Qt::StrongFocus);
+    camera = MovableObject();
+    light = MovableObject();
 }
 
 void _gl_widget::keyReleaseEvent(QKeyEvent *Keyevent)
@@ -27,25 +27,25 @@ void _gl_widget::keyReleaseEvent(QKeyEvent *Keyevent)
 
 void _gl_widget::keyPressEvent(QKeyEvent *Keyevent)
 {
-  switch(Keyevent->key()){
-  case Qt::Key_Left:lightAngleY += 10.0f * ANGLE_STEP; break;
-  case Qt::Key_Right:lightAngleY -= 10.0f * ANGLE_STEP; break;
-  case Qt::Key_Up:lightAngleX += 10.0f * ANGLE_STEP; break;
-  case Qt::Key_Down:lightAngleX -= 10.0f * ANGLE_STEP; break;
-  case Qt::Key_PageUp:lightDistance *= 1.2; break;
-  case Qt::Key_PageDown:lightDistance /= 1.2; break;
+    switch(Keyevent->key()){
+    case Qt::Key_Left:lightAngleY += 10.0f * ANGLE_STEP; break;
+    case Qt::Key_Right:lightAngleY -= 10.0f * ANGLE_STEP; break;
+    case Qt::Key_Up:lightAngleX += 10.0f * ANGLE_STEP; break;
+    case Qt::Key_Down:lightAngleX -= 10.0f * ANGLE_STEP; break;
+    case Qt::Key_PageUp:lightDistance *= 1.2; break;
+    case Qt::Key_PageDown:lightDistance /= 1.2; break;
 
-  case Qt::Key_V:ColorLerpEnabled=!ColorLerpEnabled;
-      break;
+    case Qt::Key_V:ColorLerpEnabled=!ColorLerpEnabled;
+        break;
 
-  case Qt::Key_R:TriangleSelectionMode=!TriangleSelectionMode;
-      break;
+    case Qt::Key_R:TriangleSelectionMode=!TriangleSelectionMode;
+        break;
 
-  case Qt::Key_M:LightingEnabled=!LightingEnabled;
-      break;
+    case Qt::Key_M:LightingEnabled=!LightingEnabled;
+        break;
 
-  case Qt::Key_C:
-  {
+    case Qt::Key_C:
+    {
         QColor NewColor = QColorDialog::getColor(Qt::yellow, this);
 
         if(NewColor.isValid()) {
@@ -53,44 +53,44 @@ void _gl_widget::keyPressEvent(QKeyEvent *Keyevent)
         }
 
         break;
-  }
+    }
 
-  case Qt::Key_Plus:
+    case Qt::Key_Plus:
 
-      if(SelectedTriangleID >= 0 && object3d.Resolutions[SelectedTriangleID] < MAX_SAMPLES) {
-          object3d.Resolutions[SelectedTriangleID] *= 2;
-          object3d.UpdateResolutionsArray(object3d.Resolutions);
-          updateSSBO(ssbo, sizeof(*object3d.ssbo), object3d.ssbo);
-      }
+        if(SelectedTriangleID >= 0 && object3d.Resolutions[SelectedTriangleID] < MAX_SAMPLES) {
+            object3d.Resolutions[SelectedTriangleID] *= 2;
+            object3d.UpdateResolutionsArray(object3d.Resolutions);
+            updateSSBO(ssbo, sizeof(*object3d.ssbo), object3d.ssbo);
+        }
 
-      break;
+        break;
 
-  case Qt::Key_Semicolon:
-      DrawingSamplesID = false;
-      object3d.UpdateMeshColorsArray(object3d.Points);
-      updateSSBO(ssbo, sizeof(*object3d.ssbo), object3d.ssbo);
-      break;
+    case Qt::Key_Semicolon:
+        DrawingSamplesID = false;
+        object3d.UpdateMeshColorsArray(object3d.Points);
+        updateSSBO(ssbo, sizeof(*object3d.ssbo), object3d.ssbo);
+        break;
 
-  case Qt::Key_Comma:
-      DrawingSamplesID = true;
-      object3d.UpdateMeshColorsArray(object3d.SelectionPoints);
-      updateSSBO(ssbo, sizeof(*object3d.ssbo), object3d.ssbo);
-      break;
+    case Qt::Key_Comma:
+        DrawingSamplesID = true;
+        object3d.UpdateMeshColorsArray(object3d.SelectionPoints);
+        updateSSBO(ssbo, sizeof(*object3d.ssbo), object3d.ssbo);
+        break;
 
-  case Qt::Key_Control:
-      ControlPressed = true;
-      break;
+    case Qt::Key_Control:
+        ControlPressed = true;
+        break;
 
-  case Qt::Key_Shift:
-      ShiftPressed = true;
-      break;
+    case Qt::Key_Shift:
+        ShiftPressed = true;
+        break;
 
-  case Qt::Key_F:
-      centerFocus();
-      break;
-  }
+    case Qt::Key_F:
+        centerFocus();
+        break;
+    }
 
-  update();
+    update();
 }
 
 void _gl_widget::moveCameraRightLeft(QPair<qint32, qint32> InUnits)
@@ -291,15 +291,15 @@ void _gl_widget::drawTrianglesSelectionMode()
 
 void _gl_widget::paintGL()
 {
-  clear_window();
-  change_projection();
-  change_observer();
-  draw_objects();
+    clear_window();
+    change_projection();
+    change_observer();
+    draw_objects();
 }
 
 void _gl_widget::resizeGL(int Width1, int Height1)
 {
-  glViewport(0,0,Width1,Height1);
+    glViewport(0,0,Width1,Height1);
 }
 
 void _gl_widget::initializeGL()
@@ -337,26 +337,26 @@ void _gl_widget::initializeGL()
 }
 
 bool _gl_widget::readPlyFile(const string &filename, QVector<QVector3D>& outVertices, QVector<QVector3D>& outTriangles)
- {
-     _file_ply ply;
-     if(ply.open(filename) == 0) return false;
+{
+    _file_ply ply;
+    if(ply.open(filename) == 0) return false;
 
-     vector<float> Coordinates;
-     vector<unsigned int> Positions;
-     ply.read(Coordinates, Positions);
+    vector<float> Coordinates;
+    vector<unsigned int> Positions;
+    ply.read(Coordinates, Positions);
 
-     for(size_t i = 0; i <= Coordinates.size()-3; i+=3)
-     {
-         outVertices.push_back(QVector3D(Coordinates[i],Coordinates[i+1],Coordinates[i+2]));
-     }
+    for(size_t i = 0; i <= Coordinates.size()-3; i+=3)
+    {
+        outVertices.push_back(QVector3D(Coordinates[i],Coordinates[i+1],Coordinates[i+2]));
+    }
 
-     for(size_t i = 0; i <= Positions.size()-3; i+=3)
-     {
-         outTriangles.push_back(QVector3D(Positions[i],Positions[i+1],Positions[i+2]));
-     }
+    for(size_t i = 0; i <= Positions.size()-3; i+=3)
+    {
+        outTriangles.push_back(QVector3D(Positions[i],Positions[i+1],Positions[i+2]));
+    }
 
-     return true;
- }
+    return true;
+}
 
 
 void _gl_widget::pick(const int Selection_position_x, const int Selection_position_y)
@@ -398,9 +398,9 @@ void _gl_widget::pick(const int Selection_position_x, const int Selection_positi
             // Convert the color back to an integer ID
             for(int i = 0; i < PencilSize * PencilSize; i++) {
                 const int pickedID =
-                data[i][0] +
-                data[i][1] * 256 +
-                data[i][2] * 256 * 256;
+                        data[i][0] +
+                        data[i][1] * 256 +
+                        data[i][2] * 256 * 256;
 
                 const float DistanceToCenter = qFabs(0.5f - i/(PencilSize * PencilSize));
                 if (data[i][3] == 255 && pickedID != -1 && pickedID < object3d.Points.size()) {
@@ -437,9 +437,9 @@ void _gl_widget::pick(const int Selection_position_x, const int Selection_positi
             glReadPixels(Selection_position_x, Selection_position_y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, &data);
 
             int pickedID =
-                data[0] +
-                data[1] * 256 +
-                data[2] * 256 * 256;
+                    data[0] +
+                    data[1] * 256 +
+                    data[2] * 256 * 256;
 
             if(data[3] != 0 && pickedID >= 0 && SelectedTriangleID < object3d.Resolutions.size()) {
                 SelectedTriangleID = pickedID;
@@ -499,9 +499,9 @@ void _gl_widget::selectTriangle(const int Selection_position_x, const int Select
     glReadPixels(Selection_position_x, Selection_position_y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, &data);
 
     int pickedID =
-        data[0] +
-        data[1] * 256 +
-        data[2] * 256 * 256;
+            data[0] +
+            data[1] * 256 +
+            data[2] * 256 * 256;
 
     if(data[3] != 0 && pickedID >= 0 && pickedID < object3d.triangles.size()) {
         SelectedTriangleID = pickedID;
