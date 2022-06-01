@@ -3,7 +3,7 @@
 layout(std430, binding = 3) buffer MeshColorsData
 {
     int Resolution[9000];
-    vec4 Colors[9000][256];
+    vec4 Colors[9000][289];
 };
 
 uniform bool ColorLerpEnabled;
@@ -22,6 +22,9 @@ void main(void)
     vec4 color = fragment_Color;
 
     const int SampleIndex = Index[0];
+
+    const int ArraySize = 17;
+
     int R = Resolution[SampleIndex];
     vec4 B =  floor(R * color);
     vec4 w = (R * color) - B;
@@ -31,20 +34,20 @@ void main(void)
     {
         if(round(w.r+w.g+w.b) == 0)
         {
-           c = Colors[SampleIndex][int(B[0]) + 16 * int(B[1])];
+           c = Colors[SampleIndex][int(B[0]) + ArraySize * int(B[1])];
         }
         else if(round(w.r+w.g+w.b) == 1)
         {
-            vec4 c1 = w.r * Colors[SampleIndex][int(B.r+1) + 16 * int(B.g)];
-            vec4 c2 = w.g * Colors[SampleIndex][int(B.r) + 16 * int(B.g+1)];
-            vec4 c3 = w.b * Colors[SampleIndex][int(B.r) + 16 * int(B.g)];
+            vec4 c1 = w.r * Colors[SampleIndex][int(B.r+1) + ArraySize * int(B.g)];
+            vec4 c2 = w.g * Colors[SampleIndex][int(B.r) + ArraySize * int(B.g+1)];
+            vec4 c3 = w.b * Colors[SampleIndex][int(B.r) + ArraySize * int(B.g)];
             c = c1+c2+c3;
         }
         else if(round(w.r+w.g+w.b) == 2)
         {
-            vec4 c1 = (1-w.r)*Colors[SampleIndex][int(B.r) + 16 * int(B.g+1)];
-            vec4 c2 = (1-w.g)*Colors[SampleIndex][int(B.r+1) + 16 * int(B.g)];
-            vec4 c3 = (1-w.b)*Colors[SampleIndex][int(B.r+1) + 16 * int(B.g+1)];
+            vec4 c1 = (1-w.r)*Colors[SampleIndex][int(B.r) + ArraySize * int(B.g+1)];
+            vec4 c2 = (1-w.g)*Colors[SampleIndex][int(B.r+1) + ArraySize * int(B.g)];
+            vec4 c3 = (1-w.b)*Colors[SampleIndex][int(B.r+1) + ArraySize * int(B.g+1)];
             c =  c1+c2+c3;
         }
     }
@@ -52,7 +55,7 @@ void main(void)
     {
         if(round(w.r+w.g+w.b) == 0)
         {
-           c = Colors[SampleIndex][int(B[0]) + 16 * int(B[1])];
+           c = Colors[SampleIndex][int(B[0]) + ArraySize * int(B[1])];
         }
         else if(round(w.r+w.g+w.b) == 1)
         {
@@ -60,15 +63,15 @@ void main(void)
 
             if(maxc == w.r)
             {
-                c = Colors[SampleIndex][int(B.r+1) + 16 * int(B.g)];
+                c = Colors[SampleIndex][int(B.r+1) + ArraySize * int(B.g)];
             }
             else if(maxc == w.g)
             {
-                c = Colors[SampleIndex][int(B.r) + 16 * int(B.g+1)];
+                c = Colors[SampleIndex][int(B.r) + ArraySize * int(B.g+1)];
             }
             else if(maxc == w.b)
             {
-                c = Colors[SampleIndex][int(B.r) + 16 * int(B.g)];
+                c = Colors[SampleIndex][int(B.r) + ArraySize * int(B.g)];
             }
         }
         else if(round(w.r+w.g+w.b) == 2)
@@ -77,15 +80,15 @@ void main(void)
 
             if(maxc == (1-w.r))
             {
-                c = Colors[SampleIndex][int(B.r) + 16 * int(B.g+1)];
+                c = Colors[SampleIndex][int(B.r) + ArraySize * int(B.g+1)];
             }
             else if(maxc == (1-w.g))
             {
-                c = Colors[SampleIndex][int(B.r+1) + 16 * int(B.g)];
+                c = Colors[SampleIndex][int(B.r+1) + ArraySize * int(B.g)];
             }
             else if(maxc == (1-w.b))
             {
-                c = Colors[SampleIndex][int(B.r+1) + 16 * int(B.g+1)];
+                c = Colors[SampleIndex][int(B.r+1) + ArraySize * int(B.g+1)];
             }
         }
     }

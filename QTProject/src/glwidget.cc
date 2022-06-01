@@ -57,7 +57,7 @@ void _gl_widget::keyPressEvent(QKeyEvent *Keyevent)
 
     case Qt::Key_Plus:
 
-        if(SelectedTriangleID >= 0 && object3d.Resolutions[SelectedTriangleID] < MAX_SAMPLES) {
+        if(SelectedTriangleID >= 0 && object3d.Resolutions[SelectedTriangleID] < MAX_RES) {
             object3d.Resolutions[SelectedTriangleID] *= 2;
             object3d.UpdateResolutionsArray(object3d.Resolutions);
             updateSSBO(ssbo, sizeof(*object3d.ssbo), object3d.ssbo);
@@ -363,7 +363,7 @@ void _gl_widget::pick(const int Selection_position_x, const int Selection_positi
 {
     if (program == nullptr) return;
 
-    if(!ControlPressed) {
+    if (!ControlPressed) {
         program->bind();
         program->setUniformValue("ColorLerpEnabled", false);
         program->setUniformValue("LightingEnabled", false);
@@ -410,6 +410,8 @@ void _gl_widget::pick(const int Selection_position_x, const int Selection_positi
 
                         if (!Indexes.contains(pickedID)) {
                             Indexes.append(i);
+
+                            qDebug() << pickedID;
                         }
                     }
                     else if (SelectedIDs.find(pickedID).value() > DistanceToCenter) {
@@ -614,7 +616,7 @@ void _gl_widget::setCurrentPaintingColor(const QColor &InNewColor)
 
 void _gl_widget::incrementResolution()
 {
-    if(SelectedTriangleID >= 0 && SelectedTriangleID < object3d.Resolutions.size() && object3d.Resolutions[SelectedTriangleID] < MAX_SAMPLES)
+    if(SelectedTriangleID >= 0 && SelectedTriangleID < object3d.Resolutions.size() && object3d.Resolutions[SelectedTriangleID] < MAX_RES)
     {
         object3d.Resolutions[SelectedTriangleID] *= 2;
         object3d.UpdateResolutionsArray(object3d.Resolutions);

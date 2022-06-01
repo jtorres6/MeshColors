@@ -4,7 +4,8 @@
 #include <src/object3d.h>
 #include "meshcolorsface.h"
 
-const int MAX_SAMPLES = 16;
+const int MAX_SAMPLES = 17;
+const int MAX_RES = 16;
 
 typedef struct ssbo_data
 {

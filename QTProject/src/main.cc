@@ -11,6 +11,7 @@
 #include <QMainWindow>
 #include <QSurfaceFormat>
 #include "window.h"
+#include "loadingwindow.h"
 
 
 /*****************************************************************************//**
@@ -48,7 +49,11 @@ int main( int argc, char ** argv )
     Format.setStencilBufferSize(8);
     QSurfaceFormat::setDefaultFormat(Format);
 
+    LoadingWindow loadingWindow;
+    loadingWindow.show();
+
     _window Window;
     Window.show();
+    loadingWindow.close();
     return Application.exec();
 }

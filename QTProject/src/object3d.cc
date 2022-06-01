@@ -25,7 +25,7 @@ _object3D::_object3D(QVector<QVector3D>& InVertices, QVector<QVector3D>& InTrian
 
     verticesDrawArrays.resize(triangles.size() * 3);
 
-    for (int i= 0; i < triangles.length(); i++)  {
+    for (int i= 0; i < triangles.length(); i++) {
         verticesDrawArrays[i * 3]   = vertices[triangles[i].z()];
         verticesDrawArrays[i * 3+1] = vertices[triangles[i].y()];
         verticesDrawArrays[i * 3+2] = vertices[triangles[i].x()];
