@@ -80,13 +80,9 @@ _window::_window()
     PencilTransparency_widget->setMaximum(100);
     Vertical_options->addWidget(Label4);
     Vertical_options->addWidget(PencilTransparency_widget);
+    Vertical_options->addStretch();
 
     QCheckBox *wireframeEnabledWidget = new QCheckBox("Wireframe", this);
-
-    Vertical_options->addWidget(wireframeEnabledWidget);
-    Vertical_options->addWidget(Lighting_button);
-    Vertical_options->addWidget(Lerp_button);
-    Vertical_options->addStretch();
 
     QLabel *Label2 = new QLabel("Face resolution");
     QPushButton *Increment_button = new QPushButton("+");
@@ -94,6 +90,11 @@ _window::_window()
     Vertical_options->addWidget(Label2);
     Vertical_options->addWidget(Increment_button);
     Vertical_options->addWidget(Decrease_button);
+    Vertical_options->addStretch();
+
+    Vertical_options->addWidget(wireframeEnabledWidget);
+    Vertical_options->addWidget(Lighting_button);
+    Vertical_options->addWidget(Lerp_button);
     Vertical_options->addStretch();
 
     QTabWidget *Tab_widget = new QTabWidget;
