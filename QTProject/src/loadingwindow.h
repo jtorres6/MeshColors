@@ -2,6 +2,7 @@
 #define LOADINGWINDOW_H
 
 #include <QSplashScreen>
+#include <QMainWindow>
 #include <QWidget>
 
 class LoadingWindow : public QSplashScreen

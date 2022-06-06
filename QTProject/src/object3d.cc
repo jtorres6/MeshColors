@@ -12,8 +12,6 @@
 #include <map>
 #include "meshcolorsface.h"
 
-using namespace _colors_ne;
-
 _object3D::_object3D()
 {
 }

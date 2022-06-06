@@ -19,9 +19,8 @@ namespace _axis_ne {
 class _axis:public _basic_object3D
 {
 public:
-  _axis(float Size=_axis_ne::DEFAULT_AXIS_SIZE);
-
-  void draw_line();
+  _axis();
+  _axis(float Size);
 };
 
 #endif

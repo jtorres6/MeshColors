@@ -7,7 +7,6 @@ INCLUDEPATH += $$PWD/src
 DEFINES += PROJECT_PATH=\"\\\"$${_PRO_FILE_PWD_}/\\\"\"
 
 HEADERS += \
-    $$PWD/src/colors.h \
     $$PWD/src/basic_object3d.h \
     $$PWD/src/meshcolorsface.h \
     $$PWD/src/meshcolorsobject3d.h \
@@ -16,6 +15,7 @@ HEADERS += \
     $$PWD/src/axis.h \
     $$PWD/src/glwidget.h \
     $$PWD/src/window.h \
+    $$PWD/src/loadingwindow.h \
     $$PWD/src/file_ply_stl.ch
 
 SOURCES += \
@@ -28,6 +28,7 @@ SOURCES += \
     $$PWD/src/main.cc \
     $$PWD/src/glwidget.cc \
     $$PWD/src/window.cc \
+    $$PWD/src/loadingwindow.cpp \
     $$PWD/src/file_ply_stl.cc
 
 DISTFILES += \

@@ -9,7 +9,8 @@ LoadingWindow::LoadingWindow()
     QLabel *videoText = new QLabel("Loaging shaders...");
     QLabel *lbl = new QLabel(this);
     QString moviePath = QString(PROJECT_PATH) + "models/loading.gif";
-    setPixmap(QPixmap("models/loading.gif"));
+    QPixmap pixmap = QPixmap("models/loading.gif");
+    setPixmap(pixmap);
     movie = new QMovie(moviePath);
     lbl->setMovie(movie);
     lbl->show();
