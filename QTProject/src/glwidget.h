@@ -54,17 +54,17 @@ class _gl_widget : public QOpenGLWidget
 {
 Q_OBJECT
 public:
-    _gl_widget(_window *Window1);
+    _gl_widget();
 
     void clear_window();
     void change_projection();
     void change_observer();
 
+    void draw_objects();
     void drawObject3D();
     void drawAxis();
     void drawSelectedTriangle();
     void drawObjectWireframe();
-    void draw_objects();
 
     void pick(const int Selection_position_x, const int Selection_position_y);
     void selectTriangle(const int Selection_position_x, const int Selection_position_y);
@@ -100,45 +100,38 @@ public slots:
     void toggleWireframeMode();
 
 protected:
+    /** Start QOpenGLWidget Interface **/
     void resizeGL(int Width1, int Height1) Q_DECL_OVERRIDE;
     void paintGL() Q_DECL_OVERRIDE;
     void initializeGL() Q_DECL_OVERRIDE;
     void keyPressEvent(QKeyEvent *Keyevent) Q_DECL_OVERRIDE;
     void keyReleaseEvent(QKeyEvent *Keyevent) Q_DECL_OVERRIDE;
+    /** End QOpenGLWidget Interface **/
 
+private:
     QOpenGLBuffer* generateBuffer(const void *data, int count);
-
-    void updateSSBO(GLuint InSsbo, GLsizei InSize, void* InData);
 
     void loadProgram();
     void createBuffers();
     void logGlInfo();
 
     bool readPlyFile(const string &filename, QVector<QVector3D>& outVertices, QVector<QVector3D>&  outTriangles);
+    void updateSSBO(GLuint InSsbo, GLsizei InSize, void* InData);
 
-public:
-    _window *Window;
+    MeshColorsObject3D object3d;
+    _axis Axis;
 
-private:
+    QOpenGLShaderProgram* meshColorsShader;
+    QOpenGLShaderProgram* basicRenderingShader;
 
-    QOpenGLShaderProgram* program;
-    QOpenGLShaderProgram* program2;
-
-    QOpenGLVertexArrayObject *VAO;
-    QOpenGLVertexArrayObject *VAO2;
-    QOpenGLVertexArrayObject *VAO3;
-    QOpenGLVertexArrayObject *VAO4;
-    QOpenGLVertexArrayObject *VAO5;
-
-    GLuint FBO;
-    GLuint Color_texture;
-    GLuint Depth_texture;
+    QOpenGLVertexArrayObject *objectVAO;
+    QOpenGLVertexArrayObject *trianglesIdsVAO;
+    QOpenGLVertexArrayObject *axisVAO;
+    QOpenGLVertexArrayObject *wireframeVAO;
+    QOpenGLVertexArrayObject *selectedTriangleVAO;
 
     MovableObject camera;
     MovableObject light;
-
-    _axis Axis;
-    MeshColorsObject3D object3d;
 
     string ModelFilePath;
 
@@ -165,18 +158,13 @@ private:
     QVector3D SelectedTriangle;
     QVector<QVector3D> SelectedTriangleDrawArray;
 
-    int PencilSize = 10;
-    float PencilTransparency = 0.5f;
-
-    QVector3D Points[1024];
-    QOpenGLTexture *text;
-
     QOpenGLContext *context;
     GLuint ssbo;
 
     QColor CurrentPaintingColor = QColor(1.0f, 0.0f, 0.0f, 1.0f);
 
-    QVector4D lightPosition = QVector4D(0.0f, 0.0f, 0.0f, 0.0f);
+    int PencilSize = 10;
+    float PencilTransparency = 0.5f;
 };
 
 #endif

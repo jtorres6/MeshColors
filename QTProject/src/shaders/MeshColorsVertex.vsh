@@ -5,11 +5,11 @@ uniform mat4 matrix;
 in vec3 vertex;
 in vec4 color;
 in vec3 indexes;
-in vec4 normals;
+in vec3 normals;
 
 out vec4 geometry_Color;
 out int VertexIndex;
-out vec4 VertexNormal;
+out vec3 VertexNormal;
 
 void main(void)
 {

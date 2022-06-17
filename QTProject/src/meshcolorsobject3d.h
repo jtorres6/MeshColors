@@ -32,7 +32,6 @@ private:
     QVector<MeshColorsFace> Faces;
 
     QVector<ssbo_data> MeshColorArray;
-    QVector<ssbo_data> MeshSelectionArray;
 
     bool TriangleSelectionMode = true;
     QVector<QVector4D> ColorArray;

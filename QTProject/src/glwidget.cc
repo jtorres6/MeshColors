@@ -9,7 +9,7 @@
 
 using namespace _gl_widget_ne;
 
-_gl_widget::_gl_widget(_window *Window1):Window(Window1)
+_gl_widget::_gl_widget()
 {
     setMinimumSize(300, 300);
     setFocusPolicy(Qt::StrongFocus);
@@ -19,9 +19,14 @@ _gl_widget::_gl_widget(_window *Window1):Window(Window1)
 
 void _gl_widget::keyReleaseEvent(QKeyEvent *Keyevent)
 {
-    if(Keyevent->key() == Qt::Key_Control)
-    {
-        ControlPressed = false;
+    switch(Keyevent->key()){
+    case Qt::Key_Shift:
+        ShiftPressed = true;
+        break;
+    case Qt::Key_Control:
+        ControlPressed = true;
+        break;
+
     }
 }
 
@@ -149,17 +154,17 @@ void _gl_widget::change_observer()
 
 void _gl_widget::drawObject3D()
 {
-    if (program != nullptr && VAO != nullptr) {
-        program->bind();
-        VAO->bind();
+    if (meshColorsShader != nullptr && objectVAO != nullptr) {
+        meshColorsShader->bind();
+        objectVAO->bind();
 
-        const int matrixLocation = program->uniformLocation("matrix");
+        const int matrixLocation = meshColorsShader->uniformLocation("matrix");
 
-        program->setUniformValue(matrixLocation, camera.getProjectedTransform());
-        program->setUniformValue("BaseRendering", false);
-        program->setUniformValue("LightPos", light.getLocation());
-        program->setUniformValue("ColorLerpEnabled", !DrawingSamplesID && ColorLerpEnabled);
-        program->setUniformValue("LightingEnabled", !DrawingSamplesID && LightingEnabled);
+        meshColorsShader->setUniformValue(matrixLocation, camera.getProjectedTransform());
+        meshColorsShader->setUniformValue("BaseRendering", false);
+        meshColorsShader->setUniformValue("LightPos", light.getLocation());
+        meshColorsShader->setUniformValue("ColorLerpEnabled", !DrawingSamplesID && ColorLerpEnabled);
+        meshColorsShader->setUniformValue("LightingEnabled", !DrawingSamplesID && LightingEnabled);
 
         glLineWidth(1.5f);
 
@@ -168,68 +173,68 @@ void _gl_widget::drawObject3D()
         glDrawArrays(GL_TRIANGLES, 0, object3d.verticesDrawArrays.size());
         context->functions()->glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0); // unbind
 
-        VAO->release();
-        program->release();
+        objectVAO->release();
+        meshColorsShader->release();
     }
 }
 
 void _gl_widget::drawAxis()
 {
-    if (program2 != nullptr && VAO3 != nullptr) {
-        program2->bind();
-        VAO3->bind();
+    if (basicRenderingShader != nullptr && axisVAO != nullptr) {
+        basicRenderingShader->bind();
+        axisVAO->bind();
 
         glLineWidth(1.0f);
 
-        const int matrixLocation = program2->uniformLocation("matrix");
-        program2->setUniformValue(matrixLocation, camera.getProjectedTransform());
-        program2->setUniformValue("LineColor", QVector4D(0.0f, 0.7f, 1.0f, 1.0f));
-        program2->setUniformValue("LineMode", false);
+        const int matrixLocation = basicRenderingShader->uniformLocation("matrix");
+        basicRenderingShader->setUniformValue(matrixLocation, camera.getProjectedTransform());
+        basicRenderingShader->setUniformValue("LineColor", QVector4D(0.0f, 0.7f, 1.0f, 1.0f));
+        basicRenderingShader->setUniformValue("LineMode", false);
 
         glDrawArrays(GL_LINES, 0, Axis.vertices.size());
 
-        VAO3->release();
-        program2->release();
+        axisVAO->release();
+        basicRenderingShader->release();
     }
 }
 
 void _gl_widget::drawSelectedTriangle()
 {
-    if (program2 != nullptr && VAO5 != nullptr) {
-        program2->bind();
-        VAO5->bind();
+    if (basicRenderingShader != nullptr && selectedTriangleVAO != nullptr) {
+        basicRenderingShader->bind();
+        selectedTriangleVAO->bind();
 
-        const int matrixLocation = program2->uniformLocation("matrix");
-        program2->setUniformValue(matrixLocation, camera.getProjectedTransform());
-        program2->setUniformValue("LineColor", QVector4D(0.8f, 0.0f, 0.2f, 0.9f));
-        program2->setUniformValue("LineMode", true);
+        const int matrixLocation = basicRenderingShader->uniformLocation("matrix");
+        basicRenderingShader->setUniformValue(matrixLocation, camera.getProjectedTransform());
+        basicRenderingShader->setUniformValue("LineColor", QVector4D(0.8f, 0.0f, 0.2f, 0.9f));
+        basicRenderingShader->setUniformValue("LineMode", true);
 
         glLineWidth(1.5f);
 
         glDrawArrays(GL_LINES, 0, SelectedTriangleDrawArray.size());
 
-        VAO5->release();
-        program2->release();
+        selectedTriangleVAO->release();
+        basicRenderingShader->release();
     }
 }
 
 void _gl_widget::drawObjectWireframe()
 {
-    if (program2 != nullptr && VAO4 != nullptr) {
-        program2->bind();
-        VAO4->bind();
+    if (basicRenderingShader != nullptr && wireframeVAO != nullptr) {
+        basicRenderingShader->bind();
+        wireframeVAO->bind();
 
-        const int matrixLocation = program2->uniformLocation("matrix");
-        program2->setUniformValue(matrixLocation, camera.getProjectedTransform());
-        program2->setUniformValue("LineColor", QVector4D(0.0f, 0.25f, 1.0f, 0.9f));
-        program2->setUniformValue("LineMode", true);
+        const int matrixLocation = basicRenderingShader->uniformLocation("matrix");
+        basicRenderingShader->setUniformValue(matrixLocation, camera.getProjectedTransform());
+        basicRenderingShader->setUniformValue("LineColor", QVector4D(0.0f, 0.25f, 1.0f, 0.9f));
+        basicRenderingShader->setUniformValue("LineMode", true);
 
         glLineWidth(0.5f);
 
         glDrawArrays(GL_LINES,0, object3d.trianglesDrawArrays.size());
 
-        VAO4->release();
-        program2->release();
+        wireframeVAO->release();
+        basicRenderingShader->release();
     }
 }
 
@@ -257,36 +262,36 @@ void _gl_widget::drawTrianglesSelectionMode()
     change_projection();
     change_observer();
 
-    program2->bind();
-    VAO2->bind();
+    basicRenderingShader->bind();
+    trianglesIdsVAO->bind();
 
-    const int matrixLocation = program2->uniformLocation("matrix");
-    program2->setUniformValue(matrixLocation, camera.getProjectedTransform());
+    const int matrixLocation = basicRenderingShader->uniformLocation("matrix");
+    basicRenderingShader->setUniformValue(matrixLocation, camera.getProjectedTransform());
 
-    program->setUniformValue("ColorLerpEnabled", false);
-    program->setUniformValue("LightingEnabled", false);
-    program2->setUniformValue("LineColor", QVector4D(0.0f, 0.3f, 0.8f, 1.0f));
-    program2->setUniformValue("LineMode", false);
+    meshColorsShader->setUniformValue("ColorLerpEnabled", false);
+    meshColorsShader->setUniformValue("LightingEnabled", false);
+    basicRenderingShader->setUniformValue("LineColor", QVector4D(0.0f, 0.3f, 0.8f, 1.0f));
+    basicRenderingShader->setUniformValue("LineMode", false);
 
     glDrawArrays(GL_TRIANGLES,0, object3d.verticesDrawArrays.size());
 
-    VAO2->release();
-    program2->release();
+    trianglesIdsVAO->release();
+    basicRenderingShader->release();
 
-    program2->bind();
+    basicRenderingShader->bind();
 
     // Draw axis
-    VAO3->bind();
+    axisVAO->bind();
     glLineWidth(1.0f);
 
-    program2->setUniformValue(matrixLocation, camera.getProjectedTransform());
-    program2->setUniformValue("LineColor", QVector4D(0.0f, 0.7f, 1.0f, 1.0f));
-    program2->setUniformValue("LineMode", false);
+    basicRenderingShader->setUniformValue(matrixLocation, camera.getProjectedTransform());
+    basicRenderingShader->setUniformValue("LineColor", QVector4D(0.0f, 0.7f, 1.0f, 1.0f));
+    basicRenderingShader->setUniformValue("LineMode", false);
 
     glDrawArrays(GL_LINES, 0, Axis.vertices.size());
 
-    VAO3->release();
-    program2->release();
+    axisVAO->release();
+    basicRenderingShader->release();
 }
 
 void _gl_widget::paintGL()
@@ -324,7 +329,7 @@ void _gl_widget::initializeGL()
 
     logGlInfo();
 
-    glClearColor(0.92f, 0.92f, 0.92f, 0.0f);
+    glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
     glEnable(GL_DEPTH_TEST);
 
     Observer_angle_x=0;
@@ -361,13 +366,13 @@ bool _gl_widget::readPlyFile(const string &filename, QVector<QVector3D>& outVert
 
 void _gl_widget::pick(const int Selection_position_x, const int Selection_position_y)
 {
-    if (program == nullptr) return;
+    if (meshColorsShader == nullptr) return;
 
     if (!ControlPressed) {
-        program->bind();
-        program->setUniformValue("ColorLerpEnabled", false);
-        program->setUniformValue("LightingEnabled", false);
-        program->release();
+        meshColorsShader->bind();
+        meshColorsShader->setUniformValue("ColorLerpEnabled", false);
+        meshColorsShader->setUniformValue("LightingEnabled", false);
+        meshColorsShader->release();
 
         QList<int> Indexes;
 
@@ -447,9 +452,9 @@ void _gl_widget::pick(const int Selection_position_x, const int Selection_positi
                 SelectedTriangleID = pickedID;
                 SelectedTriangle = object3d.triangles[SelectedTriangleID];
 
-                VAO5 = new QOpenGLVertexArrayObject();
-                VAO5->create();
-                VAO5->bind();
+                selectedTriangleVAO = new QOpenGLVertexArrayObject();
+                selectedTriangleVAO->create();
+                selectedTriangleVAO->bind();
 
                 SelectedTriangleDrawArray.clear();
 
@@ -460,19 +465,19 @@ void _gl_widget::pick(const int Selection_position_x, const int Selection_positi
                 SelectedTriangleDrawArray.push_back(object3d.vertices[SelectedTriangle.x()]);
                 SelectedTriangleDrawArray.push_back(object3d.vertices[SelectedTriangle.z()]);
 
-                initializeBuffer(program2, SelectedTriangleDrawArray.data(), SelectedTriangleDrawArray.size() * sizeof(QVector3D),"vertex", GL_FLOAT, 0, 3);
-                initializeBuffer(program2, new QVector4D(1.0f, 0.0f, 0.0f, 1.0f), sizeof(QVector4D), "color", GL_FLOAT, 0, 4);
+                initializeBuffer(basicRenderingShader, SelectedTriangleDrawArray.data(), SelectedTriangleDrawArray.size() * sizeof(QVector3D),"vertex", GL_FLOAT, 0, 3);
+                initializeBuffer(basicRenderingShader, new QVector4D(1.0f, 0.0f, 0.0f, 1.0f), sizeof(QVector4D), "color", GL_FLOAT, 0, 4);
 
-                VAO5->release();
+                selectedTriangleVAO->release();
             }
 
             TriangleSelectionMode = false;
         }
 
-        program->bind();
-        program->setUniformValue("ColorLerpEnabled", ColorLerpEnabled);
-        program->setUniformValue("LightingEnabled", true);
-        program->release();
+        meshColorsShader->bind();
+        meshColorsShader->setUniformValue("ColorLerpEnabled", ColorLerpEnabled);
+        meshColorsShader->setUniformValue("LightingEnabled", true);
+        meshColorsShader->release();
     }
     else {
         selectTriangle(Selection_position_x, Selection_position_y);
@@ -481,12 +486,12 @@ void _gl_widget::pick(const int Selection_position_x, const int Selection_positi
 
 void _gl_widget::selectTriangle(const int Selection_position_x, const int Selection_position_y)
 {
-    if (program == nullptr) return;
+    if (meshColorsShader == nullptr) return;
 
-    program->bind();
-    program->setUniformValue("ColorLerpEnabled", false);
-    program->setUniformValue("LightingEnabled", false);
-    program->release();
+    meshColorsShader->bind();
+    meshColorsShader->setUniformValue("ColorLerpEnabled", false);
+    meshColorsShader->setUniformValue("LightingEnabled", false);
+    meshColorsShader->release();
 
     makeCurrent();
     clear_window();
@@ -509,9 +514,9 @@ void _gl_widget::selectTriangle(const int Selection_position_x, const int Select
         SelectedTriangleID = pickedID;
         SelectedTriangle = object3d.triangles[SelectedTriangleID];
 
-        VAO5 = new QOpenGLVertexArrayObject();
-        VAO5->create();
-        VAO5->bind();
+        selectedTriangleVAO = new QOpenGLVertexArrayObject();
+        selectedTriangleVAO->create();
+        selectedTriangleVAO->bind();
 
         SelectedTriangleDrawArray.clear();
 
@@ -522,18 +527,18 @@ void _gl_widget::selectTriangle(const int Selection_position_x, const int Select
         SelectedTriangleDrawArray.push_back(object3d.vertices[SelectedTriangle.x()]);
         SelectedTriangleDrawArray.push_back(object3d.vertices[SelectedTriangle.z()]);
 
-        initializeBuffer(program2, SelectedTriangleDrawArray.data(), SelectedTriangleDrawArray.size() * sizeof(QVector3D),"vertex", GL_FLOAT, 0, 3);
-        initializeBuffer(program2, new QVector4D(1.0f, 0.0f, 0.0f, 1.0f), sizeof(QVector4D), "color", GL_FLOAT, 0, 4);
+        initializeBuffer(basicRenderingShader, SelectedTriangleDrawArray.data(), SelectedTriangleDrawArray.size() * sizeof(QVector3D),"vertex", GL_FLOAT, 0, 3);
+        initializeBuffer(basicRenderingShader, new QVector4D(1.0f, 0.0f, 0.0f, 1.0f), sizeof(QVector4D), "color", GL_FLOAT, 0, 4);
 
-        VAO5->release();
+        selectedTriangleVAO->release();
     }
 
     TriangleSelectionMode = false;
 
-    program->bind();
-    program->setUniformValue("ColorLerpEnabled", ColorLerpEnabled);
-    program->setUniformValue("LightingEnabled", true);
-    program->release();
+    meshColorsShader->bind();
+    meshColorsShader->setUniformValue("ColorLerpEnabled", ColorLerpEnabled);
+    meshColorsShader->setUniformValue("LightingEnabled", true);
+    meshColorsShader->release();
 
     update();
     paintGL();
@@ -554,9 +559,11 @@ QOpenGLBuffer* _gl_widget::generateBuffer(const void *InData, int InCount)
 
 void _gl_widget::updateSSBO(GLuint InSsbo, GLsizei InSize, void* InData)
 {
-    context->functions()->glBindBuffer(GL_SHADER_STORAGE_BUFFER, InSsbo);
-    context->functions()->glBufferData(GL_SHADER_STORAGE_BUFFER, InSize, InData, GL_DYNAMIC_DRAW); //sizeof(data) only works for statically sized C/C++ arrays.
-    context->functions()->glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0); // unbind
+    if (QOpenGLFunctions* functions = context ? context->functions() : nullptr) {
+        functions->glBindBuffer(GL_SHADER_STORAGE_BUFFER, InSsbo);
+        functions->glBufferData(GL_SHADER_STORAGE_BUFFER, InSize, InData, GL_DYNAMIC_DRAW); //sizeof(data) only works for statically sized C/C++ arrays.
+        functions->glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0); // unbind
+    }
 }
 
 void _gl_widget::setObjectPath(const char* InNewPath)
@@ -566,6 +573,8 @@ void _gl_widget::setObjectPath(const char* InNewPath)
     initializeGL();
 
     centerFocus();
+
+    update();
 }
 
 void _gl_widget::setMeshColorsArray(QVector<QVector4D> InColors)
@@ -681,83 +690,83 @@ void _gl_widget::toggleWireframeMode()
 void _gl_widget::loadProgram()
 {
     context = new QOpenGLContext(this);
-    program = new QOpenGLShaderProgram(context);
+    meshColorsShader = new QOpenGLShaderProgram(context);
 
     const QString& path = QString(PROJECT_PATH) + "src/shaders/";
 
-    program->addCacheableShaderFromSourceFile(QOpenGLShader::Vertex,   path + "MeshColorsVertex.vsh");
-    program->addCacheableShaderFromSourceFile(QOpenGLShader::Geometry, path + "MeshColorsGeometry.gsh");
-    program->addCacheableShaderFromSourceFile(QOpenGLShader::Fragment, path + "MeshColorsFragment.fsh");
-    program->link();
+    meshColorsShader->addCacheableShaderFromSourceFile(QOpenGLShader::Vertex,   path + "MeshColorsVertex.vsh");
+    meshColorsShader->addCacheableShaderFromSourceFile(QOpenGLShader::Geometry, path + "MeshColorsGeometry.gsh");
+    meshColorsShader->addCacheableShaderFromSourceFile(QOpenGLShader::Fragment, path + "MeshColorsFragment.fsh");
+    meshColorsShader->link();
 
-    program2 = new QOpenGLShaderProgram(context);
+    basicRenderingShader = new QOpenGLShaderProgram(context);
 
-    program2->addCacheableShaderFromSourceFile(QOpenGLShader::Vertex,   path + "BaseVertex.vsh");
-    program2->addCacheableShaderFromSourceFile(QOpenGLShader::Fragment, path + "BaseFragment.fsh");
-    program2->link();
+    basicRenderingShader->addCacheableShaderFromSourceFile(QOpenGLShader::Vertex,   path + "BaseVertex.vsh");
+    basicRenderingShader->addCacheableShaderFromSourceFile(QOpenGLShader::Fragment, path + "BaseFragment.fsh");
+    basicRenderingShader->link();
 }
 
 void _gl_widget::createBuffers()
 {
     if(context != nullptr) {
-        if(program != nullptr) {
-            program->bind();
+        if(meshColorsShader != nullptr) {
+            meshColorsShader->bind();
 
-            VAO = new QOpenGLVertexArrayObject();
-            if (VAO->create()) {
-                VAO->bind();
+            objectVAO = new QOpenGLVertexArrayObject();
+            if (objectVAO->create()) {
+                objectVAO->bind();
 
-                initializeBuffer(program, object3d.verticesDrawArrays.data(), object3d.verticesDrawArrays.size() * sizeof(QVector3D),"vertex", GL_FLOAT, 0, 3);
-                initializeBuffer(program, object3d.colors.data(), object3d.colors.size() * sizeof(QVector4D), "color", GL_FLOAT, 0, 4);
-                initializeBuffer(program, object3d.Index.data(), object3d.Index.size() * sizeof(QVector3D), "indexes", GL_FLOAT, 0, 3);
-                initializeBuffer(program, object3d.VerticesNormals.data(), object3d.VerticesNormals.size() * sizeof(QVector4D), "normals", GL_FLOAT, 0, 4);
+                initializeBuffer(meshColorsShader, object3d.verticesDrawArrays.data(), object3d.verticesDrawArrays.size() * sizeof(QVector3D),"vertex", GL_FLOAT, 0, 3);
+                initializeBuffer(meshColorsShader, object3d.colors.data(), object3d.colors.size() * sizeof(QVector4D), "color", GL_FLOAT, 0, 4);
+                initializeBuffer(meshColorsShader, object3d.Index.data(), object3d.Index.size() * sizeof(QVector3D), "indexes", GL_FLOAT, 0, 3);
+                initializeBuffer(meshColorsShader, object3d.VerticesNormals.data(), object3d.VerticesNormals.size() * sizeof(QVector3D), "normals", GL_FLOAT, 0, 3);
 
-                program->setUniformValue("ColorLerpEnabled", ColorLerpEnabled);
+                meshColorsShader->setUniformValue("ColorLerpEnabled", ColorLerpEnabled);
 
                 context->functions()->glGenBuffers(1, &ssbo);
 
                 updateSSBO(ssbo, sizeof(*object3d.ssbo), object3d.ssbo);
 
-                VAO->release();
+                objectVAO->release();
             }
 
-            program->release();
+            meshColorsShader->release();
         }
 
-        if(program2 != nullptr) {
-            program2->bind();
+        if(basicRenderingShader != nullptr) {
+            basicRenderingShader->bind();
 
-            VAO2 = new QOpenGLVertexArrayObject();
-            if (VAO2->create()) {
-                VAO2->bind();
+            trianglesIdsVAO = new QOpenGLVertexArrayObject();
+            if (trianglesIdsVAO->create()) {
+                trianglesIdsVAO->bind();
 
-                initializeBuffer(program2, object3d.verticesDrawArrays.data(), object3d.verticesDrawArrays.size() * sizeof(QVector3D),"vertex", GL_FLOAT, 0, 3);
-                initializeBuffer(program2, object3d.TriangleSelectionColors.data(), object3d.TriangleSelectionColors.size() * sizeof(QVector4D), "color", GL_FLOAT, 0, 4);
+                initializeBuffer(basicRenderingShader, object3d.verticesDrawArrays.data(), object3d.verticesDrawArrays.size() * sizeof(QVector3D),"vertex", GL_FLOAT, 0, 3);
+                initializeBuffer(basicRenderingShader, object3d.TriangleSelectionColors.data(), object3d.TriangleSelectionColors.size() * sizeof(QVector4D), "color", GL_FLOAT, 0, 4);
 
-                VAO2->release();
+                trianglesIdsVAO->release();
             }
 
-            VAO3 = new QOpenGLVertexArrayObject();
-            if (VAO3->create()) {
-                VAO3->bind();
+            axisVAO = new QOpenGLVertexArrayObject();
+            if (axisVAO->create()) {
+                axisVAO->bind();
 
-                initializeBuffer(program2, Axis.vertices.data(), Axis.vertices.size() * sizeof(QVector3D),"vertex", GL_FLOAT, 0, 3);
-                initializeBuffer(program2, Axis.colors.data(), Axis.colors.size() * sizeof(QVector4D), "color", GL_FLOAT, 0, 4);
+                initializeBuffer(basicRenderingShader, Axis.vertices.data(), Axis.vertices.size() * sizeof(QVector3D),"vertex", GL_FLOAT, 0, 3);
+                initializeBuffer(basicRenderingShader, Axis.colors.data(), Axis.colors.size() * sizeof(QVector4D), "color", GL_FLOAT, 0, 4);
 
-                VAO3->release();
+                axisVAO->release();
             }
 
-            VAO4 = new QOpenGLVertexArrayObject();
-            if (VAO4->create()) {
-                VAO4->bind();
+            wireframeVAO = new QOpenGLVertexArrayObject();
+            if (wireframeVAO->create()) {
+                wireframeVAO->bind();
 
-                initializeBuffer(program2, object3d.trianglesDrawArrays.data(), object3d.trianglesDrawArrays.size() * sizeof(QVector3D),"vertex", GL_FLOAT, 0, 3);
-                initializeBuffer(program2, object3d.TriangleSelectionColors.data(), object3d.TriangleSelectionColors.size() * sizeof(QVector4D), "color", GL_FLOAT, 0, 4);
+                initializeBuffer(basicRenderingShader, object3d.trianglesDrawArrays.data(), object3d.trianglesDrawArrays.size() * sizeof(QVector3D),"vertex", GL_FLOAT, 0, 3);
+                initializeBuffer(basicRenderingShader, object3d.TriangleSelectionColors.data(), object3d.TriangleSelectionColors.size() * sizeof(QVector4D), "color", GL_FLOAT, 0, 4);
 
-                VAO4->release();
+                wireframeVAO->release();
             }
 
-            program2->release();
+            basicRenderingShader->release();
         }
     }
 }

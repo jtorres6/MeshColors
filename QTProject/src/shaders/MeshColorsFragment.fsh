@@ -11,7 +11,7 @@ uniform bool LightingEnabled;
 uniform vec4 LightPos;
 
 flat in int Index[3];
-flat in vec4 Normal[3];
+flat in vec3 Normal[3];
 in vec4 fragment_Color;
 
 out vec4 out_Color;

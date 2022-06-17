@@ -105,7 +105,7 @@ _window::_window()
     Framed_widget->setSizePolicy(Q);
     Framed_widget->setFrameStyle(QFrame::Panel);
     Framed_widget->setLineWidth(1);
-    m_glWidget = new _gl_widget(this);
+    m_glWidget = new _gl_widget();
     m_glWidget->setSizePolicy(Q);
     QHBoxLayout *Test_frame1 = new QHBoxLayout();
     QVBoxLayout *Test_frame2 = new QVBoxLayout();

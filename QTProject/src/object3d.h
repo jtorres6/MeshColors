@@ -29,7 +29,7 @@ public:
     QVector<QVector3D> trianglesDrawArrays;
     QVector<QVector3D> Index;
     QVector<QVector4D> TriangleSelectionColors;
-    QVector<QVector4D> VerticesNormals;
+    QVector<QVector3D> VerticesNormals;
 
     _object3D();
     _object3D(QVector<QVector3D>& InVertices, QVector<QVector3D>& InTriangles);
