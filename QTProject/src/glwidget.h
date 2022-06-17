@@ -66,7 +66,7 @@ public:
     void drawSelectedTriangle();
     void drawObjectWireframe();
 
-    void pick(const int Selection_position_x, const int Selection_position_y);
+    void selectSample(const int Selection_position_x, const int Selection_position_y);
     void selectTriangle(const int Selection_position_x, const int Selection_position_y);
     void drawTrianglesSelectionMode();
 
@@ -110,7 +110,6 @@ protected:
     void mousePressEvent(QMouseEvent *e) Q_DECL_OVERRIDE;
     void mouseReleaseEvent(QMouseEvent *event) Q_DECL_OVERRIDE;
     void wheelEvent(QWheelEvent *event) Q_DECL_OVERRIDE;
-    void resizeEvent(QResizeEvent *event) Q_DECL_OVERRIDE;
     /** End QOpenGLWidget Interface **/
 
 private:

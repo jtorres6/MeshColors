@@ -35,12 +35,11 @@ _object3D::_object3D(QVector<QVector3D>& InVertices, QVector<QVector3D>& InTrian
         trianglesDrawArrays.push_back(vertices[triangles[i].x()]);
         trianglesDrawArrays.push_back(vertices[triangles[i].z()]);
 
-        // Convert "i", the integer mesh ID, into an RGB color
-        int r = (i & 0x000000FF) >>  0;
-        int g = (i & 0x0000FF00) >>  8;
-        int b = (i & 0x00FF0000) >> 16;
+        const float r = ((i & 0x000000FF) >>  0) / 255.0f;
+        const float g = ((i & 0x0000FF00) >>  8) / 255.0f;
+        const float b = ((i & 0x00FF0000) >> 16) / 255.0f;
 
-        QVector4D TriangleID = QVector4D(r/255.0f, g/255.0f, b/255.0f, 255.0f);
+        QVector4D TriangleID = QVector4D(r, g, b, 1.0f);
         TriangleSelectionColors.push_back(TriangleID);
         TriangleSelectionColors.push_back(TriangleID);
         TriangleSelectionColors.push_back(TriangleID);

@@ -100,12 +100,12 @@ void _gl_widget::keyPressEvent(QKeyEvent *Keyevent)
 
 void _gl_widget::mousePressEvent(QMouseEvent *e)
 {
-    if (e != nullptr &&underMouse()) {
+    if (e != nullptr && underMouse()) {
         const float x = e->pos().x();
         const float y = height() - e->pos().y();
 
-        if (e->buttons() & Qt::LeftButton) {
-            pick(x, y);
+        if (e->buttons() & Qt::LeftButton && !ControlPressed) {
+            selectSample(x, y);
         }
         else if (e->buttons() & Qt::MiddleButton) {
            selectTriangle(x, y);
@@ -117,7 +117,7 @@ void _gl_widget::mouseMoveEvent(QMouseEvent *e)
 {
     if(underMouse()) {
         if(e->buttons() & Qt::LeftButton ) {
-            pick(e->pos().x(), height() - e->pos().y());
+            selectSample(e->pos().x(), height() - e->pos().y());
         }
 
         if(e->buttons() & Qt::RightButton) {
@@ -161,14 +161,6 @@ void _gl_widget::wheelEvent(QWheelEvent *event)
         }
     }
 }
-
-void _gl_widget::resizeEvent(QResizeEvent *event)
-{
-    if(event != nullptr) {
-       resize(event->size().width(), event->size().height());
-    }
-}
-
 
 void _gl_widget::moveCameraRightLeft(QPair<qint32, qint32> InUnits)
 {
@@ -421,7 +413,7 @@ bool _gl_widget::readPlyFile(const string &filename, QVector<QVector3D>& outVert
 }
 
 
-void _gl_widget::pick(const int Selection_position_x, const int Selection_position_y)
+void _gl_widget::selectSample(const int Selection_position_x, const int Selection_position_y)
 {
     if (meshColorsShader == nullptr) return;
 
@@ -433,103 +425,56 @@ void _gl_widget::pick(const int Selection_position_x, const int Selection_positi
 
         QList<int> Indexes;
 
-        if (!TriangleSelectionMode) {
-            DrawingSamplesID = true;
+        DrawingSamplesID = true;
 
-            makeCurrent();
+        makeCurrent();
 
-            object3d.UpdateMeshColorsArray(object3d.SelectionPoints);
+        object3d.UpdateMeshColorsArray(object3d.SelectionPoints);
 
-            updateSSBO(ssbo, sizeof(*object3d.ssbo), object3d.ssbo);
+        updateSSBO(ssbo, sizeof(*object3d.ssbo), object3d.ssbo);
 
-            update();
-            paintGL();
+        update();
+        paintGL();
 
-            // get the pixel
-            unsigned char data[PencilSize * PencilSize][4];
-            glReadBuffer(GL_FRONT);
-            glPixelStorei(GL_PACK_ALIGNMENT,1);
+        // get the pixel
+        unsigned char data[PencilSize * PencilSize][4];
+        glReadBuffer(GL_FRONT);
+        glPixelStorei(GL_PACK_ALIGNMENT,1);
 
-            int PosX = Selection_position_x - 12.5f - (PencilSize * 0.5f);
-            int PosY = Selection_position_y - 12.5f - (PencilSize * 0.5f);
+        int PosX = Selection_position_x - (PencilSize * 0.5f);
+        int PosY = Selection_position_y - (PencilSize * 0.5f);
 
-            glReadPixels(PosX, PosY, PencilSize, PencilSize, GL_RGBA, GL_UNSIGNED_BYTE, data);
+        glReadPixels(PosX, PosY, PencilSize, PencilSize, GL_RGBA, GL_UNSIGNED_BYTE, data);
 
-            QMap<int, float> SelectedIDs;
+        QMap<int, float> SelectedIDs;
 
-            // Convert the color back to an integer ID
-            for(int i = 0; i < PencilSize * PencilSize; i++) {
-                const int pickedID =
-                        data[i][0] +
-                        data[i][1] * 256 +
-                        data[i][2] * 256 * 256;
+        // Convert the color back to an integer ID
+        for(int i = 0; i < PencilSize * PencilSize; i++) {
+            const int pickedID =
+                    data[i][0] +
+                    data[i][1] * 256 +
+                    data[i][2] * 256 * 256;
 
-                const float DistanceToCenter = qFabs(0.5f - i/(PencilSize * PencilSize));
-                if (data[i][3] == 255 && pickedID != -1 && pickedID < object3d.Points.size()) {
-                    if (!SelectedIDs.contains(pickedID)) {
-                        SelectedIDs.insert(pickedID, DistanceToCenter);
-                        object3d.Points[pickedID] =  (1.0f - PencilTransparency) * object3d.Points[pickedID] + PencilTransparency * QVector4D(CurrentPaintingColor.red()/255.0f, CurrentPaintingColor.green()/255.0f, CurrentPaintingColor.blue()/255.0f, 1.0f);
+            const float DistanceToCenter = qFabs(0.5f - i/(PencilSize * PencilSize));
+            if (data[i][3] == 255 && pickedID != -1 && pickedID < object3d.Points.size()) {
+                if (!SelectedIDs.contains(pickedID)) {
+                    SelectedIDs.insert(pickedID, DistanceToCenter);
+                    object3d.Points[pickedID] =  (1.0f - PencilTransparency) * object3d.Points[pickedID] + PencilTransparency * QVector4D(CurrentPaintingColor.red()/255.0f, CurrentPaintingColor.green()/255.0f, CurrentPaintingColor.blue()/255.0f, 1.0f);
 
-                        if (!Indexes.contains(pickedID)) {
-                            Indexes.append(i);
-
-                            qDebug() << pickedID;
-                        }
-                    }
-                    else if (SelectedIDs.find(pickedID).value() > DistanceToCenter) {
-                        SelectedIDs.find(pickedID).value() = DistanceToCenter;
-                        object3d.Points[pickedID] = DistanceToCenter * object3d.Points[pickedID] + (1.0f - DistanceToCenter) * QVector4D(CurrentPaintingColor.red()/255.0f, CurrentPaintingColor.green()/255.0f, CurrentPaintingColor.blue()/255.0f, 1.0f);
+                    if (!Indexes.contains(pickedID)) {
+                        Indexes.append(i);
                     }
                 }
+                else if (SelectedIDs.find(pickedID).value() > DistanceToCenter) {
+                    SelectedIDs.find(pickedID).value() = DistanceToCenter;
+                    object3d.Points[pickedID] = DistanceToCenter * object3d.Points[pickedID] + (1.0f - DistanceToCenter) * QVector4D(CurrentPaintingColor.red()/255.0f, CurrentPaintingColor.green()/255.0f, CurrentPaintingColor.blue()/255.0f, 1.0f);
+                }
             }
-
-            object3d.UpdateMeshColorsArray(object3d.Points);
-            updateSSBO(ssbo, sizeof(*object3d.ssbo), object3d.ssbo);
-            DrawingSamplesID = false;
         }
-        else {
-            makeCurrent();
-            clear_window();
 
-            //paintGL();
-            drawTrianglesSelectionMode();
-
-            // get the pixel
-            unsigned char data[4];
-            glReadBuffer(GL_FRONT);
-            glPixelStorei(GL_PACK_ALIGNMENT, 1);
-            glReadPixels(Selection_position_x, Selection_position_y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, &data);
-
-            int pickedID =
-                    data[0] +
-                    data[1] * 256 +
-                    data[2] * 256 * 256;
-
-            if(data[3] != 0 && pickedID >= 0 && SelectedTriangleID < object3d.Resolutions.size()) {
-                SelectedTriangleID = pickedID;
-                SelectedTriangle = object3d.triangles[SelectedTriangleID];
-
-                selectedTriangleVAO = new QOpenGLVertexArrayObject();
-                selectedTriangleVAO->create();
-                selectedTriangleVAO->bind();
-
-                SelectedTriangleDrawArray.clear();
-
-                SelectedTriangleDrawArray.push_back(object3d.vertices[SelectedTriangle.z()]);
-                SelectedTriangleDrawArray.push_back(object3d.vertices[SelectedTriangle.y()]);
-                SelectedTriangleDrawArray.push_back(object3d.vertices[SelectedTriangle.y()]);
-                SelectedTriangleDrawArray.push_back(object3d.vertices[SelectedTriangle.x()]);
-                SelectedTriangleDrawArray.push_back(object3d.vertices[SelectedTriangle.x()]);
-                SelectedTriangleDrawArray.push_back(object3d.vertices[SelectedTriangle.z()]);
-
-                initializeBuffer(basicRenderingShader, SelectedTriangleDrawArray.data(), SelectedTriangleDrawArray.size() * sizeof(QVector3D),"vertex", GL_FLOAT, 0, 3);
-                initializeBuffer(basicRenderingShader, new QVector4D(1.0f, 0.0f, 0.0f, 1.0f), sizeof(QVector4D), "color", GL_FLOAT, 0, 4);
-
-                selectedTriangleVAO->release();
-            }
-
-            TriangleSelectionMode = false;
-        }
+        object3d.UpdateMeshColorsArray(object3d.Points);
+        updateSSBO(ssbo, sizeof(*object3d.ssbo), object3d.ssbo);
+        DrawingSamplesID = false;
 
         meshColorsShader->bind();
         meshColorsShader->setUniformValue("ColorLerpEnabled", ColorLerpEnabled);

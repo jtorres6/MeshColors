@@ -42,8 +42,7 @@ public slots:
     void SaveImageAs();
     void LoadMeshColorsFile();
 
-private:
-
+private:;
   _gl_widget *m_glWidget;
   QWidget *Options_widget;
   QDialog *helpDialog;
