@@ -21,10 +21,10 @@ void _gl_widget::keyReleaseEvent(QKeyEvent *Keyevent)
 {
     switch(Keyevent->key()){
     case Qt::Key_Shift:
-        ShiftPressed = true;
+        ShiftPressed = false;
         break;
     case Qt::Key_Control:
-        ControlPressed = true;
+        ControlPressed = false;
         break;
 
     }
@@ -98,6 +98,78 @@ void _gl_widget::keyPressEvent(QKeyEvent *Keyevent)
     update();
 }
 
+void _gl_widget::mousePressEvent(QMouseEvent *e)
+{
+    if (e != nullptr &&underMouse()) {
+        const float x = e->pos().x();
+        const float y = height() - e->pos().y();
+
+        if (e->buttons() & Qt::LeftButton) {
+            pick(x, y);
+        }
+        else if (e->buttons() & Qt::MiddleButton) {
+           selectTriangle(x, y);
+        }
+    }
+}
+
+void _gl_widget::mouseMoveEvent(QMouseEvent *e)
+{
+    if(underMouse()) {
+        if(e->buttons() & Qt::LeftButton ) {
+            pick(e->pos().x(), height() - e->pos().y());
+        }
+
+        if(e->buttons() & Qt::RightButton) {
+            if(MousePressed) {
+               moveCameraRightLeft(QPair<qint32, qint32>(e->pos().x() - PreviousPosition.first, e->pos().y() - PreviousPosition.second));
+            }
+            else {
+                MousePressed = true;
+            }
+
+            PreviousPosition.first  = e->pos().x();
+            PreviousPosition.second = e->pos().y();
+        }
+    }
+}
+
+void _gl_widget::mouseReleaseEvent(QMouseEvent *event)
+{
+    if(event != nullptr)
+    {
+        MousePressed = false;
+    }
+}
+
+void _gl_widget::wheelEvent(QWheelEvent *event)
+{
+    if(event != nullptr)
+    {
+        const float value = event->angleDelta().y();
+
+        if(!ControlPressed) {
+            addCameraZoom(value);
+        }
+        else {
+            if(value > 0.0f) {
+                incrementResolution();
+            }
+            else {
+                decreaseResolution();
+            }
+        }
+    }
+}
+
+void _gl_widget::resizeEvent(QResizeEvent *event)
+{
+    if(event != nullptr) {
+       resize(event->size().width(), event->size().height());
+    }
+}
+
+
 void _gl_widget::moveCameraRightLeft(QPair<qint32, qint32> InUnits)
 {
     if(ControlPressed) {
@@ -114,18 +186,8 @@ void _gl_widget::moveCameraRightLeft(QPair<qint32, qint32> InUnits)
 
 void _gl_widget::addCameraZoom(const float InValue)
 {
-    if(!ControlPressed) {
-        Observer_distance += (0.005f * (Observer_distance/20.0f)) * InValue;
-        update();
-    }
-    else {
-        if(InValue > 0.0f) {
-            incrementResolution();
-        }
-        else {
-            decreaseResolution();
-        }
-    }
+    Observer_distance += (0.005f * (Observer_distance/20.0f)) * InValue;
+    update();
 }
 
 void _gl_widget::clear_window()
@@ -186,10 +248,9 @@ void _gl_widget::drawAxis()
 
         glLineWidth(1.0f);
 
-        const int matrixLocation = basicRenderingShader->uniformLocation("matrix");
-        basicRenderingShader->setUniformValue(matrixLocation, camera.getProjectedTransform());
-        basicRenderingShader->setUniformValue("LineColor", QVector4D(0.0f, 0.7f, 1.0f, 1.0f));
-        basicRenderingShader->setUniformValue("LineMode", false);
+        basicRenderingShader->setUniformValue("matrix", camera.getProjectedTransform());
+        basicRenderingShader->setUniformValue("singleLineColor", false);
+        basicRenderingShader->setUniformValue("lineColor", QVector4D(0.0f, 0.0f, 0.0f, 0.0f));
 
         glDrawArrays(GL_LINES, 0, Axis.vertices.size());
 
@@ -204,10 +265,9 @@ void _gl_widget::drawSelectedTriangle()
         basicRenderingShader->bind();
         selectedTriangleVAO->bind();
 
-        const int matrixLocation = basicRenderingShader->uniformLocation("matrix");
-        basicRenderingShader->setUniformValue(matrixLocation, camera.getProjectedTransform());
-        basicRenderingShader->setUniformValue("LineColor", QVector4D(0.8f, 0.0f, 0.2f, 0.9f));
-        basicRenderingShader->setUniformValue("LineMode", true);
+        basicRenderingShader->setUniformValue("matrix", camera.getProjectedTransform());
+        basicRenderingShader->setUniformValue("lineColor", QVector4D(0.8f, 0.0f, 0.2f, 0.9f));
+        basicRenderingShader->setUniformValue("singleLineColor", true);
 
         glLineWidth(1.5f);
 
@@ -224,10 +284,9 @@ void _gl_widget::drawObjectWireframe()
         basicRenderingShader->bind();
         wireframeVAO->bind();
 
-        const int matrixLocation = basicRenderingShader->uniformLocation("matrix");
-        basicRenderingShader->setUniformValue(matrixLocation, camera.getProjectedTransform());
-        basicRenderingShader->setUniformValue("LineColor", QVector4D(0.0f, 0.25f, 1.0f, 0.9f));
-        basicRenderingShader->setUniformValue("LineMode", true);
+        basicRenderingShader->setUniformValue("matrix", camera.getProjectedTransform());
+        basicRenderingShader->setUniformValue("lineColor", QVector4D(0.0f, 0.25f, 1.0f, 0.9f));
+        basicRenderingShader->setUniformValue("singleLineColor", true);
 
         glLineWidth(0.5f);
 
@@ -265,13 +324,11 @@ void _gl_widget::drawTrianglesSelectionMode()
     basicRenderingShader->bind();
     trianglesIdsVAO->bind();
 
-    const int matrixLocation = basicRenderingShader->uniformLocation("matrix");
-    basicRenderingShader->setUniformValue(matrixLocation, camera.getProjectedTransform());
-
+    basicRenderingShader->setUniformValue("matrix", camera.getProjectedTransform());
     meshColorsShader->setUniformValue("ColorLerpEnabled", false);
     meshColorsShader->setUniformValue("LightingEnabled", false);
-    basicRenderingShader->setUniformValue("LineColor", QVector4D(0.0f, 0.3f, 0.8f, 1.0f));
-    basicRenderingShader->setUniformValue("LineMode", false);
+    basicRenderingShader->setUniformValue("lineColor", QVector4D(0.0f, 0.3f, 0.8f, 1.0f));
+    basicRenderingShader->setUniformValue("singleLineColor", false);
 
     glDrawArrays(GL_TRIANGLES,0, object3d.verticesDrawArrays.size());
 
@@ -284,9 +341,9 @@ void _gl_widget::drawTrianglesSelectionMode()
     axisVAO->bind();
     glLineWidth(1.0f);
 
-    basicRenderingShader->setUniformValue(matrixLocation, camera.getProjectedTransform());
-    basicRenderingShader->setUniformValue("LineColor", QVector4D(0.0f, 0.7f, 1.0f, 1.0f));
-    basicRenderingShader->setUniformValue("LineMode", false);
+    basicRenderingShader->setUniformValue("matrix", camera.getProjectedTransform());
+    basicRenderingShader->setUniformValue("lineColor", QVector4D(0.0f, 0.7f, 1.0f, 1.0f));
+    basicRenderingShader->setUniformValue("singleLineColor", false);
 
     glDrawArrays(GL_LINES, 0, Axis.vertices.size());
 

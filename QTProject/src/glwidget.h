@@ -106,6 +106,11 @@ protected:
     void initializeGL() Q_DECL_OVERRIDE;
     void keyPressEvent(QKeyEvent *Keyevent) Q_DECL_OVERRIDE;
     void keyReleaseEvent(QKeyEvent *Keyevent) Q_DECL_OVERRIDE;
+    void mouseMoveEvent(QMouseEvent *e) Q_DECL_OVERRIDE;
+    void mousePressEvent(QMouseEvent *e) Q_DECL_OVERRIDE;
+    void mouseReleaseEvent(QMouseEvent *event) Q_DECL_OVERRIDE;
+    void wheelEvent(QWheelEvent *event) Q_DECL_OVERRIDE;
+    void resizeEvent(QResizeEvent *event) Q_DECL_OVERRIDE;
     /** End QOpenGLWidget Interface **/
 
 private:
@@ -153,6 +158,7 @@ private:
 
     bool ControlPressed = false;
     bool ShiftPressed = false;
+    bool MousePressed = false;
 
     int SelectedTriangleID = -1;
     QVector3D SelectedTriangle;
@@ -165,6 +171,8 @@ private:
 
     int PencilSize = 10;
     float PencilTransparency = 0.5f;
+
+    QPair<int, int> PreviousPosition;
 };
 
 #endif

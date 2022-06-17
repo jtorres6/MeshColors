@@ -205,66 +205,6 @@ _window::_window()
     resize(800,800);
 }
 
-void _window::mousePressEvent(QMouseEvent *e)
-{
-    if (e != nullptr && m_glWidget != nullptr && m_glWidget->underMouse()) {
-        const float x = e->pos().x();
-        const float y = height() - e->pos().y();
-
-        if (e->buttons() & Qt::LeftButton) {
-            m_glWidget->pick(x, y);
-        }
-        else if (e->buttons() & Qt::MiddleButton) {
-            m_glWidget->selectTriangle(x, y);
-        }
-    }
-}
-
-void _window::mouseMoveEvent(QMouseEvent *e)
-{
-    if(m_glWidget != nullptr && m_glWidget->underMouse()) {
-        if(e->buttons() & Qt::LeftButton ) {
-            m_glWidget->pick(e->pos().x(), height() - e->pos().y());
-        }
-
-        if(e->buttons() & Qt::RightButton) {
-            if(MousePressed) {
-                m_glWidget->moveCameraRightLeft(QPair<qint32, qint32>(e->pos().x() - PreviousPosition.first, e->pos().y() - PreviousPosition.second));
-            }
-            else {
-                MousePressed = true;
-            }
-
-            PreviousPosition.first  = e->pos().x();
-            PreviousPosition.second = e->pos().y();
-        }
-    }
-}
-
-void _window::mouseReleaseEvent(QMouseEvent *event)
-{
-    if(event != nullptr)
-    {
-        MousePressed = false;
-    }
-}
-
-void _window::wheelEvent(QWheelEvent *event)
-{
-    if(event != nullptr)
-    {
-        m_glWidget->addCameraZoom(event->angleDelta().y());
-    }
-}
-
-void _window::resizeEvent(QResizeEvent *event)
-{
-    if(event != nullptr)
-    {
-        m_glWidget->resize(event->size().width(), event->size().height());
-    }
-}
-
 void _window::OpenFileDialog()
 {
     QString fileName = QFileDialog::getOpenFileName(this,

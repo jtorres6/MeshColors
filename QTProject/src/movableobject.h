@@ -16,8 +16,8 @@ public:
 
     const QMatrix4x4 &getTransform() const;
     const QMatrix4x4 getProjectedTransform() const;
-    const QVector4D getLocation() const;
-    const QVector4D getProjectedLocation() const;
+    const QVector3D getLocation() const;
+    const QVector3D getProjectedLocation() const;
 
     QMatrix4x4 projection;
 

@@ -3,16 +3,16 @@
 layout (location = 0) uniform mat4 matrix;
 layout (location = 1) in vec3 vertex;
 layout (location = 2) in vec4 color;
-layout (location = 3) uniform vec4 LineColor;
-layout (location = 4) uniform bool LineMode;
+layout (location = 3) uniform vec4 lineColor;
+layout (location = 4) uniform bool singleLineColor;
 
 out vec4 next_color;
 
 void main(void)
 {
-    if(LineMode)
+    if(singleLineColor)
     {
-        next_color = LineColor;
+        next_color = lineColor;
     }
     else
     {

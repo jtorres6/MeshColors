@@ -31,9 +31,9 @@ const QMatrix4x4 &MovableObject::getTransform() const
     return transform;
 }
 
-const QVector4D MovableObject::getLocation() const
+const QVector3D MovableObject::getLocation() const
 {
-    return QVector4D(1.0f, 1.0f, 1.0f, 1.0f) * transform;
+    return QVector3D(1.0f, 1.0f, 1.0f) * transform;
 }
 
 const QMatrix4x4 MovableObject::getProjectedTransform() const
@@ -41,8 +41,8 @@ const QMatrix4x4 MovableObject::getProjectedTransform() const
     return projection * transform;
 }
 
-const QVector4D MovableObject::getProjectedLocation() const
+const QVector3D MovableObject::getProjectedLocation() const
 {
 
-    return QVector4D(1.0f, 1.0f, 1.0f, 1.0f) * transform * projection;
+    return QVector3D(1.0f, 1.0f, 1.0f) * transform * projection;
 }

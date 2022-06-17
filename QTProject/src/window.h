@@ -43,21 +43,13 @@ public slots:
     void LoadMeshColorsFile();
 
 private:
-  void mouseMoveEvent(QMouseEvent *e);
-  void mousePressEvent(QMouseEvent *e);
-  void mouseReleaseEvent(QMouseEvent *event);
-  void wheelEvent(QWheelEvent *event);
-  void resizeEvent(QResizeEvent *event);
 
   _gl_widget *m_glWidget;
   QWidget *Options_widget;
   QDialog *helpDialog;
 
-  QPair<int, int> PreviousPosition;
   QPushButton *Color_selection;
   QString SaveFileName;
-
-  bool MousePressed = false;
 };
 
 #endif
