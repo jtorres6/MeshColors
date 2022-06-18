@@ -4,7 +4,6 @@ layout (triangles) in;
 layout (triangle_strip, max_vertices = 200) out;
 
 in vec3 VertexNormal[];
-in vec4 geometry_Color[];
 
 flat out int Index[3];
 flat out vec3 Normal[3];
