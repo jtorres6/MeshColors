@@ -465,10 +465,6 @@ void _gl_widget::selectSample(const int Selection_position_x, const int Selectio
                         Indexes.append(i);
                     }
                 }
-                else if (SelectedIDs.find(pickedID).value() > DistanceToCenter) {
-                    SelectedIDs.find(pickedID).value() = DistanceToCenter;
-                    object3d.Points[pickedID] = DistanceToCenter * object3d.Points[pickedID] + (1.0f - DistanceToCenter) * QVector4D(CurrentPaintingColor.red()/255.0f, CurrentPaintingColor.green()/255.0f, CurrentPaintingColor.blue()/255.0f, 1.0f);
-                }
             }
         }
 
@@ -512,7 +508,7 @@ void _gl_widget::selectTriangle(const int Selection_position_x, const int Select
             data[1] * 256 +
             data[2] * 256 * 256;
 
-    if(data[3] != 0 && pickedID >= 0 && pickedID < object3d.triangles.size()) {
+    if(data[3] == 255 && pickedID >= 0 && pickedID < object3d.triangles.size()) {
         SelectedTriangleID = pickedID;
         SelectedTriangle = object3d.triangles[SelectedTriangleID];
 
