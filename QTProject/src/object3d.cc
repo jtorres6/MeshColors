@@ -44,10 +44,6 @@ _object3D::_object3D(QVector<QVector3D>& InVertices, QVector<QVector3D>& InTrian
         TriangleSelectionColors.push_back(TriangleID);
         TriangleSelectionColors.push_back(TriangleID);
 
-        Index.push_back(QVector3D(i, i, i));
-        Index.push_back(QVector3D(i, i, i));
-        Index.push_back(QVector3D(i, i, i));
-
         const QVector3D v1 = vertices[int(triangles[i].x())] - vertices[int(triangles[i].y())];
         const QVector3D v2 = vertices[int(triangles[i].y())] - vertices[int(triangles[i].z())];
         const QVector3D& Normal = QVector3D::crossProduct(v1, v2).normalized();

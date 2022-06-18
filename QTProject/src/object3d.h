@@ -27,7 +27,6 @@ public:
     QVector<QVector3D> triangles;
     QVector<QVector3D> verticesDrawArrays;
     QVector<QVector3D> trianglesDrawArrays;
-    QVector<QVector3D> Index;
     QVector<QVector4D> TriangleSelectionColors;
     QVector<QVector3D> VerticesNormals;
 

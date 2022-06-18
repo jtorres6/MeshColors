@@ -10,7 +10,6 @@ uniform bool ColorLerpEnabled;
 uniform bool LightingEnabled;
 uniform vec3 LightPos;
 
-flat in int Index[3];
 flat in vec3 Normal[3];
 in vec4 fragment_Color;
 
@@ -21,7 +20,7 @@ void main(void)
 {
     vec4 color = fragment_Color;
 
-    const int SampleIndex = Index[0];
+    const int SampleIndex = gl_PrimitiveID;
 
     const int ArraySize = 17;
 

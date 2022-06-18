@@ -8,13 +8,11 @@ in vec3 indexes;
 in vec3 normals;
 
 out vec4 geometry_Color;
-out int VertexIndex;
 out vec3 VertexNormal;
 
 void main(void)
 {
     geometry_Color = color;
     gl_Position = matrix*vec4(vertex, 1.0f);
-    VertexIndex = int(indexes.x);
     VertexNormal = normals;
 }

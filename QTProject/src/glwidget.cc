@@ -716,7 +716,6 @@ void _gl_widget::createBuffers()
 
                 initializeBuffer(meshColorsShader, object3d.verticesDrawArrays.data(), object3d.verticesDrawArrays.size() * sizeof(QVector3D),"vertex", GL_FLOAT, 0, 3);
                 initializeBuffer(meshColorsShader, object3d.colors.data(), object3d.colors.size() * sizeof(QVector4D), "color", GL_FLOAT, 0, 4);
-                initializeBuffer(meshColorsShader, object3d.Index.data(), object3d.Index.size() * sizeof(QVector3D), "indexes", GL_FLOAT, 0, 3);
                 initializeBuffer(meshColorsShader, object3d.VerticesNormals.data(), object3d.VerticesNormals.size() * sizeof(QVector3D), "normals", GL_FLOAT, 0, 3);
 
                 meshColorsShader->setUniformValue("ColorLerpEnabled", ColorLerpEnabled);
