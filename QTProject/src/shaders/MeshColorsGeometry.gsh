@@ -5,7 +5,6 @@ layout (triangle_strip, max_vertices = 200) out;
 
 in vec3 VertexNormal[];
 
-flat out int Index[3];
 flat out vec3 Normal[3];
 out vec4 fragment_Color;
 out vec4 fragPos;

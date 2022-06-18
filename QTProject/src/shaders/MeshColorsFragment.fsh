@@ -14,7 +14,6 @@ flat in vec3 Normal[3];
 in vec4 fragment_Color;
 
 out vec4 out_Color;
-in vec4 fragPos;
 
 void main(void)
 {
@@ -24,9 +23,9 @@ void main(void)
 
     const int ArraySize = 17;
 
-    int R = Resolution[SampleIndex];
-    vec4 B =  floor(R * color);
-    vec4 w = (R * color) - B;
+    const int R = Resolution[SampleIndex];
+    const vec4 B =  floor(R * color);
+    const vec4 w = (R * color) - B;
     vec4 c = vec4(0.0f,0.0f,0.0f,0.0f);
 
     if(ColorLerpEnabled)
