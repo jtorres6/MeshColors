@@ -15,6 +15,10 @@ public:
     int resolution;
     QVector<QVector<int>> samples;
 
+friend QDataStream &operator<<(QDataStream &ds, const MeshColorsFace &inObj);
+friend QDataStream &operator>>(QDataStream &ds, MeshColorsFace &inObj);
+
+
 private:
     void initializeSamples();
     void increaseSamples(const int newResolution, QVector<QVector4D>& colorSamples);

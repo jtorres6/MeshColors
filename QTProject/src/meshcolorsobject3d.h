@@ -26,10 +26,15 @@ public:
 
     ssbo_data* ssbo;
     QVector<QVector4D> Points, SelectionPoints;
+    QVector<MeshColorsFace> Faces;
     QVector<int> Resolutions;
 
+    friend QDataStream &operator<<(QDataStream &ds, const MeshColorsObject3D &inObj);
+    friend QDataStream &operator>>(QDataStream &ds, MeshColorsObject3D &inObj);
+
+    void SyncSSBO();
+
 private:
-    QVector<MeshColorsFace> Faces;
 
     QVector<ssbo_data> MeshColorArray;
 

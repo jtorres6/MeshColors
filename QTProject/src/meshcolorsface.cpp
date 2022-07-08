@@ -1,6 +1,7 @@
 #include "meshcolorsface.h"
 #include <QVector4D>
 #include <QDebug>
+#include <QDataStream>
 
 static int vertexIndex = 0;
 
@@ -212,3 +213,20 @@ void MeshColorsFace::updateSamplesIndexes(QVector<QPair<int, int>>& coreSamples,
         samples[coreSamples[i].first][coreSamples[i].second] = coreSampleIndex[i];
     }
 }
+
+QDataStream &operator<<(QDataStream &ds, const MeshColorsFace &inObj)
+{
+    ds << inObj.resolution;
+    ds << inObj.samples;
+
+    return ds;
+}
+
+QDataStream &operator>>(QDataStream &ds, MeshColorsFace &inObj)
+{
+    ds >> inObj.resolution;
+    ds >> inObj.samples;
+
+    return ds;
+}
+

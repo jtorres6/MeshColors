@@ -234,35 +234,8 @@ void _window::SaveImage()
         QDataStream out(&file);
         out.setVersion(QDataStream::Qt_5_10);
 
-        const int nFaces = m_glWidget->getObject3D()->triangles.size();
-
-        QVector<int> Res;
-        QVector<QVector4D> Colors;
-        int counter = 0;
-
-        for(int j = 0; j < m_glWidget->getObject3D()->vertices.size()-1; j++)
-        {
-            Colors.push_back(m_glWidget->getMeshColorsArray()[j]);
-            counter++;
-        }
-
-        for(int i = 0; i < nFaces; i++)
-        {
-            Res.push_back(m_glWidget->getResolutionsArray()[i]);
-
-            const int nColors = 3 * (m_glWidget->getResolutionsArray()[i] - 1) +
-                    ((m_glWidget->getResolutionsArray()[i] - 1) * (m_glWidget->getResolutionsArray()[i] - 2)) / 2;
-
-            for(int j = 0; j < nColors; j++)
-            {
-                Colors.push_back(m_glWidget->getMeshColorsArray()[counter+j]);
-            }
-
-            counter += 2000;
-        }
-
-        out << Res;
-        out << Colors;
+        out << m_glWidget->object3d.Points;
+        out << m_glWidget->object3d;
     }
     else
     {
@@ -290,37 +263,10 @@ void _window::SaveImageAs()
     SaveFileName = fileName;
 
     QDataStream out(&file);
-    out.setVersion(QDataStream::Qt_5_10);
+    out.setVersion(QDataStream::Qt_5_15);
 
-    const int nFaces = m_glWidget->getObject3D()->triangles.size();
-
-    QVector<int> Res;
-    QVector<QVector4D> Colors;
-    int counter = 0;
-
-    for(int j = 0; j < m_glWidget->getObject3D()->vertices.size()-1; j++)
-    {
-        Colors.push_back(m_glWidget->getMeshColorsArray()[j]);
-        counter++;
-    }
-
-    for(int i = 0; i < nFaces; i++)
-    {
-        Res.push_back(m_glWidget->getResolutionsArray()[i]);
-
-        int nColors = 3 * (m_glWidget->getResolutionsArray()[i] - 1) +
-                ((m_glWidget->getResolutionsArray()[i] - 1) * (m_glWidget->getResolutionsArray()[i] - 2)) / 2;
-
-        for(int j = 0; j < nColors; j++)
-        {
-            Colors.push_back(m_glWidget->getMeshColorsArray()[counter+j]);
-        }
-
-        counter += 2000;
-    }
-
-    out << Res;
-    out << Colors;
+    out << m_glWidget->object3d.Points;
+    out << m_glWidget->object3d;
 }
 
 void _window::LoadMeshColorsFile()
@@ -341,44 +287,11 @@ void _window::LoadMeshColorsFile()
     }
 
     QDataStream in(&file);
-    in.setVersion(QDataStream::Qt_5_10);
-    QVector<int> resolutions;
-    QVector<QVector4D> array;
+    in.setVersion(QDataStream::Qt_5_15);
 
-    in >> resolutions;
-    in >> array;
-
-    QVector<QVector4D> Colors;
-    const int nFaces = m_glWidget->getObject3D()->triangles.size();
-
-    int counter = 0;
-
-    for(int i = 0; i < m_glWidget->getObject3D()->vertices.size() - 1; i++)
-    {
-        Colors.push_back(array[i]);
-        counter++;
-    }
-
-    for(int i = 0; i < nFaces; i++)
-    {
-        int nColors = 3 * (resolutions[i] - 1) + ((resolutions[i] - 1) * (resolutions[i] - 2)) / 2;
-
-        for(int j = 0; j < 2000; j++)
-        {
-            if(j < nColors)
-            {
-                Colors.push_back(array[counter]);
-                counter++;
-            }
-            else
-            {
-                Colors.push_back(QVector4D(1.0f, 1.0f, 1.0f, 0.0f));
-            }
-        }
-    }
-
-    m_glWidget->setResolutionsArray(resolutions);
-    m_glWidget->setMeshColorsArray(Colors);
+    in >> m_glWidget->object3d.Points;
+    in >> m_glWidget->object3d;
+    m_glWidget->forceUpdate();
 }
 
 void _window::OpenColorDialog()

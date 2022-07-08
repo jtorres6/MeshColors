@@ -64,6 +64,24 @@ void MeshColorsObject3D::UpdateResolutionsArray(const QVector<int>& InNewResolut
     }
 }
 
+void MeshColorsObject3D::SyncSSBO()
+{
+    if(ssbo != nullptr) {
+        for(int i = 0; i < triangles.size(); i++) {
+            if(i >= Faces.size()) return;
+
+            ssbo->Resolution[i] = Faces[i].resolution;
+
+            for(int a = 0; a < Faces[i].samples.size(); a++) {
+                for(int j = 0; j < Faces[i].samples[a].size(); j++) {
+                    ssbo->Colors[i][a][j] = Points[Faces[i].samples[a][j]];
+                }
+            }
+        }
+    }
+
+}
+
 void MeshColorsObject3D::InitializeSSBO()
 {
     ssbo = (ssbo_data*)malloc(sizeof(ssbo_data));
@@ -82,5 +100,27 @@ void MeshColorsObject3D::InitializePointsArrays()
 
         SelectionPoints.push_back(QVector4D(r/255.0f, g/255.0f, b/255.0f, 1.0f));
     }
+}
+
+QDataStream &operator<<(QDataStream &ds, const MeshColorsObject3D &inObj)
+{
+    for(const MeshColorsFace& face : inObj.Faces)
+    {
+        ds << face;
+    }
+
+    return ds;
+}
+
+QDataStream &operator>>(QDataStream &ds, MeshColorsObject3D &inObj)
+{
+    for(MeshColorsFace& face : inObj.Faces)
+    {
+        ds >> face;
+    }
+
+    inObj.SyncSSBO();
+
+    return ds;
 }
 

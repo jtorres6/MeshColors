@@ -613,6 +613,12 @@ const _object3D* _gl_widget::getObject3D() const
     return &object3d;
 }
 
+void _gl_widget::forceUpdate()
+{
+    updateSSBO(ssbo, sizeof(*object3d.ssbo), object3d.ssbo);
+    update();
+}
+
 void _gl_widget::setCurrentPaintingColor(const QColor &InNewColor)
 {
     if(InNewColor.isValid())

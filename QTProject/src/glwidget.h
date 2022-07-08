@@ -83,9 +83,13 @@ public:
     const QVector<int>& getResolutionsArray() const;
     const _object3D *getObject3D() const;
 
+    void forceUpdate();
+
     void setCurrentPaintingColor(const QColor& InNewColor);
 
     void initializeBuffer(QOpenGLShaderProgram* InShader, void* InData, const int InSize, const char* InName, const GLenum InType, const int InOffset, const int InStride);
+
+    MeshColorsObject3D object3d;
 
 public slots:
     void incrementResolution();
@@ -122,7 +126,6 @@ private:
     bool readPlyFile(const string &filename, QVector<QVector3D>& outVertices, QVector<QVector3D>&  outTriangles);
     void updateSSBO(GLuint InSsbo, GLsizei InSize, void* InData);
 
-    MeshColorsObject3D object3d;
     _axis Axis;
 
     QOpenGLShaderProgram* meshColorsShader;
